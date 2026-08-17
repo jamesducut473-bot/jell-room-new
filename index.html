@@ -657,6 +657,13 @@ button{cursor:pointer}
 const SIGNALING_SERVER =
   "wss://jell-room-new.onrender.com";
 
+/*
+  AUTOMATIC 2-PERSON ROOM
+  Everyone who opens this website automatically joins
+  the same waiting room. No invitation link is needed.
+*/
+const AUTO_ROOM_ID = "jell-auto-room";
+
 
 let ws = null;
 let pc = null;
@@ -1384,19 +1391,26 @@ function connectSignaling(){
         "joined"
       ){
 
+        /*
+          IMPORTANT:
+          The signaling server decides whether this browser
+          is the host or guest. Do not guess from the URL.
+        */
+        isHost =
+          data.role === "host";
+
         if(
-          data.role ===
-          "guest"
+          isHost
         ){
 
           setStatus(
-            "Joined room — waiting for connection..."
+            "Connected — waiting for the other person..."
           );
 
         }else{
 
           setStatus(
-            "Room ready — waiting for friend..."
+            "Connected — joining the other person..."
           );
 
         }
@@ -2217,32 +2231,47 @@ function loadMovie(){
 
 
 /* =========================
-   AUTO JOIN FROM INVITE LINK
+   AUTOMATIC ROOM START
 ========================= */
 
+/*
+  No Make Room button, Join Room button, or invitation link
+  is required anymore.
+
+  The first visitor becomes the host.
+  The second visitor becomes the guest.
+  The signaling server assigns the role.
+*/
 (function(){
 
-  const params =
-    new URLSearchParams(
-      location.search
-    );
-
-  const room =
-    params.get(
-      "room"
-    );
-
-
-  if(room){
+  function startAutomaticRoom(){
 
     roomId =
-      room.trim();
+      AUTO_ROOM_ID;
 
-    isHost =
-      false;
-
+    /*
+      The server, not the browser, decides the role.
+      We start with false and update it when "joined"
+      arrives from the server.
+    */
+    isHost = false;
 
     openRoom();
+
+  }
+
+  if(
+    document.readyState === "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      startAutomaticRoom
+    );
+
+  }else{
+
+    startAutomaticRoom();
 
   }
 
@@ -2276,4 +2305,4 @@ setTimeout(
 </script>
 
 </body>
-</html>
+</html
