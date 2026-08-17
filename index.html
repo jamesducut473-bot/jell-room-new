@@ -18,6 +18,10 @@ body{
 button,input{font:inherit}
 button{cursor:pointer}
 
+/* =========================
+   START SCREEN
+========================= */
+
 .start-screen{
   min-height:100vh;
   display:flex;
@@ -76,6 +80,10 @@ button{cursor:pointer}
   outline:none;
 }
 
+/* =========================
+   INTRO
+========================= */
+
 .intro{
   height:64px;
   background:#dcebdc;
@@ -104,6 +112,10 @@ button{cursor:pointer}
   font-size:13px;
   color:#55705b;
 }
+
+/* =========================
+   MAIN
+========================= */
 
 .main{
   display:grid;
@@ -173,6 +185,10 @@ button{cursor:pointer}
   padding:11px 15px;
 }
 
+/* =========================
+   VIDEO CALL
+========================= */
+
 .side{
   background:white;
   border-radius:16px;
@@ -233,6 +249,10 @@ button{cursor:pointer}
   background:#39483c;
 }
 
+/* =========================
+   CONTROLS
+========================= */
+
 .controls{
   display:flex;
   justify-content:center;
@@ -268,6 +288,10 @@ button{cursor:pointer}
   width:21px;
   height:21px;
 }
+
+/* =========================
+   INVITE
+========================= */
 
 .invite-box{
   background:#f4f8f4;
@@ -559,18 +583,9 @@ button{cursor:pointer}
             stroke-width="2"
           >
 
-            <rect
-              x="9"
-              y="2"
-              width="6"
-              height="12"
-              rx="3"
-            />
-
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
             <path d="M5 10a7 7 0 0 0 14 0"/>
-
             <path d="M12 17v5"/>
-
             <path d="M8 22h8"/>
 
           </svg>
@@ -593,14 +608,7 @@ button{cursor:pointer}
           >
 
             <path d="M15 10l4-3v10l-4-3"/>
-
-            <rect
-              x="3"
-              y="6"
-              width="12"
-              height="12"
-              rx="2"
-            />
+            <rect x="3" y="6" width="12" height="12" rx="2"/>
 
           </svg>
 
@@ -650,15 +658,8 @@ button{cursor:pointer}
 
 <script>
 
-/*
-==================================================
- SIGNALING SERVER
-==================================================
-*/
-
 const SIGNALING_SERVER =
-  "wss://jell-room-server.onrender.com";
-
+  "wss://jell-room-new.onrender.com";
 
 const AUTO_ROOM_ID = "jell-auto-room";
 
@@ -685,21 +686,11 @@ let youtubePlayer = null;
 let vimeoPlayer = null;
 
 if (!document.getElementById("youtube-api")) {
-
-  const ytScript =
-    document.createElement("script");
-
-  ytScript.id =
-    "youtube-api";
-
-  ytScript.src =
-    "https://www.youtube.com/iframe_api";
-
-  document.head.appendChild(
-    ytScript
-  );
+  const ytScript = document.createElement("script");
+  ytScript.id = "youtube-api";
+  ytScript.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(ytScript);
 }
-
 
 /* =========================
    START SCREEN
@@ -707,13 +698,9 @@ if (!document.getElementById("youtube-api")) {
 
 function showJoin(){
 
-  document.getElementById(
-    "joinArea"
-  ).style.display =
-    "block";
+  document.getElementById("joinArea").style.display = "block";
 
 }
-
 
 /* =========================
    MAKE ROOM
@@ -733,7 +720,6 @@ function makeRoom(){
 
 }
 
-
 /* =========================
    JOIN ROOM
 ========================= */
@@ -741,15 +727,11 @@ function makeRoom(){
 function joinRoom(){
 
   const value =
-    document.getElementById(
-      "joinInput"
-    ).value.trim();
+    document.getElementById("joinInput").value.trim();
 
   if(!value){
 
-    alert(
-      "Paste an invitation link or room ID."
-    );
+    alert("Paste an invitation link or room ID.");
 
     return;
 
@@ -757,22 +739,15 @@ function joinRoom(){
 
   try{
 
-    const url =
-      new URL(value);
+    const url = new URL(value);
 
     const room =
-      url.searchParams.get(
-        "room"
-      );
+      url.searchParams.get("room");
 
     if(room){
-
       roomId = room;
-
     }else{
-
       roomId = value;
-
     }
 
   }catch{
@@ -787,7 +762,6 @@ function joinRoom(){
 
 }
 
-
 /* =========================
    OPEN ROOM
 ========================= */
@@ -796,18 +770,14 @@ function openRoom(){
 
   if(!roomId){
 
-    setStatus(
-      "Invalid room ID"
-    );
+    setStatus("Invalid room ID");
 
     return;
 
   }
 
   const roomUrl =
-    new URL(
-      window.location.href
-    );
+    new URL(window.location.href);
 
   roomUrl.search = "";
 
@@ -824,15 +794,9 @@ function openRoom(){
     roomUrl.searchParams.toString()
   );
 
-  document.getElementById(
-    "startScreen"
-  ).style.display =
-    "none";
+  document.getElementById("startScreen").style.display = "none";
 
-  document.getElementById(
-    "watchRoom"
-  ).style.display =
-    "block";
+  document.getElementById("watchRoom").style.display = "block";
 
   updateInvite();
 
@@ -842,32 +806,24 @@ function openRoom(){
 
 }
 
-
 /* =========================
    INVITE
 ========================= */
 
 function updateInvite(){
 
-  document.getElementById(
-    "inviteLink"
-  ).value =
+  document.getElementById("inviteLink").value =
     location.origin +
     location.pathname +
     "?room=" +
-    encodeURIComponent(
-      roomId
-    );
+    encodeURIComponent(roomId);
 
 }
-
 
 async function copyInvite(){
 
   const input =
-    document.getElementById(
-      "inviteLink"
-    );
+    document.getElementById("inviteLink");
 
   try{
 
@@ -875,26 +831,19 @@ async function copyInvite(){
       input.value
     );
 
-    setStatus(
-      "Invitation link copied"
-    );
+    setStatus("Invitation link copied");
 
   }catch{
 
     input.select();
 
-    document.execCommand(
-      "copy"
-    );
+    document.execCommand("copy");
 
-    setStatus(
-      "Invitation link copied"
-    );
+    setStatus("Invitation link copied");
 
   }
 
 }
-
 
 /* =========================
    STATUS
@@ -904,22 +853,19 @@ function setStatus(text){
 
   document.getElementById(
     "connectionStatus"
-  ).textContent =
-    text;
+  ).textContent = text;
 
   document.getElementById(
     "roomStatus"
-  ).textContent =
-    text;
+  ).textContent = text;
 
 }
 
-
 /* =========================
-   CAMERA
+   CAMERA + AUDIO
 ========================= */
 
-async function startCamera(options={}){
+async function startCamera(options = {}){
 
   try{
 
@@ -934,19 +880,32 @@ async function startCamera(options={}){
 
     }
 
+    /*
+      AUDIO FIX:
+      Echo cancellation reduces feedback.
+      Noise suppression reduces background noise.
+      Auto gain control helps prevent distorted/uneven volume.
+      Mono audio is better suited for a voice call.
+    */
+
     localStream =
       await navigator.mediaDevices.getUserMedia({
 
-        video:true,
+        video: true,
 
-        audio:true
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+          sampleRate: 48000,
+          sampleSize: 16
+        }
 
       });
 
     const localVideo =
-      document.getElementById(
-        "localVideo"
-      );
+      document.getElementById("localVideo");
 
     if(localVideo){
 
@@ -967,8 +926,8 @@ async function startCamera(options={}){
 
     setStatus(
       isHost
-      ? "Room ready — camera ready"
-      : "Joined room — camera ready"
+        ? "Room ready — camera ready"
+        : "Joined room — camera ready"
     );
 
     if(pc){
@@ -997,8 +956,8 @@ async function startCamera(options={}){
 
     setStatus(
       isHost
-      ? "Room ready — camera/mic permission needed"
-      : "Joined room — camera/mic permission needed"
+        ? "Room ready — camera/mic permission needed"
+        : "Joined room — camera/mic permission needed"
     );
 
     return null;
@@ -1006,7 +965,6 @@ async function startCamera(options={}){
   }
 
 }
-
 
 /* =========================
    WEBRTC
@@ -1017,16 +975,10 @@ let pendingCandidates = [];
 let remoteDescriptionSet = false;
 let makingOffer = false;
 
-
 function addLocalTracks(){
 
-  if(
-    !pc ||
-    !localStream
-  ){
-
+  if(!pc || !localStream){
     return;
-
   }
 
   const senders =
@@ -1040,8 +992,7 @@ function addLocalTracks(){
         senders.some(
           sender =>
             sender.track &&
-            sender.track.kind ===
-            track.kind
+            sender.track.kind === track.kind
         );
 
       if(!alreadyAdded){
@@ -1056,7 +1007,6 @@ function addLocalTracks(){
     });
 
 }
-
 
 function createPeerConnection(){
 
@@ -1085,29 +1035,21 @@ function createPeerConnection(){
 
     });
 
-  remoteDescriptionSet =
-    false;
-
-  pendingCandidates =
-    [];
+  remoteDescriptionSet = false;
+  pendingCandidates = [];
 
   addLocalTracks();
 
   pc.onicecandidate =
     event=>{
 
-      if(
-        event.candidate
-      ){
+      if(event.candidate){
 
         sendSignal({
 
           type:"candidate",
-
           room:roomId,
-
-          candidate:
-            event.candidate
+          candidate:event.candidate
 
         });
 
@@ -1188,15 +1130,11 @@ function createPeerConnection(){
 
 }
 
-
-function sendSignal(
-  data
-){
+function sendSignal(data){
 
   if(
     !ws ||
-    ws.readyState !==
-    WebSocket.OPEN
+    ws.readyState !== WebSocket.OPEN
   ){
 
     console.warn(
@@ -1216,7 +1154,6 @@ function sendSignal(
 
 }
 
-
 async function flushPendingCandidates(){
 
   if(
@@ -1231,8 +1168,7 @@ async function flushPendingCandidates(){
   const queued =
     pendingCandidates;
 
-  pendingCandidates =
-    [];
+  pendingCandidates = [];
 
   for(
     const candidate of queued
@@ -1257,7 +1193,6 @@ async function flushPendingCandidates(){
 
 }
 
-
 /* =========================
    SIGNALING
 ========================= */
@@ -1266,9 +1201,7 @@ function connectSignaling(){
 
   if(!roomId){
 
-    setStatus(
-      "No room ID"
-    );
+    setStatus("No room ID");
 
     return;
 
@@ -1277,10 +1210,8 @@ function connectSignaling(){
   if(
     ws &&
     (
-      ws.readyState ===
-      WebSocket.OPEN ||
-      ws.readyState ===
-      WebSocket.CONNECTING
+      ws.readyState === WebSocket.OPEN ||
+      ws.readyState === WebSocket.CONNECTING
     )
   ){
 
@@ -1304,15 +1235,14 @@ function connectSignaling(){
       sendSignal({
 
         type:"join",
-
         room:roomId
 
       });
 
       setStatus(
         isHost
-        ? "Room ready — waiting for friend..."
-        : "Joining room..."
+          ? "Room ready — waiting for friend..."
+          : "Joining room..."
       );
 
     };
@@ -1346,8 +1276,7 @@ function connectSignaling(){
       );
 
       if(
-        data.type ===
-        "joined"
+        data.type === "joined"
       ){
 
         isHost =
@@ -1355,10 +1284,7 @@ function connectSignaling(){
 
         if(data.movie){
 
-          if(
-            typeof data.movie ===
-            "string"
-          ){
+          if(typeof data.movie === "string") {
 
             lastMovieUrl =
               data.movie;
@@ -1377,13 +1303,10 @@ function connectSignaling(){
           }else{
 
             lastMovieUrl =
-              data.movie.url ||
-              "";
+              data.movie.url || "";
 
             movieState = {
-              ...(data.movie.state ||
-                movieState),
-
+              ...(data.movie.state || movieState),
               updatedAt:
                 data.movie.updatedAt ||
                 Date.now()
@@ -1396,11 +1319,10 @@ function connectSignaling(){
               );
 
               setTimeout(
-                () =>
-                  syncMovieState(
-                    movieState,
-                    true
-                  ),
+                ()=>syncMovieState(
+                  movieState,
+                  true
+                ),
                 1200
               );
 
@@ -1410,20 +1332,7 @@ function connectSignaling(){
 
         }
 
-        if(
-          data.movieState
-        ){
-
-          movieState = {
-            ...movieState,
-            ...data.movieState
-          };
-
-        }
-
-        if(
-          isHost
-        ){
+        if(isHost){
 
           setStatus(
             "Connected — waiting for the other person..."
@@ -1442,14 +1351,11 @@ function connectSignaling(){
       }
 
       if(
-        data.type ===
-        "peer-joined" ||
-        data.type ===
-        "user-connected"
+        data.type === "peer-joined" ||
+        data.type === "user-connected"
       ){
 
-        peerPresent =
-          true;
+        peerPresent = true;
 
         setStatus(
           "Friend joined — connecting..."
@@ -1462,9 +1368,7 @@ function connectSignaling(){
             sendSignal({
 
               type:"movie",
-
               room:roomId,
-
               url:lastMovieUrl
 
             });
@@ -1479,13 +1383,9 @@ function connectSignaling(){
 
       }
 
-      if(
-        data.type ===
-        "offer"
-      ){
+      if(data.type === "offer"){
 
-        peerPresent =
-          true;
+        peerPresent = true;
 
         await receiveOffer(
           data.offer
@@ -1495,10 +1395,7 @@ function connectSignaling(){
 
       }
 
-      if(
-        data.type ===
-        "answer"
-      ){
+      if(data.type === "answer"){
 
         await receiveAnswer(
           data.answer
@@ -1508,10 +1405,7 @@ function connectSignaling(){
 
       }
 
-      if(
-        data.type ===
-        "candidate"
-      ){
+      if(data.type === "candidate"){
 
         await receiveCandidate(
           data.candidate
@@ -1521,10 +1415,7 @@ function connectSignaling(){
 
       }
 
-      if(
-        data.type ===
-        "movie"
-      ){
+      if(data.type === "movie"){
 
         if(data.url){
 
@@ -1553,15 +1444,11 @@ function connectSignaling(){
 
       }
 
-      if(
-        data.type ===
-        "movie-state"
-      ){
+      if(data.type === "movie-state"){
 
         if(
           data.url &&
-          data.url !==
-          lastMovieUrl
+          data.url !== lastMovieUrl
         ){
 
           lastMovieUrl =
@@ -1577,13 +1464,10 @@ function connectSignaling(){
         if(data.state){
 
           syncMovieState({
-
             ...data.state,
-
             updatedAt:
               data.updatedAt ||
               Date.now()
-
           });
 
           setStatus(
@@ -1597,10 +1481,8 @@ function connectSignaling(){
       }
 
       if(
-        data.type ===
-        "room-full" ||
-        data.type ===
-        "full"
+        data.type === "room-full" ||
+        data.type === "full"
       ){
 
         setStatus(
@@ -1612,14 +1494,11 @@ function connectSignaling(){
       }
 
       if(
-        data.type ===
-        "peer-left" ||
-        data.type ===
-        "user-disconnected"
+        data.type === "peer-left" ||
+        data.type === "user-disconnected"
       ){
 
-        peerPresent =
-          false;
+        peerPresent = false;
 
         if(pc){
 
@@ -1629,34 +1508,24 @@ function connectSignaling(){
 
         }
 
-        pc =
-          null;
-
-        pendingCandidates =
-          [];
-
-        remoteDescriptionSet =
-          false;
-
-        makingOffer =
-          false;
+        pc = null;
+        pendingCandidates = [];
+        remoteDescriptionSet = false;
+        makingOffer = false;
 
         removeGuestVideo();
 
         setStatus(
           isHost
-          ? "Waiting for friend..."
-          : "Friend left the room"
+            ? "Waiting for friend..."
+            : "Friend left the room"
         );
 
         return;
 
       }
 
-      if(
-        data.type ===
-        "error"
-      ){
+      if(data.type === "error"){
 
         setStatus(
           data.message ||
@@ -1692,7 +1561,6 @@ function connectSignaling(){
 
 }
 
-
 /* =========================
    OFFER
 ========================= */
@@ -1700,23 +1568,19 @@ function connectSignaling(){
 async function createOffer(){
 
   if(makingOffer){
-
     return;
-
   }
 
   if(
     !ws ||
-    ws.readyState !==
-    WebSocket.OPEN
+    ws.readyState !== WebSocket.OPEN
   ){
 
     return;
 
   }
 
-  makingOffer =
-    true;
+  makingOffer = true;
 
   try{
 
@@ -1734,11 +1598,8 @@ async function createOffer(){
     sendSignal({
 
       type:"offer",
-
       room:roomId,
-
-      offer:
-        pc.localDescription
+      offer:pc.localDescription
 
     });
 
@@ -1759,13 +1620,11 @@ async function createOffer(){
 
   }finally{
 
-    makingOffer =
-      false;
+    makingOffer = false;
 
   }
 
 }
-
 
 /* =========================
    ANSWER
@@ -1779,9 +1638,7 @@ async function receiveOffer(
 
     createPeerConnection();
 
-    if(
-      !localStream
-    ){
+    if(!localStream){
 
       try{
 
@@ -1808,8 +1665,7 @@ async function receiveOffer(
       )
     );
 
-    remoteDescriptionSet =
-      true;
+    remoteDescriptionSet = true;
 
     await flushPendingCandidates();
 
@@ -1823,11 +1679,8 @@ async function receiveOffer(
     sendSignal({
 
       type:"answer",
-
       room:roomId,
-
-      answer:
-        pc.localDescription
+      answer:pc.localDescription
 
     });
 
@@ -1850,7 +1703,6 @@ async function receiveOffer(
 
 }
 
-
 async function receiveAnswer(
   answer
 ){
@@ -1858,9 +1710,7 @@ async function receiveAnswer(
   try{
 
     if(!pc){
-
       return;
-
     }
 
     await pc.setRemoteDescription(
@@ -1869,8 +1719,7 @@ async function receiveAnswer(
       )
     );
 
-    remoteDescriptionSet =
-      true;
+    remoteDescriptionSet = true;
 
     await flushPendingCandidates();
 
@@ -1892,7 +1741,6 @@ async function receiveAnswer(
   }
 
 }
-
 
 async function receiveCandidate(
   candidate
@@ -1927,7 +1775,6 @@ async function receiveCandidate(
   }
 
 }
-
 
 /* =========================
    GUEST VIDEO
@@ -1978,14 +1825,9 @@ function addGuestVideo(
       "video"
     );
 
-  video.autoplay =
-    true;
-
-  video.playsInline =
-    true;
-
-  video.srcObject =
-    stream;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.srcObject = stream;
 
   const name =
     document.createElement(
@@ -1998,17 +1840,10 @@ function addGuestVideo(
   name.textContent =
     "Guest";
 
-  tile.appendChild(
-    video
-  );
+  tile.appendChild(video);
+  tile.appendChild(name);
 
-  tile.appendChild(
-    name
-  );
-
-  grid.appendChild(
-    tile
-  );
+  grid.appendChild(tile);
 
   document.getElementById(
     "peopleCount"
@@ -2016,7 +1851,6 @@ function addGuestVideo(
     "2 people in room";
 
 }
-
 
 /* =========================
    REMOVE GUEST
@@ -2030,9 +1864,7 @@ function removeGuestVideo(){
     );
 
   if(guest){
-
     guest.remove();
-
   }
 
   document.getElementById(
@@ -2041,7 +1873,6 @@ function removeGuestVideo(){
     "1 person in room";
 
 }
-
 
 /* =========================
    MIC
@@ -2074,7 +1905,6 @@ function toggleMic(){
   );
 
 }
-
 
 /* =========================
    CAMERA
@@ -2110,11 +1940,10 @@ function toggleCamera(){
     "localOff"
   ).style.display =
     currentlyEnabled
-    ? "flex"
-    : "none";
+      ? "flex"
+      : "none";
 
 }
-
 
 /* =========================
    LEAVE
@@ -2128,8 +1957,7 @@ function leaveRoom(){
       movieSyncTimer
     );
 
-    movieSyncTimer =
-      null;
+    movieSyncTimer = null;
 
   }
 
@@ -2165,7 +1993,6 @@ function leaveRoom(){
 
 }
 
-
 /* =========================
    MOVIE
 ========================= */
@@ -2178,20 +2005,14 @@ function extractVideoUrl(url){
 
 }
 
-
 function sendMovieState(force=false){
 
   if(
     suppressMovieSync ||
     !ws ||
-    ws.readyState !==
-    WebSocket.OPEN ||
+    ws.readyState !== WebSocket.OPEN ||
     !roomId
-  ){
-
-    return;
-
-  }
+  ) return;
 
   const state =
     getMovieState();
@@ -2204,28 +2025,21 @@ function sendMovieState(force=false){
   sendSignal({
 
     type:"movie-state",
-
     room:roomId,
-
     url:lastMovieUrl,
-
-    state:state,
-
-    updatedAt:
-      Date.now()
+    state,
+    updatedAt:Date.now()
 
   });
 
 }
-
 
 function getMovieState(){
 
   try{
 
     if(
-      activeMovieType ===
-      "youtube" &&
+      activeMovieType === "youtube" &&
       youtubePlayer &&
       youtubePlayer.getCurrentTime
     ){
@@ -2234,26 +2048,20 @@ function getMovieState(){
 
         currentTime:
           Number(
-            youtubePlayer.getCurrentTime() ||
-            0
+            youtubePlayer.getCurrentTime() || 0
           ),
 
         paused:
-          youtubePlayer.getPlayerState() !==
-          1,
+          youtubePlayer.getPlayerState() !== 1,
 
         playbackRate:
           Number(
-            youtubePlayer.getPlaybackRate() ||
-            1
+            youtubePlayer.getPlaybackRate() || 1
           ),
 
         volume:
           Number(
-            (
-              youtubePlayer.getVolume() ||
-              100
-            ) / 100
+            (youtubePlayer.getVolume() || 100) / 100
           )
 
       };
@@ -2261,8 +2069,7 @@ function getMovieState(){
     }
 
     if(
-      activeMovieType ===
-      "vimeo" &&
+      activeMovieType === "vimeo" &&
       vimeoPlayer
     ){
 
@@ -2278,8 +2085,7 @@ function getMovieState(){
 
         currentTime:
           Number(
-            activeMovieElement.currentTime ||
-            0
+            activeMovieElement.currentTime || 0
           ),
 
         paused:
@@ -2287,14 +2093,12 @@ function getMovieState(){
 
         playbackRate:
           Number(
-            activeMovieElement.playbackRate ||
-            1
+            activeMovieElement.playbackRate || 1
           ),
 
         volume:
           Number(
-            activeMovieElement.volume ||
-            1
+            activeMovieElement.volume || 1
           )
 
       };
@@ -2313,7 +2117,6 @@ function getMovieState(){
   return null;
 
 }
-
 
 function syncMovieState(
   state,
@@ -2342,35 +2145,29 @@ function syncMovieState(
         0,
         (
           Date.now() -
-          Number(
-            state.updatedAt
-          )
+          Number(state.updatedAt)
         ) / 1000
       );
 
     targetTime +=
       elapsed *
       Number(
-        state.playbackRate ||
-        1
+        state.playbackRate || 1
       );
 
   }
 
-  suppressMovieSync =
-    true;
+  suppressMovieSync = true;
 
   const finish =
     ()=>{
-      suppressMovieSync =
-        false;
+      suppressMovieSync = false;
     };
 
   try{
 
     if(
-      activeMovieType ===
-      "youtube" &&
+      activeMovieType === "youtube" &&
       youtubePlayer &&
       youtubePlayer.seekTo
     ){
@@ -2394,8 +2191,7 @@ function syncMovieState(
       }
 
       if(
-        typeof state.volume ===
-        "number" &&
+        typeof state.volume === "number" &&
         youtubePlayer.setVolume
       ){
 
@@ -2449,8 +2245,7 @@ function syncMovieState(
       }
 
       if(
-        typeof state.volume ===
-        "number"
+        typeof state.volume === "number"
       ){
 
         activeMovieElement.volume =
@@ -2498,7 +2293,6 @@ function syncMovieState(
 
 }
 
-
 function movieEventState(
   extra={}
 ){
@@ -2515,7 +2309,6 @@ function movieEventState(
   sendMovieState(true);
 
 }
-
 
 function attachHtmlVideoSync(
   video
@@ -2576,7 +2369,6 @@ function attachHtmlVideoSync(
 
 }
 
-
 function createYouTubePlayer(
   iframe,
   videoId
@@ -2625,7 +2417,7 @@ function createYouTubePlayer(
                           youtubePlayer &&
                           youtubePlayer.getPlayerState &&
                           youtubePlayer.getPlayerState() ===
-                          YT.PlayerState.PLAYING
+                            YT.PlayerState.PLAYING
                         ){
 
                           movieEventState();
@@ -2638,46 +2430,44 @@ function createYouTubePlayer(
 
                 },
 
-                onStateChange:
-                  (e)=>{
+                onStateChange:(e)=>{
 
-                    if(
-                      suppressMovieSync
-                    ) return;
+                  if(
+                    suppressMovieSync
+                  ) return;
 
-                    if(
-                      e.data ===
+                  if(
+                    e.data ===
                       YT.PlayerState.PLAYING ||
-                      e.data ===
+                    e.data ===
                       YT.PlayerState.PAUSED ||
-                      e.data ===
+                    e.data ===
                       YT.PlayerState.BUFFERING
-                    ){
+                  ){
 
-                      movieEventState({
+                    movieEventState({
 
-                        paused:
-                          e.data !==
-                          YT.PlayerState.PLAYING
+                      paused:
+                        e.data !==
+                        YT.PlayerState.PLAYING
 
-                      });
-
-                    }
-
-                  },
-
-                onPlaybackRateChange:
-                  ()=>{
-
-                    if(
-                      !suppressMovieSync
-                    ){
-
-                      movieEventState();
-
-                    }
+                    });
 
                   }
+
+                },
+
+                onPlaybackRateChange:()=>{
+
+                  if(
+                    !suppressMovieSync
+                  ){
+
+                    movieEventState();
+
+                  }
+
+                }
 
               }
 
@@ -2687,7 +2477,7 @@ function createYouTubePlayer(
       }catch(e){
 
         console.warn(
-          "YouTube API player error:",
+          "YouTube API player error",
           e
         );
 
@@ -2711,7 +2501,6 @@ function createYouTubePlayer(
 
 }
 
-
 function renderMovie(
   url,
   announce=true
@@ -2729,8 +2518,7 @@ function renderMovie(
       "movieContainer"
     );
 
-  if(!container)
-    return false;
+  if(!container) return false;
 
   if(movieSyncTimer){
 
@@ -2738,22 +2526,14 @@ function renderMovie(
       movieSyncTimer
     );
 
-    movieSyncTimer =
-      null;
+    movieSyncTimer = null;
 
   }
 
-  youtubePlayer =
-    null;
-
-  vimeoPlayer =
-    null;
-
-  activeMovieElement =
-    null;
-
-  activeMovieType =
-    null;
+  youtubePlayer = null;
+  vimeoPlayer = null;
+  activeMovieElement = null;
+  activeMovieType = null;
 
   const youtube =
     url.match(
@@ -2791,8 +2571,7 @@ function renderMovie(
     iframe.title =
       "Shared movie";
 
-    container.innerHTML =
-      "";
+    container.innerHTML = "";
 
     container.appendChild(
       iframe
@@ -2839,8 +2618,7 @@ function renderMovie(
     iframe.title =
       "Shared movie";
 
-    container.innerHTML =
-      "";
+    container.innerHTML = "";
 
     container.appendChild(
       iframe
@@ -2905,8 +2683,7 @@ function renderMovie(
     }
   );
 
-  container.innerHTML =
-    "";
+  container.innerHTML = "";
 
   container.appendChild(
     video
@@ -2919,7 +2696,6 @@ function renderMovie(
   return true;
 
 }
-
 
 function attachVimeoPlayer(
   iframe
@@ -2971,13 +2747,10 @@ function attachVimeoPlayer(
         ){
 
           movieEventState({
-
             currentTime:
               Number(
-                d.seconds ||
-                0
+                d.seconds || 0
               )
-
           });
 
         }
@@ -2991,8 +2764,7 @@ function attachVimeoPlayer(
 
         movieState.currentTime =
           Number(
-            d.seconds ||
-            0
+            d.seconds || 0
           );
 
       }
@@ -3007,13 +2779,10 @@ function attachVimeoPlayer(
         ){
 
           movieEventState({
-
             playbackRate:
               Number(
-                d.playbackRate ||
-                1
+                d.playbackRate || 1
               )
-
           });
 
         }
@@ -3030,13 +2799,10 @@ function attachVimeoPlayer(
         ){
 
           movieEventState({
-
             volume:
               Number(
-                d.volume ||
-                0
+                d.volume || 0
               )
-
           });
 
         }
@@ -3056,14 +2822,13 @@ function attachVimeoPlayer(
   }catch(e){
 
     console.warn(
-      "Vimeo API player error:",
+      "Vimeo API player error",
       e
     );
 
   }
 
 }
-
 
 function loadMovie(){
 
@@ -3101,38 +2866,28 @@ function loadMovie(){
   movieState = {
 
     currentTime:0,
-
     paused:true,
-
     playbackRate:1,
-
     volume:1,
-
-    updatedAt:
-      Date.now()
+    updatedAt:Date.now()
 
   };
 
   sendSignal({
 
     type:"movie",
-
     room:roomId,
-
     url:url
 
   });
 
-  sendMovieState(
-    true
-  );
+  sendMovieState(true);
 
   setStatus(
     "Movie loaded — syncing to friend..."
   );
 
 }
-
 
 function restoreMovie(
   url
@@ -3158,7 +2913,6 @@ function restoreMovie(
   );
 
 }
-
 
 /* =========================
    AUTOMATIC ROOM START
@@ -3195,7 +2949,6 @@ function restoreMovie(
   }
 
 })();
-
 
 /* =========================
    10 SECOND INTRO
