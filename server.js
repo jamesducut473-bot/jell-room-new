@@ -1,21 +1,57 @@
 const http = require("http");
+const crypto = require("crypto");
 const { WebSocketServer } = require("ws");
 
 const PORT = Number(process.env.PORT) || 10000;
 const HOST = "0.0.0.0";
 
 const ROOM_ID = "main";
+const MAX_USERS = 2;
 const RECONNECT_GRACE_MS = 30000;
 
-// ONE ROOM ONLY
 const room = {
-  host: null,
-  guest: null,
-  movie: null
+  users: new Map()
 };
 
-const httpServer = http.createServer((req, res) => {
+function createClientId() {
+  return crypto.randomUUID();
+}
+
+function send(ws, data) {
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify(data));
+  }
+}
+
+function cleanupRoom() {
+  const now = Date.now();
+
+  for (const [clientId, user] of room.users) {
+    if (
+      !user.ws &&
+      user.disconnectedAt &&
+      now - user.disconnectedAt > RECONNECT_GRACE_MS
+    ) {
+      room.users.delete(clientId);
+      console.log("Removed expired user:", clientId);
+    }
+  }
+}
+
+function getOtherUser(clientId) {
+  for (const [id, user] of room.users) {
+    if (id !== clientId && user.ws) {
+      return user;
+    }
+  }
+
+  return null;
+}
+
+const server = http.createServer((req, res) => {
   if (req.url === "/health") {
+    cleanupRoom();
+
     res.writeHead(200, {
       "Content-Type": "application/json"
     });
@@ -23,10 +59,8 @@ const httpServer = http.createServer((req, res) => {
     res.end(
       JSON.stringify({
         ok: true,
-        service: "jell-room-server",
         room: ROOM_ID,
-        hostConnected: !!room.host,
-        guestConnected: !!room.guest
+        users: room.users.size
       })
     );
 
@@ -37,107 +71,15 @@ const httpServer = http.createServer((req, res) => {
     "Content-Type": "text/plain"
   });
 
-  res.end("Jell one-room signaling server is running.");
+  res.end("One-room signaling server is running.");
 });
 
 const wss = new WebSocketServer({
-  server: httpServer
+  server
 });
 
-function send(ws, data) {
-  if (ws && ws.readyState === 1) {
-    try {
-      ws.send(JSON.stringify(data));
-    } catch (err) {
-      console.error("Send error:", err.message);
-    }
-  }
-}
-
-function getPeer(ws) {
-  if (room.host?.ws === ws) {
-    return room.guest?.ws || null;
-  }
-
-  if (room.guest?.ws === ws) {
-    return room.host?.ws || null;
-  }
-
-  return null;
-}
-
-function sendToPeer(ws, data) {
-  const peer = getPeer(ws);
-
-  if (peer) {
-    send(peer, data);
-  }
-}
-
-function slotFor(ws) {
-  if (room.host?.ws === ws) return "host";
-  if (room.guest?.ws === ws) return "guest";
-  return null;
-}
-
-function cleanupExpiredSlots() {
-  const now = Date.now();
-
-  if (
-    room.host &&
-    !room.host.ws &&
-    room.host.disconnectedAt &&
-    now - room.host.disconnectedAt > RECONNECT_GRACE_MS
-  ) {
-    console.log("Host reconnect window expired.");
-    room.host = null;
-  }
-
-  if (
-    room.guest &&
-    !room.guest.ws &&
-    room.guest.disconnectedAt &&
-    now - room.guest.disconnectedAt > RECONNECT_GRACE_MS
-  ) {
-    console.log("Guest reconnect window expired.");
-    room.guest = null;
-  }
-}
-
-function notifyPeerLeft(ws) {
-  const peer = getPeer(ws);
-
-  if (peer) {
-    send(peer, {
-      type: "peer-left",
-      room: ROOM_ID
-    });
-  }
-}
-
-function disconnectSlot(ws) {
-  const slot = slotFor(ws);
-
-  if (!slot) return;
-
-  const record = room[slot];
-
-  if (!record) return;
-
-  /*
-   * Keep the identity for a short time so a refresh/reconnect
-   * does not immediately create a false "room full".
-   */
-  record.ws = null;
-  record.disconnectedAt = Date.now();
-
-  console.log(
-    `${slot} disconnected. Reconnect grace started.`
-  );
-}
-
 wss.on("connection", (ws) => {
-  ws.clientId = null;
+  let clientId = null;
 
   console.log("WebSocket connected");
 
@@ -149,179 +91,140 @@ wss.on("connection", (ws) => {
     } catch {
       send(ws, {
         type: "error",
-        message: "Invalid JSON"
+        message: "Invalid message."
       });
       return;
     }
 
     /*
-    =========================================
-    JOIN THE ONLY ROOM
-    =========================================
+    ==========================================
+    JOIN
+    ==========================================
     */
 
     if (data.type === "join") {
-      cleanupExpiredSlots();
+      cleanupRoom();
 
-      const clientId = String(
-        data.clientId || ""
-      ).trim();
+      /*
+       * CLIENT ID IS OPTIONAL.
+       * If missing, the server creates one.
+       */
 
-      if (!clientId) {
+      const requestedId =
+        typeof data.clientId === "string" &&
+        data.clientId.trim()
+          ? data.clientId.trim()
+          : null;
+
+      /*
+       * Reconnect existing client
+       */
+
+      if (
+        requestedId &&
+        room.users.has(requestedId)
+      ) {
+        const existing =
+          room.users.get(requestedId);
+
+        clientId = requestedId;
+
+        existing.ws = ws;
+        existing.disconnectedAt = null;
+
+        ws.clientId = clientId;
+
+        const other =
+          getOtherUser(clientId);
+
         send(ws, {
-          type: "error",
-          message: "Missing client ID"
+          type: "joined",
+          clientId,
+          room: ROOM_ID,
+          role: existing.role,
+          peerPresent: !!other
         });
+
+        if (other) {
+          send(other.ws, {
+            type: "peer-rejoined"
+          });
+        }
+
+        console.log(
+          "User reconnected:",
+          clientId
+        );
 
         return;
       }
+
+      /*
+       * Brand-new client
+       */
+
+      if (room.users.size >= MAX_USERS) {
+        send(ws, {
+          type: "room-full"
+        });
+
+        console.log(
+          "Rejected user: room full"
+        );
+
+        return;
+      }
+
+      clientId =
+        requestedId ||
+        createClientId();
+
+      const role =
+        room.users.size === 0
+          ? "host"
+          : "guest";
+
+      room.users.set(clientId, {
+        ws,
+        role,
+        disconnectedAt: null
+      });
 
       ws.clientId = clientId;
 
-      /*
-       * RECONNECT EXISTING HOST
-       */
-
-      if (
-        room.host &&
-        room.host.clientId === clientId
-      ) {
-        room.host.ws = ws;
-        room.host.disconnectedAt = null;
-
-        send(ws, {
-          type: "joined",
-          role: "host",
-          room: ROOM_ID,
-          peerPresent: !!room.guest?.ws,
-          movie: room.movie
-        });
-
-        if (room.guest?.ws) {
-          send(room.guest.ws, {
-            type: "peer-rejoined",
-            room: ROOM_ID
-          });
-        }
-
-        console.log("Host reconnected.");
-
-        return;
-      }
+      const other =
+        getOtherUser(clientId);
 
       /*
-       * RECONNECT EXISTING GUEST
-       */
-
-      if (
-        room.guest &&
-        room.guest.clientId === clientId
-      ) {
-        room.guest.ws = ws;
-        room.guest.disconnectedAt = null;
-
-        send(ws, {
-          type: "joined",
-          role: "guest",
-          room: ROOM_ID,
-          peerPresent: !!room.host?.ws,
-          movie: room.movie
-        });
-
-        if (room.host?.ws) {
-          send(room.host.ws, {
-            type: "peer-rejoined",
-            room: ROOM_ID
-          });
-        }
-
-        console.log("Guest reconnected.");
-
-        return;
-      }
-
-      /*
-       * FIRST USER
-       */
-
-      if (!room.host) {
-        room.host = {
-          clientId,
-          ws,
-          disconnectedAt: null
-        };
-
-        send(ws, {
-          type: "joined",
-          role: "host",
-          room: ROOM_ID,
-          peerPresent: !!room.guest?.ws,
-          movie: room.movie
-        });
-
-        console.log("Host joined the only room.");
-
-        if (room.guest?.ws) {
-          send(room.guest.ws, {
-            type: "peer-rejoined",
-            room: ROOM_ID
-          });
-        }
-
-        return;
-      }
-
-      /*
-       * SECOND USER
-       */
-
-      if (!room.guest) {
-        room.guest = {
-          clientId,
-          ws,
-          disconnectedAt: null
-        };
-
-        send(ws, {
-          type: "joined",
-          role: "guest",
-          room: ROOM_ID,
-          peerPresent: !!room.host?.ws,
-          movie: room.movie
-        });
-
-        if (room.host?.ws) {
-          send(room.host.ws, {
-            type: "peer-joined",
-            room: ROOM_ID
-          });
-        }
-
-        console.log("Guest joined the only room.");
-
-        return;
-      }
-
-      /*
-       * BOTH SLOTS ARE USED
+       * Tell client its automatically
+       * assigned ID.
        */
 
       send(ws, {
-        type: "room-full",
-        room: ROOM_ID
+        type: "joined",
+        clientId,
+        room: ROOM_ID,
+        role,
+        peerPresent: !!other
       });
 
+      if (other) {
+        send(other.ws, {
+          type: "peer-joined"
+        });
+      }
+
       console.log(
-        "Rejected third user: room full."
+        `${role} joined. Users: ${room.users.size}`
       );
 
       return;
     }
 
     /*
-    =========================================
+    ==========================================
     WEBRTC SIGNALING
-    =========================================
+    ==========================================
     */
 
     if (
@@ -329,15 +232,19 @@ wss.on("connection", (ws) => {
       data.type === "answer" ||
       data.type === "candidate"
     ) {
-      const peer = getPeer(ws);
-
-      if (!peer) {
+      if (!clientId) {
         return;
       }
 
-      send(peer, {
+      const other =
+        getOtherUser(clientId);
+
+      if (!other) {
+        return;
+      }
+
+      send(other.ws, {
         type: data.type,
-        room: ROOM_ID,
 
         ...(data.type === "offer"
           ? { offer: data.offer }
@@ -356,139 +263,89 @@ wss.on("connection", (ws) => {
     }
 
     /*
-    =========================================
-    MOVIE URL
-    =========================================
-    */
-
-    if (data.type === "movie") {
-      room.movie = {
-        url: String(data.url || ""),
-        state: data.state || {
-          currentTime: 0,
-          paused: true,
-          playbackRate: 1,
-          volume: 1
-        },
-        updatedAt: Date.now()
-      };
-
-      sendToPeer(ws, {
-        type: "movie",
-        room: ROOM_ID,
-        url: room.movie.url,
-        state: room.movie.state,
-        updatedAt: room.movie.updatedAt
-      });
-
-      return;
-    }
-
-    /*
-    =========================================
-    MOVIE STATE
-    =========================================
-    */
-
-    if (data.type === "movie-state") {
-      if (!room.movie) {
-        room.movie = {
-          url: String(data.url || ""),
-          state: data.state || {},
-          updatedAt:
-            Number(data.updatedAt) || Date.now()
-        };
-      } else {
-        if (data.url) {
-          room.movie.url =
-            String(data.url);
-        }
-
-        if (data.state) {
-          room.movie.state =
-            data.state;
-        }
-
-        room.movie.updatedAt =
-          Number(data.updatedAt) ||
-          Date.now();
-      }
-
-      sendToPeer(ws, {
-        type: "movie-state",
-        room: ROOM_ID,
-        url: room.movie.url,
-        state: room.movie.state,
-        updatedAt: room.movie.updatedAt
-      });
-
-      return;
-    }
-
-    /*
-    =========================================
+    ==========================================
     PING
-    =========================================
+    ==========================================
     */
 
     if (data.type === "ping") {
       send(ws, {
         type: "pong"
       });
-
-      return;
     }
   });
 
   ws.on("close", () => {
+    if (!clientId) {
+      return;
+    }
+
+    const user =
+      room.users.get(clientId);
+
     /*
-     * Only mark the slot disconnected if this
-     * websocket is still the active websocket.
-     *
-     * This prevents an old connection from
-     * kicking out a newly reconnected user.
+     * Ignore old websocket connections.
+     * This is important during reconnects.
      */
 
-    if (
-      room.host &&
-      room.host.ws === ws
-    ) {
-      notifyPeerLeft(ws);
-      disconnectSlot(ws);
+    if (!user || user.ws !== ws) {
+      return;
     }
 
-    if (
-      room.guest &&
-      room.guest.ws === ws
-    ) {
-      notifyPeerLeft(ws);
-      disconnectSlot(ws);
+    user.ws = null;
+    user.disconnectedAt = Date.now();
+
+    const other =
+      getOtherUser(clientId);
+
+    if (other) {
+      send(other.ws, {
+        type: "peer-left"
+      });
     }
 
-    cleanupExpiredSlots();
+    console.log(
+      "User disconnected:",
+      clientId
+    );
 
-    console.log("WebSocket closed.");
+    /*
+     * Do NOT immediately delete the user.
+     * They have 30 seconds to reconnect.
+     */
+
+    setTimeout(() => {
+      cleanupRoom();
+    }, RECONNECT_GRACE_MS + 100);
   });
 
-  ws.on("error", (err) => {
+  ws.on("error", (error) => {
     console.error(
       "WebSocket error:",
-      err.message
+      error.message
     );
   });
 });
 
 setInterval(
-  cleanupExpiredSlots,
+  cleanupRoom,
   5000
 );
 
-httpServer.listen(
+server.listen(
   PORT,
   HOST,
   () => {
     console.log(
-      `Jell one-room server listening on ${HOST}:${PORT}`
+      `Server running on ${HOST}:${PORT}`
+    );
+    console.log(
+      "Room:",
+      ROOM_ID
+    );
+    console.log(
+      "Maximum users:",
+      MAX_USERS
     );
   }
 );
