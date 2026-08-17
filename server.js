@@ -6,7 +6,7 @@ const HOST = "0.0.0.0";
 
 const rooms = new Map();
 
-const httpServer = http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
@@ -21,9 +21,7 @@ const httpServer = http.createServer((req, res) => {
   res.end("Jell room signaling server is running.");
 });
 
-const wss = new WebSocketServer({
-  server: httpServer
-});
+const wss = new WebSocketServer({ server });
 
 function send(ws, data) {
   if (ws && ws.readyState === 1) {
@@ -31,42 +29,32 @@ function send(ws, data) {
   }
 }
 
-function broadcastToRoom(room, data, except = null) {
+function sendToPeer(ws, data) {
+  if (!ws || !ws.roomId) return;
+
+  const room = rooms.get(ws.roomId);
   if (!room) return;
 
-  if (room.host && room.host !== except) {
-    send(room.host, data);
-  }
+  const peer =
+    ws === room.host
+      ? room.guest
+      : ws === room.guest
+      ? room.host
+      : null;
 
-  if (room.guest && room.guest !== except) {
-    send(room.guest, data);
-  }
+  if (peer) send(peer, data);
 }
 
-function getMovieState(room) {
-  if (!room || !room.movie) return null;
-
-  return {
-    url: room.movie.url,
-    state: {
-      currentTime: Number(room.movie.state?.currentTime || 0),
-      paused: room.movie.state?.paused !== false,
-      playbackRate: Number(room.movie.state?.playbackRate || 1),
-      volume: typeof room.movie.state?.volume === "number"
-        ? room.movie.state.volume
-        : 1
-    },
-    updatedAt: Number(room.movie.updatedAt || Date.now())
-  };
+function broadcastRoom(room, data, except = null) {
+  if (room.host && room.host !== except) send(room.host, data);
+  if (room.guest && room.guest !== except) send(room.guest, data);
 }
 
 function leaveRoom(ws) {
   const roomId = ws.roomId;
-
   if (!roomId) return;
 
   const room = rooms.get(roomId);
-
   if (!room) {
     ws.roomId = null;
     ws.role = null;
@@ -85,14 +73,15 @@ function leaveRoom(ws) {
     }
 
     rooms.delete(roomId);
-
   } else if (room.guest === ws) {
     room.guest = null;
 
-    send(room.host, {
-      type: "peer-left",
-      room: roomId
-    });
+    if (room.host) {
+      send(room.host, {
+        type: "peer-left",
+        room: roomId
+      });
+    }
   }
 
   ws.roomId = null;
@@ -120,9 +109,11 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    /* =========================
-       JOIN ROOM
-    ========================= */
+    /*
+    =========================================
+    JOIN ROOM
+    =========================================
+    */
 
     if (data.type === "join") {
       const roomId = String(data.room || "").trim();
@@ -141,7 +132,9 @@ wss.on("connection", (ws) => {
 
       let room = rooms.get(roomId);
 
-      /* FIRST PERSON = HOST */
+      /*
+      FIRST USER = HOST
+      */
 
       if (!room) {
         room = {
@@ -160,25 +153,24 @@ wss.on("connection", (ws) => {
           role: "host",
           room: roomId,
           peerPresent: false,
-          movie: null
+          movie: room.movie
         });
 
         console.log(`Room created: ${roomId}`);
         return;
       }
 
-      /* THIRD PERSON = FULL */
+      /*
+      SECOND USER = GUEST
+      */
 
       if (room.guest) {
         send(ws, {
           type: "room-full",
           room: roomId
         });
-
         return;
       }
-
-      /* SECOND PERSON = GUEST */
 
       room.guest = ws;
 
@@ -190,87 +182,66 @@ wss.on("connection", (ws) => {
         role: "guest",
         room: roomId,
         peerPresent: true,
-        movie: getMovieState(room)
+        movie: room.movie
       });
+
+      /*
+      Tell host that a new guest has arrived.
+      Host is responsible for starting WebRTC.
+      */
 
       send(room.host, {
         type: "peer-joined",
-        room: roomId,
-        movie: getMovieState(room)
+        room: roomId
       });
 
       console.log(`Guest joined: ${roomId}`);
       return;
     }
 
-    /* =========================
-       WEBRTC SIGNALING
-    ========================= */
+    /*
+    =========================================
+    WEBRTC SIGNALING
+    =========================================
+    */
 
     if (
       data.type === "offer" ||
       data.type === "answer" ||
       data.type === "candidate"
     ) {
-      const roomId = ws.roomId;
-      const room = rooms.get(roomId);
-
-      if (!room) return;
-
-      const target =
-        ws === room.host
-          ? room.guest
-          : ws === room.guest
-          ? room.host
-          : null;
-
-      if (!target) return;
-
-      if (data.type === "offer") {
-        send(target, {
-          type: "offer",
-          room: roomId,
-          offer: data.offer
-        });
-      }
-
-      if (data.type === "answer") {
-        send(target, {
-          type: "answer",
-          room: roomId,
-          answer: data.answer
-        });
-      }
-
-      if (data.type === "candidate") {
-        send(target, {
-          type: "candidate",
-          room: roomId,
-          candidate: data.candidate
-        });
-      }
+      sendToPeer(ws, {
+        type: data.type,
+        room: ws.roomId,
+        ...(data.type === "offer"
+          ? { offer: data.offer }
+          : {}),
+        ...(data.type === "answer"
+          ? { answer: data.answer }
+          : {}),
+        ...(data.type === "candidate"
+          ? { candidate: data.candidate }
+          : {})
+      });
 
       return;
     }
 
-    /* =========================
-       NEW MOVIE
-       ONLY HOST MAY CHANGE IT
-    ========================= */
+    /*
+    =========================================
+    MOVIE
+    =========================================
+    */
 
     if (data.type === "movie") {
       const roomId = ws.roomId;
       const room = rooms.get(roomId);
 
-      if (!room || ws !== room.host) return;
-
-      const url = String(data.url || "").trim();
-
-      if (!url) return;
+      if (!room) return;
 
       room.movie = {
-        url,
-        state: {
+        url: String(data.url || ""),
+        state: data.state || {
           currentTime: 0,
           paused: true,
           playbackRate: 1,
@@ -279,12 +250,12 @@ wss.on("connection", (ws) => {
         updatedAt: Date.now()
       };
 
-      broadcastToRoom(
+      broadcastRoom(
         room,
         {
           type: "movie",
           room: roomId,
-          url,
+          url: room.movie.url,
           state: room.movie.state,
           updatedAt: room.movie.updatedAt
         },
@@ -294,50 +265,62 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    /* =========================
-       MOVIE PLAYBACK STATE
-       ONLY HOST MAY SEND
-    ========================= */
+    /*
+    =========================================
+    MOVIE STATE
+    =========================================
+    */
 
     if (data.type === "movie-state") {
       const roomId = ws.roomId;
       const room = rooms.get(roomId);
 
-      if (!room || ws !== room.host) return;
-      if (!room.movie) return;
+      if (!room) return;
 
-      const state = data.state || {};
+      if (!room.movie) {
+        room.movie = {
+          url: String(data.url || ""),
+          state: data.state || {},
+          updatedAt: Date.now()
+        };
+      } else {
+        if (data.url) {
+          room.movie.url = String(data.url);
+        }
 
-      room.movie.state = {
-        currentTime: Number(state.currentTime || 0),
-        paused: state.paused !== false,
-        playbackRate: Number(state.playbackRate || 1),
-        volume:
-          typeof state.volume === "number"
-            ? Math.max(0, Math.min(1, state.volume))
-            : 1
-      };
+        if (data.state) {
+          room.movie.state = data.state;
+        }
 
-      room.movie.updatedAt = Number(
-        data.updatedAt || Date.now()
-      );
-
-      if (data.url) {
-        room.movie.url = String(data.url);
+        room.movie.updatedAt =
+          Number(data.updatedAt) || Date.now();
       }
 
-      /* Send ONLY to guest.
-         This prevents an infinite sync loop. */
-
-      if (room.guest) {
-        send(room.guest, {
+      broadcastRoom(
+        room,
+        {
           type: "movie-state",
           room: roomId,
           url: room.movie.url,
           state: room.movie.state,
           updatedAt: room.movie.updatedAt
-        });
-      }
+        },
+        ws
+      );
+
+      return;
+    }
+
+    /*
+    =========================================
+    PING
+    =========================================
+    */
+
+    if (data.type === "ping") {
+      send(ws, {
+        type: "pong"
+      });
 
       return;
     }
@@ -347,15 +330,15 @@ wss.on("connection", (ws) => {
     leaveRoom(ws);
   });
 
-  ws.on("error", (err) => {
+  ws.on("error", (error) => {
     console.error(
       "WebSocket error:",
-      err.message
+      error.message
     );
   });
 });
 
-httpServer.listen(PORT, HOST, () => {
+server.listen(PORT, HOST, () => {
   console.log(
     `Jell room server listening on ${HOST}:${PORT}`
   );
