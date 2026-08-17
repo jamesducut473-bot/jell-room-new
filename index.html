@@ -16,12 +16,7 @@ body{
 }
 
 button,input{font:inherit}
-
 button{cursor:pointer}
-
-/* =========================
-   START SCREEN
-========================= */
 
 .start-screen{
   min-height:100vh;
@@ -81,10 +76,6 @@ button{cursor:pointer}
   outline:none;
 }
 
-/* =========================
-   INTRO
-========================= */
-
 .intro{
   height:64px;
   background:#dcebdc;
@@ -113,10 +104,6 @@ button{cursor:pointer}
   font-size:13px;
   color:#55705b;
 }
-
-/* =========================
-   MAIN
-========================= */
 
 .main{
   display:grid;
@@ -186,10 +173,6 @@ button{cursor:pointer}
   padding:11px 15px;
 }
 
-/* =========================
-   VIDEO CALL
-========================= */
-
 .side{
   background:white;
   border-radius:16px;
@@ -250,10 +233,6 @@ button{cursor:pointer}
   background:#39483c;
 }
 
-/* =========================
-   CONTROLS
-========================= */
-
 .controls{
   display:flex;
   justify-content:center;
@@ -289,10 +268,6 @@ button{cursor:pointer}
   width:21px;
   height:21px;
 }
-
-/* =========================
-   INVITE
-========================= */
 
 .invite-box{
   background:#f4f8f4;
@@ -342,11 +317,7 @@ button{cursor:pointer}
   .video-tile{min-height:0;}
 }
 
-/* Landscape phone: movie stays dominant; call panel fits neatly in the viewport. */
 @media(max-width:850px) and (orientation:landscape){
-  /* Landscape phone: movie gets the clear majority of the screen.
-     The call column is deliberately compact and its two tiles are
-     constrained inside the visible viewport — no tile can overflow. */
   .main{
     grid-template-columns:minmax(0,7.4fr) minmax(120px,2.6fr);
     gap:7px;
@@ -440,8 +411,6 @@ button{cursor:pointer}
     border-radius:13px;
   }
 
-  /* Room sharing is automatic now, so these extra boxes don't consume
-     valuable landscape height. */
   .invite-box,
   .status,
   .people{
@@ -458,14 +427,7 @@ button{cursor:pointer}
 
 <body>
 
-<!-- =========================
-     START SCREEN
-========================= -->
-
-<div
-  class="start-screen"
-  id="startScreen"
->
+<div class="start-screen" id="startScreen">
 
   <div class="start-card">
 
@@ -477,34 +439,22 @@ button{cursor:pointer}
       Watch together with someone
     </div>
 
-    <button
-      class="start-button"
-      onclick="makeRoom()"
-    >
+    <button class="start-button" onclick="makeRoom()">
       Make Room
     </button>
 
-    <button
-      class="start-button secondary"
-      onclick="showJoin()"
-    >
+    <button class="start-button secondary" onclick="showJoin()">
       Join Room
     </button>
 
-    <div
-      class="join-area"
-      id="joinArea"
-    >
+    <div class="join-area" id="joinArea">
 
       <input
         id="joinInput"
         placeholder="Paste invitation link or room ID"
       >
 
-      <button
-        class="start-button"
-        onclick="joinRoom()"
-      >
+      <button class="start-button" onclick="joinRoom()">
         Join
       </button>
 
@@ -514,47 +464,31 @@ button{cursor:pointer}
 
 </div>
 
-
-<!-- =========================
-     WATCH ROOM
-========================= -->
-
 <div id="watchRoom" style="display:none">
 
-  <div
-    class="intro"
-    id="intro"
-  >
+  <div class="intro" id="intro">
 
     <div class="logo">
       Jell & James Movie
     </div>
 
-    <div
-      class="room-status"
-      id="roomStatus"
-    >
+    <div class="room-status" id="roomStatus">
       Room ready
     </div>
 
   </div>
 
-
   <main class="main">
 
     <section>
 
-      <div
-        class="movie-card"
-        id="movieContainer"
-      >
+      <div class="movie-card" id="movieContainer">
 
         <div class="movie-placeholder">
           Paste a movie/video URL below to start watching.
         </div>
 
       </div>
-
 
       <div class="movie-info">
 
@@ -569,10 +503,7 @@ button{cursor:pointer}
             placeholder="Paste YouTube, Vimeo or video URL..."
           >
 
-          <button
-            class="primary"
-            onclick="loadMovie()"
-          >
+          <button class="primary" onclick="loadMovie()">
             Play
           </button>
 
@@ -582,25 +513,15 @@ button{cursor:pointer}
 
     </section>
 
-
-    <!-- VIDEO CALL -->
-
     <aside class="side">
 
       <div class="side-title">
         Video Call
       </div>
 
+      <div class="video-grid" id="videoGrid">
 
-      <div
-        class="video-grid"
-        id="videoGrid"
-      >
-
-        <div
-          class="video-tile"
-          id="localTile"
-        >
+        <div class="video-tile" id="localTile">
 
           <video
             id="localVideo"
@@ -609,10 +530,7 @@ button{cursor:pointer}
             playsinline
           ></video>
 
-          <div
-            class="video-off"
-            id="localOff"
-          >
+          <div class="video-off" id="localOff">
             Camera Off
           </div>
 
@@ -623,9 +541,6 @@ button{cursor:pointer}
         </div>
 
       </div>
-
-
-      <!-- CONTROLS -->
 
       <div class="controls">
 
@@ -662,7 +577,6 @@ button{cursor:pointer}
 
         </button>
 
-
         <button
           class="control"
           id="cameraButton"
@@ -692,21 +606,15 @@ button{cursor:pointer}
 
         </button>
 
-
         <button
           class="control end"
           onclick="leaveRoom()"
           title="Leave room"
         >
-
           ✕
-
         </button>
 
       </div>
-
-
-      <!-- INVITE -->
 
       <div class="invite-box">
 
@@ -716,34 +624,21 @@ button{cursor:pointer}
 
         <div class="invite-row">
 
-          <input
-            id="inviteLink"
-            readonly
-          >
+          <input id="inviteLink" readonly>
 
-          <button
-            class="small-button"
-            onclick="copyInvite()"
-          >
+          <button class="small-button" onclick="copyInvite()">
             Copy
           </button>
 
         </div>
 
-        <div
-          class="status"
-          id="connectionStatus"
-        >
+        <div class="status" id="connectionStatus">
           Starting room...
         </div>
 
       </div>
 
-
-      <div
-        class="people"
-        id="peopleCount"
-      >
+      <div class="people" id="peopleCount">
         1 person in room
       </div>
 
@@ -753,31 +648,19 @@ button{cursor:pointer}
 
 </div>
 
-
 <script>
 
 /*
 ==================================================
  SIGNALING SERVER
 ==================================================
-
- Render backend WebSocket server:
-
- wss://jell-room-new.onrender.com
-
-==================================================
 */
 
 const SIGNALING_SERVER =
-  "wss://jell-room-new.onrender.com";
+  "wss://jell-room-server.onrender.com";
 
-/*
-  AUTOMATIC 2-PERSON ROOM
-  Everyone who opens this website automatically joins
-  the same waiting room. No invitation link is needed.
-*/
+
 const AUTO_ROOM_ID = "jell-auto-room";
-
 
 let ws = null;
 let pc = null;
@@ -786,7 +669,14 @@ let localStream = null;
 let roomId = null;
 let isHost = false;
 let lastMovieUrl = "";
-let movieState = { currentTime: 0, paused: true, playbackRate: 1, volume: 1 };
+
+let movieState = {
+  currentTime: 0,
+  paused: true,
+  playbackRate: 1,
+  volume: 1
+};
+
 let movieSyncTimer = null;
 let suppressMovieSync = false;
 let activeMovieType = null;
@@ -794,12 +684,20 @@ let activeMovieElement = null;
 let youtubePlayer = null;
 let vimeoPlayer = null;
 
-// Load the YouTube IFrame API once so play/pause/seek can be synchronized.
 if (!document.getElementById("youtube-api")) {
-  const ytScript = document.createElement("script");
-  ytScript.id = "youtube-api";
-  ytScript.src = "https://www.youtube.com/iframe_api";
-  document.head.appendChild(ytScript);
+
+  const ytScript =
+    document.createElement("script");
+
+  ytScript.id =
+    "youtube-api";
+
+  ytScript.src =
+    "https://www.youtube.com/iframe_api";
+
+  document.head.appendChild(
+    ytScript
+  );
 }
 
 
@@ -811,7 +709,8 @@ function showJoin(){
 
   document.getElementById(
     "joinArea"
-  ).style.display = "block";
+  ).style.display =
+    "block";
 
 }
 
@@ -856,7 +755,6 @@ function joinRoom(){
 
   }
 
-
   try{
 
     const url =
@@ -883,7 +781,6 @@ function joinRoom(){
 
   }
 
-
   isHost = false;
 
   openRoom();
@@ -907,22 +804,17 @@ function openRoom(){
 
   }
 
-
   const roomUrl =
     new URL(
       window.location.href
     );
 
-
-  roomUrl.search =
-    "";
-
+  roomUrl.search = "";
 
   roomUrl.searchParams.set(
     "room",
     roomId
   );
-
 
   history.replaceState(
     {},
@@ -932,36 +824,20 @@ function openRoom(){
     roomUrl.searchParams.toString()
   );
 
-
   document.getElementById(
     "startScreen"
   ).style.display =
     "none";
-
 
   document.getElementById(
     "watchRoom"
   ).style.display =
     "block";
 
-
   updateInvite();
 
-
-  /*
-    IMPORTANT:
-    Join the WebSocket room FIRST.
-    Camera/microphone permission must never
-    prevent User B from joining the room.
-  */
   connectSignaling();
 
-
-  /*
-    Camera/mic is started separately.
-    If Messenger blocks permission, the user
-    can still remain joined to the room.
-  */
   startCamera();
 
 }
@@ -1067,7 +943,6 @@ async function startCamera(options={}){
 
       });
 
-
     const localVideo =
       document.getElementById(
         "localVideo"
@@ -1090,28 +965,20 @@ async function startCamera(options={}){
 
     }
 
-
     setStatus(
       isHost
       ? "Room ready — camera ready"
       : "Joined room — camera ready"
     );
 
-
-    /*
-      If WebRTC was already created while waiting
-      for camera permission, add the tracks now.
-    */
     if(pc){
 
       addLocalTracks();
 
-      /*
-        If the other person is already in the room,
-        renegotiate so the newly available camera/mic
-        tracks are included.
-      */
-      if(peerPresent && !options.skipRenegotiation){
+      if(
+        peerPresent &&
+        !options.skipRenegotiation
+      ){
 
         await createOffer();
 
@@ -1133,12 +1000,6 @@ async function startCamera(options={}){
       ? "Room ready — camera/mic permission needed"
       : "Joined room — camera/mic permission needed"
     );
-
-    /*
-      IMPORTANT:
-      Do not stop the room connection if camera permission
-      is denied. The WebSocket room still remains joined.
-    */
 
     return null;
 
@@ -1168,10 +1029,8 @@ function addLocalTracks(){
 
   }
 
-
   const senders =
     pc.getSenders();
-
 
   localStream
     .getTracks()
@@ -1184,7 +1043,6 @@ function addLocalTracks(){
             sender.track.kind ===
             track.kind
         );
-
 
       if(!alreadyAdded){
 
@@ -1210,7 +1068,6 @@ function createPeerConnection(){
 
   }
 
-
   pc =
     new RTCPeerConnection({
 
@@ -1228,16 +1085,13 @@ function createPeerConnection(){
 
     });
 
-
   remoteDescriptionSet =
     false;
 
   pendingCandidates =
     [];
 
-
   addLocalTracks();
-
 
   pc.onicecandidate =
     event=>{
@@ -1261,7 +1115,6 @@ function createPeerConnection(){
 
     };
 
-
   pc.ontrack =
     event=>{
 
@@ -1278,7 +1131,6 @@ function createPeerConnection(){
 
     };
 
-
   pc.onconnectionstatechange =
     ()=>{
 
@@ -1286,7 +1138,6 @@ function createPeerConnection(){
         "WebRTC connection state:",
         pc.connectionState
       );
-
 
       if(
         pc.connectionState ===
@@ -1299,7 +1150,6 @@ function createPeerConnection(){
 
       }
 
-
       if(
         pc.connectionState ===
         "disconnected"
@@ -1310,7 +1160,6 @@ function createPeerConnection(){
         );
 
       }
-
 
       if(
         pc.connectionState ===
@@ -1325,7 +1174,6 @@ function createPeerConnection(){
 
     };
 
-
   pc.oniceconnectionstatechange =
     ()=>{
 
@@ -1335,7 +1183,6 @@ function createPeerConnection(){
       );
 
     };
-
 
   return pc;
 
@@ -1361,11 +1208,9 @@ function sendSignal(
 
   }
 
-
   ws.send(
     JSON.stringify(data)
   );
-
 
   return true;
 
@@ -1383,14 +1228,11 @@ async function flushPendingCandidates(){
 
   }
 
-
   const queued =
     pendingCandidates;
 
-
   pendingCandidates =
     [];
-
 
   for(
     const candidate of queued
@@ -1432,7 +1274,6 @@ function connectSignaling(){
 
   }
 
-
   if(
     ws &&
     (
@@ -1447,12 +1288,10 @@ function connectSignaling(){
 
   }
 
-
   ws =
     new WebSocket(
       SIGNALING_SERVER
     );
-
 
   ws.onopen =
     ()=>{
@@ -1462,11 +1301,6 @@ function connectSignaling(){
         SIGNALING_SERVER
       );
 
-
-      /*
-        This happens immediately after the WebSocket opens.
-        Camera permission is NOT required for this step.
-      */
       sendSignal({
 
         type:"join",
@@ -1474,7 +1308,6 @@ function connectSignaling(){
         room:roomId
 
       });
-
 
       setStatus(
         isHost
@@ -1484,12 +1317,10 @@ function connectSignaling(){
 
     };
 
-
   ws.onmessage =
     async event=>{
 
       let data;
-
 
       try{
 
@@ -1509,36 +1340,85 @@ function connectSignaling(){
 
       }
 
-
       console.log(
         "Signaling message:",
         data
       );
-
 
       if(
         data.type ===
         "joined"
       ){
 
-        /*
-          IMPORTANT:
-          The signaling server decides whether this browser
-          is the host or guest. Do not guess from the URL.
-        */
         isHost =
           data.role === "host";
 
         if(data.movie){
-          if(typeof data.movie === "string") {
-            lastMovieUrl = data.movie;
-            movieState = { currentTime:0, paused:true, playbackRate:1, volume:1 };
-            restoreMovie(data.movie);
-          } else {
-            lastMovieUrl = data.movie.url || "";
-            movieState = { ...(data.movie.state || movieState), updatedAt: data.movie.updatedAt || Date.now() };
-            if(lastMovieUrl) { restoreMovie(lastMovieUrl); setTimeout(()=>syncMovieState(movieState, true), 1200); }
+
+          if(
+            typeof data.movie ===
+            "string"
+          ){
+
+            lastMovieUrl =
+              data.movie;
+
+            movieState = {
+              currentTime:0,
+              paused:true,
+              playbackRate:1,
+              volume:1
+            };
+
+            restoreMovie(
+              data.movie
+            );
+
+          }else{
+
+            lastMovieUrl =
+              data.movie.url ||
+              "";
+
+            movieState = {
+              ...(data.movie.state ||
+                movieState),
+
+              updatedAt:
+                data.movie.updatedAt ||
+                Date.now()
+            };
+
+            if(lastMovieUrl){
+
+              restoreMovie(
+                lastMovieUrl
+              );
+
+              setTimeout(
+                () =>
+                  syncMovieState(
+                    movieState,
+                    true
+                  ),
+                1200
+              );
+
+            }
+
           }
+
+        }
+
+        if(
+          data.movieState
+        ){
+
+          movieState = {
+            ...movieState,
+            ...data.movieState
+          };
+
         }
 
         if(
@@ -1561,7 +1441,6 @@ function connectSignaling(){
 
       }
 
-
       if(
         data.type ===
         "peer-joined" ||
@@ -1572,35 +1451,33 @@ function connectSignaling(){
         peerPresent =
           true;
 
-
         setStatus(
           "Friend joined — connecting..."
         );
 
-
-        /*
-          The host is the only side that starts
-          the initial offer.
-        */
         if(isHost){
 
           if(lastMovieUrl){
+
             sendSignal({
+
               type:"movie",
+
               room:roomId,
+
               url:lastMovieUrl
+
             });
+
           }
 
           await createOffer();
 
         }
 
-
         return;
 
       }
-
 
       if(
         data.type ===
@@ -1610,16 +1487,13 @@ function connectSignaling(){
         peerPresent =
           true;
 
-
         await receiveOffer(
           data.offer
         );
 
-
         return;
 
       }
-
 
       if(
         data.type ===
@@ -1630,11 +1504,9 @@ function connectSignaling(){
           data.answer
         );
 
-
         return;
 
       }
-
 
       if(
         data.type ===
@@ -1645,34 +1517,84 @@ function connectSignaling(){
           data.candidate
         );
 
-
         return;
 
       }
 
+      if(
+        data.type ===
+        "movie"
+      ){
 
-      if(data.type === "movie"){
         if(data.url){
-          lastMovieUrl = data.url;
-          movieState = { currentTime:0, paused:true, playbackRate:1, volume:1 };
-          renderMovie(data.url, false);
-          setStatus("Movie synced");
+
+          lastMovieUrl =
+            data.url;
+
+          movieState = {
+            currentTime:0,
+            paused:true,
+            playbackRate:1,
+            volume:1
+          };
+
+          renderMovie(
+            data.url,
+            false
+          );
+
+          setStatus(
+            "Movie synced"
+          );
+
         }
+
         return;
+
       }
 
-      if(data.type === "movie-state"){
-        if(data.url && data.url !== lastMovieUrl){
-          lastMovieUrl = data.url;
-          renderMovie(data.url, false);
+      if(
+        data.type ===
+        "movie-state"
+      ){
+
+        if(
+          data.url &&
+          data.url !==
+          lastMovieUrl
+        ){
+
+          lastMovieUrl =
+            data.url;
+
+          renderMovie(
+            data.url,
+            false
+          );
+
         }
+
         if(data.state){
-          syncMovieState({ ...data.state, updatedAt: data.updatedAt || Date.now() });
-          setStatus("Playback synced");
-        }
-        return;
-      }
 
+          syncMovieState({
+
+            ...data.state,
+
+            updatedAt:
+              data.updatedAt ||
+              Date.now()
+
+          });
+
+          setStatus(
+            "Playback synced"
+          );
+
+        }
+
+        return;
+
+      }
 
       if(
         data.type ===
@@ -1685,11 +1607,9 @@ function connectSignaling(){
           "Room is full"
         );
 
-
         return;
 
       }
-
 
       if(
         data.type ===
@@ -1701,7 +1621,6 @@ function connectSignaling(){
         peerPresent =
           false;
 
-
         if(pc){
 
           try{
@@ -1709,7 +1628,6 @@ function connectSignaling(){
           }catch{}
 
         }
-
 
         pc =
           null;
@@ -1723,9 +1641,7 @@ function connectSignaling(){
         makingOffer =
           false;
 
-
         removeGuestVideo();
-
 
         setStatus(
           isHost
@@ -1733,11 +1649,9 @@ function connectSignaling(){
           : "Friend left the room"
         );
 
-
         return;
 
       }
-
 
       if(
         data.type ===
@@ -1753,7 +1667,6 @@ function connectSignaling(){
 
     };
 
-
   ws.onerror =
     error=>{
 
@@ -1762,13 +1675,11 @@ function connectSignaling(){
         error
       );
 
-
       setStatus(
         "Unable to connect to room server"
       );
 
     };
-
 
   ws.onclose =
     ()=>{
@@ -1794,7 +1705,6 @@ async function createOffer(){
 
   }
 
-
   if(
     !ws ||
     ws.readyState !==
@@ -1805,10 +1715,8 @@ async function createOffer(){
 
   }
 
-
   makingOffer =
     true;
-
 
   try{
 
@@ -1816,15 +1724,12 @@ async function createOffer(){
 
     addLocalTracks();
 
-
     const offer =
       await pc.createOffer();
-
 
     await pc.setLocalDescription(
       offer
     );
-
 
     sendSignal({
 
@@ -1837,7 +1742,6 @@ async function createOffer(){
 
     });
 
-
     setStatus(
       "Connecting..."
     );
@@ -1848,7 +1752,6 @@ async function createOffer(){
       "Offer error:",
       error
     );
-
 
     setStatus(
       "Unable to create WebRTC offer"
@@ -1876,11 +1779,6 @@ async function receiveOffer(
 
     createPeerConnection();
 
-
-    /*
-      Camera permission is optional for joining.
-      If permission is available, include the tracks.
-    */
     if(
       !localStream
     ){
@@ -1902,9 +1800,7 @@ async function receiveOffer(
 
     }
 
-
     addLocalTracks();
-
 
     await pc.setRemoteDescription(
       new RTCSessionDescription(
@@ -1912,22 +1808,17 @@ async function receiveOffer(
       )
     );
 
-
     remoteDescriptionSet =
       true;
 
-
     await flushPendingCandidates();
-
 
     const answer =
       await pc.createAnswer();
 
-
     await pc.setLocalDescription(
       answer
     );
-
 
     sendSignal({
 
@@ -1940,7 +1831,6 @@ async function receiveOffer(
 
     });
 
-
     setStatus(
       "Connecting..."
     );
@@ -1951,7 +1841,6 @@ async function receiveOffer(
       "Answer creation error:",
       error
     );
-
 
     setStatus(
       "WebRTC setup failed"
@@ -1974,20 +1863,16 @@ async function receiveAnswer(
 
     }
 
-
     await pc.setRemoteDescription(
       new RTCSessionDescription(
         answer
       )
     );
 
-
     remoteDescriptionSet =
       true;
 
-
     await flushPendingCandidates();
-
 
     setStatus(
       "Connecting..."
@@ -1999,7 +1884,6 @@ async function receiveAnswer(
       "Remote answer error:",
       error
     );
-
 
     setStatus(
       "WebRTC answer failed"
@@ -2027,7 +1911,6 @@ async function receiveCandidate(
 
   }
 
-
   try{
 
     await pc.addIceCandidate(
@@ -2044,6 +1927,7 @@ async function receiveCandidate(
   }
 
 }
+
 
 /* =========================
    GUEST VIDEO
@@ -2063,12 +1947,10 @@ function addGuestVideo(
 
   }
 
-
   const grid =
     document.getElementById(
       "videoGrid"
     );
-
 
   if(
     grid.querySelectorAll(
@@ -2079,7 +1961,6 @@ function addGuestVideo(
     return;
 
   }
-
 
   const tile =
     document.createElement(
@@ -2092,16 +1973,19 @@ function addGuestVideo(
   tile.id =
     "guestTile";
 
-
   const video =
     document.createElement(
       "video"
     );
 
-  video.autoplay = true;
-  video.playsInline = true;
-  video.srcObject = stream;
+  video.autoplay =
+    true;
 
+  video.playsInline =
+    true;
+
+  video.srcObject =
+    stream;
 
   const name =
     document.createElement(
@@ -2114,12 +1998,17 @@ function addGuestVideo(
   name.textContent =
     "Guest";
 
+  tile.appendChild(
+    video
+  );
 
-  tile.appendChild(video);
-  tile.appendChild(name);
+  tile.appendChild(
+    name
+  );
 
-  grid.appendChild(tile);
-
+  grid.appendChild(
+    tile
+  );
 
   document.getElementById(
     "peopleCount"
@@ -2140,13 +2029,11 @@ function removeGuestVideo(){
       "guestTile"
     );
 
-
   if(guest){
 
     guest.remove();
 
   }
-
 
   document.getElementById(
     "peopleCount"
@@ -2164,17 +2051,13 @@ function toggleMic(){
 
   if(!localStream) return;
 
-
   const tracks =
     localStream.getAudioTracks();
 
-
   if(!tracks.length) return;
-
 
   const currentlyEnabled =
     tracks[0].enabled;
-
 
   tracks.forEach(
     track=>{
@@ -2182,7 +2065,6 @@ function toggleMic(){
         !currentlyEnabled;
     }
   );
-
 
   document.getElementById(
     "micButton"
@@ -2202,17 +2084,13 @@ function toggleCamera(){
 
   if(!localStream) return;
 
-
   const tracks =
     localStream.getVideoTracks();
 
-
   if(!tracks.length) return;
-
 
   const currentlyEnabled =
     tracks[0].enabled;
-
 
   tracks.forEach(
     track=>{
@@ -2221,14 +2099,12 @@ function toggleCamera(){
     }
   );
 
-
   document.getElementById(
     "cameraButton"
   ).classList.toggle(
     "off",
     currentlyEnabled
   );
-
 
   document.getElementById(
     "localOff"
@@ -2247,8 +2123,14 @@ function toggleCamera(){
 function leaveRoom(){
 
   if(movieSyncTimer){
-    clearInterval(movieSyncTimer);
-    movieSyncTimer = null;
+
+    clearInterval(
+      movieSyncTimer
+    );
+
+    movieSyncTimer =
+      null;
+
   }
 
   if(ws){
@@ -2259,7 +2141,6 @@ function leaveRoom(){
 
   }
 
-
   if(pc){
 
     try{
@@ -2268,18 +2149,16 @@ function leaveRoom(){
 
   }
 
-
   if(localStream){
 
     localStream
       .getTracks()
       .forEach(
-        track=>
-        track.stop()
+        track =>
+          track.stop()
       );
 
   }
-
 
   location.href =
     location.pathname;
@@ -2293,172 +2172,896 @@ function leaveRoom(){
 
 function extractVideoUrl(url){
 
-  return String(url || "").trim();
+  return String(
+    url || ""
+  ).trim();
 
 }
 
 
 function sendMovieState(force=false){
-  if(suppressMovieSync || !ws || ws.readyState !== WebSocket.OPEN || !roomId) return;
-  const state = getMovieState();
+
+  if(
+    suppressMovieSync ||
+    !ws ||
+    ws.readyState !==
+    WebSocket.OPEN ||
+    !roomId
+  ){
+
+    return;
+
+  }
+
+  const state =
+    getMovieState();
+
   if(!state) return;
-  movieState = state;
-  sendSignal({ type:"movie-state", room:roomId, url:lastMovieUrl, state, updatedAt:Date.now() });
+
+  movieState =
+    state;
+
+  sendSignal({
+
+    type:"movie-state",
+
+    room:roomId,
+
+    url:lastMovieUrl,
+
+    state:state,
+
+    updatedAt:
+      Date.now()
+
+  });
+
 }
+
 
 function getMovieState(){
+
   try{
-    if(activeMovieType === "youtube" && youtubePlayer && youtubePlayer.getCurrentTime){
-      return { currentTime:Number(youtubePlayer.getCurrentTime()||0), paused:youtubePlayer.getPlayerState() !== 1, playbackRate:Number(youtubePlayer.getPlaybackRate()||1), volume:Number((youtubePlayer.getVolume()||100)/100) };
+
+    if(
+      activeMovieType ===
+      "youtube" &&
+      youtubePlayer &&
+      youtubePlayer.getCurrentTime
+    ){
+
+      return {
+
+        currentTime:
+          Number(
+            youtubePlayer.getCurrentTime() ||
+            0
+          ),
+
+        paused:
+          youtubePlayer.getPlayerState() !==
+          1,
+
+        playbackRate:
+          Number(
+            youtubePlayer.getPlaybackRate() ||
+            1
+          ),
+
+        volume:
+          Number(
+            (
+              youtubePlayer.getVolume() ||
+              100
+            ) / 100
+          )
+
+      };
+
     }
-    if(activeMovieType === "vimeo" && vimeoPlayer){
-      // Vimeo is synchronized through its event callbacks; the latest state is kept in movieState.
-      return { ...movieState };
+
+    if(
+      activeMovieType ===
+      "vimeo" &&
+      vimeoPlayer
+    ){
+
+      return {
+        ...movieState
+      };
+
     }
+
     if(activeMovieElement){
-      return { currentTime:Number(activeMovieElement.currentTime||0), paused:!!activeMovieElement.paused, playbackRate:Number(activeMovieElement.playbackRate||1), volume:Number(activeMovieElement.volume||1) };
+
+      return {
+
+        currentTime:
+          Number(
+            activeMovieElement.currentTime ||
+            0
+          ),
+
+        paused:
+          !!activeMovieElement.paused,
+
+        playbackRate:
+          Number(
+            activeMovieElement.playbackRate ||
+            1
+          ),
+
+        volume:
+          Number(
+            activeMovieElement.volume ||
+            1
+          )
+
+      };
+
     }
-  }catch(e){ console.warn("Movie state read failed", e); }
+
+  }catch(e){
+
+    console.warn(
+      "Movie state read failed",
+      e
+    );
+
+  }
+
   return null;
+
 }
 
-function syncMovieState(state, isInitial=false){
+
+function syncMovieState(
+  state,
+  isInitial=false
+){
+
   if(!state) return;
-  movieState = { ...movieState, ...state };
 
-  // Compensate for network delay while playing so the guest stays close
-  // to the host instead of always being behind by the network latency.
-  let targetTime = Number(state.currentTime || 0);
-  if(!state.paused && state.updatedAt){
-    const elapsed = Math.max(0, (Date.now() - Number(state.updatedAt)) / 1000);
-    targetTime += elapsed * Number(state.playbackRate || 1);
-  }
-
-  suppressMovieSync = true;
-  const finish = ()=>{ suppressMovieSync=false; };
-  try{
-    if(activeMovieType === "youtube" && youtubePlayer && youtubePlayer.seekTo){
-      youtubePlayer.seekTo(targetTime, true);
-      if(state.playbackRate && youtubePlayer.setPlaybackRate) youtubePlayer.setPlaybackRate(Number(state.playbackRate));
-      if(typeof state.volume === "number" && youtubePlayer.setVolume) youtubePlayer.setVolume(Math.round(state.volume*100));
-      if(state.paused) youtubePlayer.pauseVideo(); else youtubePlayer.playVideo();
-      setTimeout(finish, 250);
-      return;
-    }
-    if(activeMovieElement){
-      if(Number.isFinite(targetTime)) activeMovieElement.currentTime = targetTime;
-      if(state.playbackRate) activeMovieElement.playbackRate = Number(state.playbackRate);
-      if(typeof state.volume === "number") activeMovieElement.volume = Math.max(0, Math.min(1, Number(state.volume)));
-      if(state.paused) activeMovieElement.pause();
-      else activeMovieElement.play().catch(()=>{});
-    }
-  }catch(e){ console.warn("Movie sync failed", e); }
-  setTimeout(finish, 150);
-}
-
-function movieEventState(extra={}){
-  const base = getMovieState() || movieState;
-  movieState = { ...base, ...extra };
-  sendMovieState(true);
-}
-
-function attachHtmlVideoSync(video){
-  activeMovieElement = video;
-  ["play","pause","seeked","ratechange","volumechange"].forEach(ev=>{
-    video.addEventListener(ev, ()=>{
-      if(suppressMovieSync) return;
-      movieEventState();
-    });
-  });
-  if(movieSyncTimer) clearInterval(movieSyncTimer);
-  movieSyncTimer = setInterval(()=>{
-    if(!suppressMovieSync && !video.paused) movieEventState();
-  }, 1000);
-}
-
-function createYouTubePlayer(iframe, videoId){
-  const startPlayer = ()=>{
-    try{
-      youtubePlayer = new YT.Player(iframe, {
-        events:{
-          onReady:()=>{
-            if(movieState && movieState.currentTime) syncMovieState(movieState, true);
-            if(movieSyncTimer) clearInterval(movieSyncTimer);
-            movieSyncTimer = setInterval(()=>{
-              if(!suppressMovieSync && youtubePlayer && youtubePlayer.getPlayerState && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING){
-                movieEventState();
-              }
-            }, 500);
-          },
-          onStateChange:(e)=>{
-            if(suppressMovieSync) return;
-            if(e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.BUFFERING){
-              movieEventState({ paused:e.data !== YT.PlayerState.PLAYING });
-            }
-          },
-          onPlaybackRateChange:()=>{ if(!suppressMovieSync) movieEventState(); }
-        }
-      });
-    }catch(e){ console.warn("YouTube API player error", e); }
+  movieState = {
+    ...movieState,
+    ...state
   };
-  if(window.YT && YT.Player) startPlayer();
-  else window.onYouTubeIframeAPIReady = startPlayer;
-}
 
-function renderMovie(url, announce=true){
-  url = extractVideoUrl(url);
-  if(!url) return false;
-  const container = document.getElementById("movieContainer");
-  if(!container) return false;
+  let targetTime =
+    Number(
+      state.currentTime || 0
+    );
 
-  if(movieSyncTimer) { clearInterval(movieSyncTimer); movieSyncTimer=null; }
-  youtubePlayer=null; vimeoPlayer=null; activeMovieElement=null; activeMovieType=null;
+  if(
+    !state.paused &&
+    state.updatedAt
+  ){
 
-  const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/);
-  if(youtube){
-    activeMovieType="youtube";
-    const iframe=document.createElement("iframe");
-    iframe.id="sharedYoutubePlayer";
-    iframe.src="https://www.youtube.com/embed/"+youtube[1]+"?enablejsapi=1&origin="+encodeURIComponent(location.origin)+"&rel=0";
-    iframe.allow="autoplay; fullscreen; picture-in-picture";
-    iframe.allowFullscreen=true; iframe.title="Shared movie";
-    container.innerHTML=""; container.appendChild(iframe);
-    createYouTubePlayer(iframe, youtube[1]);
-    return true;
+    const elapsed =
+      Math.max(
+        0,
+        (
+          Date.now() -
+          Number(
+            state.updatedAt
+          )
+        ) / 1000
+      );
+
+    targetTime +=
+      elapsed *
+      Number(
+        state.playbackRate ||
+        1
+      );
+
   }
 
-  const vimeo=url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if(vimeo){
-    activeMovieType="vimeo";
-    const iframe=document.createElement("iframe");
-    iframe.id="sharedVimeoPlayer";
-    iframe.src="https://player.vimeo.com/video/"+vimeo[1]+"?api=1";
-    iframe.allow="autoplay; fullscreen; picture-in-picture"; iframe.allowFullscreen=true; iframe.title="Shared movie";
-    container.innerHTML=""; container.appendChild(iframe);
-    // Vimeo control sync requires its Player SDK; load it once.
-    if(!window.Vimeo){ const sc=document.createElement("script"); sc.src="https://player.vimeo.com/api/player.js"; sc.onload=()=>attachVimeoPlayer(iframe); document.head.appendChild(sc); } else attachVimeoPlayer(iframe);
-    return true;
-  }
+  suppressMovieSync =
+    true;
 
-  const video=document.createElement("video");
-  video.src=url; video.controls=true; video.playsInline=true; video.autoplay=false;
-  video.addEventListener("error",()=>setStatus("Hindi ma-play ang video URL"));
-  container.innerHTML=""; container.appendChild(video);
-  attachHtmlVideoSync(video);
-  return true;
-}
+  const finish =
+    ()=>{
+      suppressMovieSync =
+        false;
+    };
 
-function attachVimeoPlayer(iframe){
   try{
-    vimeoPlayer = new Vimeo.Player(iframe);
-    vimeoPlayer.on("play",()=>{ if(!suppressMovieSync) movieEventState({paused:false}); });
-    vimeoPlayer.on("pause",()=>{ if(!suppressMovieSync) movieEventState({paused:true}); });
-    vimeoPlayer.on("seeked",d=>{ if(!suppressMovieSync) movieEventState({currentTime:Number(d.seconds||0)}); });
-    vimeoPlayer.on("timeupdate",d=>{ movieState.currentTime=Number(d.seconds||0); });
-    vimeoPlayer.on("playbackratechange",d=>{ if(!suppressMovieSync) movieEventState({playbackRate:Number(d.playbackRate||1)}); });
-    vimeoPlayer.on("volumechange",d=>{ if(!suppressMovieSync) movieEventState({volume:Number(d.volume||0)}); });
-    if(movieState) syncMovieState(movieState, true);
-  }catch(e){ console.warn("Vimeo API player error", e); }
+
+    if(
+      activeMovieType ===
+      "youtube" &&
+      youtubePlayer &&
+      youtubePlayer.seekTo
+    ){
+
+      youtubePlayer.seekTo(
+        targetTime,
+        true
+      );
+
+      if(
+        state.playbackRate &&
+        youtubePlayer.setPlaybackRate
+      ){
+
+        youtubePlayer.setPlaybackRate(
+          Number(
+            state.playbackRate
+          )
+        );
+
+      }
+
+      if(
+        typeof state.volume ===
+        "number" &&
+        youtubePlayer.setVolume
+      ){
+
+        youtubePlayer.setVolume(
+          Math.round(
+            state.volume * 100
+          )
+        );
+
+      }
+
+      if(state.paused){
+
+        youtubePlayer.pauseVideo();
+
+      }else{
+
+        youtubePlayer.playVideo();
+
+      }
+
+      setTimeout(
+        finish,
+        250
+      );
+
+      return;
+
+    }
+
+    if(activeMovieElement){
+
+      if(
+        Number.isFinite(
+          targetTime
+        )
+      ){
+
+        activeMovieElement.currentTime =
+          targetTime;
+
+      }
+
+      if(state.playbackRate){
+
+        activeMovieElement.playbackRate =
+          Number(
+            state.playbackRate
+          );
+
+      }
+
+      if(
+        typeof state.volume ===
+        "number"
+      ){
+
+        activeMovieElement.volume =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              Number(
+                state.volume
+              )
+            )
+          );
+
+      }
+
+      if(state.paused){
+
+        activeMovieElement.pause();
+
+      }else{
+
+        activeMovieElement
+          .play()
+          .catch(
+            ()=>{}
+          );
+
+      }
+
+    }
+
+  }catch(e){
+
+    console.warn(
+      "Movie sync failed",
+      e
+    );
+
+  }
+
+  setTimeout(
+    finish,
+    150
+  );
+
+}
+
+
+function movieEventState(
+  extra={}
+){
+
+  const base =
+    getMovieState() ||
+    movieState;
+
+  movieState = {
+    ...base,
+    ...extra
+  };
+
+  sendMovieState(true);
+
+}
+
+
+function attachHtmlVideoSync(
+  video
+){
+
+  activeMovieElement =
+    video;
+
+  [
+    "play",
+    "pause",
+    "seeked",
+    "ratechange",
+    "volumechange"
+  ].forEach(
+    ev=>{
+
+      video.addEventListener(
+        ev,
+        ()=>{
+
+          if(
+            suppressMovieSync
+          ) return;
+
+          movieEventState();
+
+        }
+      );
+
+    }
+  );
+
+  if(movieSyncTimer){
+
+    clearInterval(
+      movieSyncTimer
+    );
+
+  }
+
+  movieSyncTimer =
+    setInterval(
+      ()=>{
+
+        if(
+          !suppressMovieSync &&
+          !video.paused
+        ){
+
+          movieEventState();
+
+        }
+
+      },
+      1000
+    );
+
+}
+
+
+function createYouTubePlayer(
+  iframe,
+  videoId
+){
+
+  const startPlayer =
+    ()=>{
+
+      try{
+
+        youtubePlayer =
+          new YT.Player(
+            iframe,
+            {
+
+              events:{
+
+                onReady:()=>{
+
+                  if(
+                    movieState &&
+                    movieState.currentTime
+                  ){
+
+                    syncMovieState(
+                      movieState,
+                      true
+                    );
+
+                  }
+
+                  if(movieSyncTimer){
+
+                    clearInterval(
+                      movieSyncTimer
+                    );
+
+                  }
+
+                  movieSyncTimer =
+                    setInterval(
+                      ()=>{
+
+                        if(
+                          !suppressMovieSync &&
+                          youtubePlayer &&
+                          youtubePlayer.getPlayerState &&
+                          youtubePlayer.getPlayerState() ===
+                          YT.PlayerState.PLAYING
+                        ){
+
+                          movieEventState();
+
+                        }
+
+                      },
+                      500
+                    );
+
+                },
+
+                onStateChange:
+                  (e)=>{
+
+                    if(
+                      suppressMovieSync
+                    ) return;
+
+                    if(
+                      e.data ===
+                      YT.PlayerState.PLAYING ||
+                      e.data ===
+                      YT.PlayerState.PAUSED ||
+                      e.data ===
+                      YT.PlayerState.BUFFERING
+                    ){
+
+                      movieEventState({
+
+                        paused:
+                          e.data !==
+                          YT.PlayerState.PLAYING
+
+                      });
+
+                    }
+
+                  },
+
+                onPlaybackRateChange:
+                  ()=>{
+
+                    if(
+                      !suppressMovieSync
+                    ){
+
+                      movieEventState();
+
+                    }
+
+                  }
+
+              }
+
+            }
+          );
+
+      }catch(e){
+
+        console.warn(
+          "YouTube API player error:",
+          e
+        );
+
+      }
+
+    };
+
+  if(
+    window.YT &&
+    YT.Player
+  ){
+
+    startPlayer();
+
+  }else{
+
+    window.onYouTubeIframeAPIReady =
+      startPlayer;
+
+  }
+
+}
+
+
+function renderMovie(
+  url,
+  announce=true
+){
+
+  url =
+    extractVideoUrl(
+      url
+    );
+
+  if(!url) return false;
+
+  const container =
+    document.getElementById(
+      "movieContainer"
+    );
+
+  if(!container)
+    return false;
+
+  if(movieSyncTimer){
+
+    clearInterval(
+      movieSyncTimer
+    );
+
+    movieSyncTimer =
+      null;
+
+  }
+
+  youtubePlayer =
+    null;
+
+  vimeoPlayer =
+    null;
+
+  activeMovieElement =
+    null;
+
+  activeMovieType =
+    null;
+
+  const youtube =
+    url.match(
+      /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/
+    );
+
+  if(youtube){
+
+    activeMovieType =
+      "youtube";
+
+    const iframe =
+      document.createElement(
+        "iframe"
+      );
+
+    iframe.id =
+      "sharedYoutubePlayer";
+
+    iframe.src =
+      "https://www.youtube.com/embed/" +
+      youtube[1] +
+      "?enablejsapi=1&origin=" +
+      encodeURIComponent(
+        location.origin
+      ) +
+      "&rel=0";
+
+    iframe.allow =
+      "autoplay; fullscreen; picture-in-picture";
+
+    iframe.allowFullscreen =
+      true;
+
+    iframe.title =
+      "Shared movie";
+
+    container.innerHTML =
+      "";
+
+    container.appendChild(
+      iframe
+    );
+
+    createYouTubePlayer(
+      iframe,
+      youtube[1]
+    );
+
+    return true;
+
+  }
+
+  const vimeo =
+    url.match(
+      /vimeo\.com\/(?:video\/)?(\d+)/
+    );
+
+  if(vimeo){
+
+    activeMovieType =
+      "vimeo";
+
+    const iframe =
+      document.createElement(
+        "iframe"
+      );
+
+    iframe.id =
+      "sharedVimeoPlayer";
+
+    iframe.src =
+      "https://player.vimeo.com/video/" +
+      vimeo[1] +
+      "?api=1";
+
+    iframe.allow =
+      "autoplay; fullscreen; picture-in-picture";
+
+    iframe.allowFullscreen =
+      true;
+
+    iframe.title =
+      "Shared movie";
+
+    container.innerHTML =
+      "";
+
+    container.appendChild(
+      iframe
+    );
+
+    if(!window.Vimeo){
+
+      const sc =
+        document.createElement(
+          "script"
+        );
+
+      sc.src =
+        "https://player.vimeo.com/api/player.js";
+
+      sc.onload =
+        ()=>{
+          attachVimeoPlayer(
+            iframe
+          );
+        };
+
+      document.head.appendChild(
+        sc
+      );
+
+    }else{
+
+      attachVimeoPlayer(
+        iframe
+      );
+
+    }
+
+    return true;
+
+  }
+
+  const video =
+    document.createElement(
+      "video"
+    );
+
+  video.src =
+    url;
+
+  video.controls =
+    true;
+
+  video.playsInline =
+    true;
+
+  video.autoplay =
+    false;
+
+  video.addEventListener(
+    "error",
+    ()=>{
+      setStatus(
+        "Hindi ma-play ang video URL"
+      );
+    }
+  );
+
+  container.innerHTML =
+    "";
+
+  container.appendChild(
+    video
+  );
+
+  attachHtmlVideoSync(
+    video
+  );
+
+  return true;
+
+}
+
+
+function attachVimeoPlayer(
+  iframe
+){
+
+  try{
+
+    vimeoPlayer =
+      new Vimeo.Player(
+        iframe
+      );
+
+    vimeoPlayer.on(
+      "play",
+      ()=>{
+        if(
+          !suppressMovieSync
+        ){
+
+          movieEventState({
+            paused:false
+          });
+
+        }
+      }
+    );
+
+    vimeoPlayer.on(
+      "pause",
+      ()=>{
+        if(
+          !suppressMovieSync
+        ){
+
+          movieEventState({
+            paused:true
+          });
+
+        }
+      }
+    );
+
+    vimeoPlayer.on(
+      "seeked",
+      d=>{
+
+        if(
+          !suppressMovieSync
+        ){
+
+          movieEventState({
+
+            currentTime:
+              Number(
+                d.seconds ||
+                0
+              )
+
+          });
+
+        }
+
+      }
+    );
+
+    vimeoPlayer.on(
+      "timeupdate",
+      d=>{
+
+        movieState.currentTime =
+          Number(
+            d.seconds ||
+            0
+          );
+
+      }
+    );
+
+    vimeoPlayer.on(
+      "playbackratechange",
+      d=>{
+
+        if(
+          !suppressMovieSync
+        ){
+
+          movieEventState({
+
+            playbackRate:
+              Number(
+                d.playbackRate ||
+                1
+              )
+
+          });
+
+        }
+
+      }
+    );
+
+    vimeoPlayer.on(
+      "volumechange",
+      d=>{
+
+        if(
+          !suppressMovieSync
+        ){
+
+          movieEventState({
+
+            volume:
+              Number(
+                d.volume ||
+                0
+              )
+
+          });
+
+        }
+
+      }
+    );
+
+    if(movieState){
+
+      syncMovieState(
+        movieState,
+        true
+      );
+
+    }
+
+  }catch(e){
+
+    console.warn(
+      "Vimeo API player error:",
+      e
+    );
+
+  }
+
 }
 
 
@@ -2471,7 +3074,6 @@ function loadMovie(){
       ).value
     );
 
-
   if(!url){
 
     setStatus(
@@ -2482,32 +3084,35 @@ function loadMovie(){
 
   }
 
-
-  if(!renderMovie(url, true)){
+  if(
+    !renderMovie(
+      url,
+      true
+    )
+  ){
 
     return;
 
   }
 
-
   lastMovieUrl =
     url;
 
   movieState = {
+
     currentTime:0,
+
     paused:true,
+
     playbackRate:1,
+
     volume:1,
-    updatedAt:Date.now()
+
+    updatedAt:
+      Date.now()
+
   };
 
-
-  /*
-    Tell the signaling server which movie
-    the room is currently watching.
-    The server stores it so a person who
-    joins later receives the same movie.
-  */
   sendSignal({
 
     type:"movie",
@@ -2518,10 +3123,9 @@ function loadMovie(){
 
   });
 
-  // Publish the initial playback state immediately. Later play/pause/seek
-  // changes are published by the movie event listeners and 500ms timer.
-  sendMovieState(true);
-
+  sendMovieState(
+    true
+  );
 
   setStatus(
     "Movie loaded — syncing to friend..."
@@ -2529,7 +3133,10 @@ function loadMovie(){
 
 }
 
-function restoreMovie(url){
+
+function restoreMovie(
+  url
+){
 
   if(!url) return;
 
@@ -2539,7 +3146,10 @@ function restoreMovie(url){
     );
 
   if(input){
-    input.value = url;
+
+    input.value =
+      url;
+
   }
 
   renderMovie(
@@ -2554,14 +3164,6 @@ function restoreMovie(url){
    AUTOMATIC ROOM START
 ========================= */
 
-/*
-  No Make Room button, Join Room button, or invitation link
-  is required anymore.
-
-  The first visitor becomes the host.
-  The second visitor becomes the guest.
-  The signaling server assigns the role.
-*/
 (function(){
 
   function startAutomaticRoom(){
@@ -2569,19 +3171,16 @@ function restoreMovie(url){
     roomId =
       AUTO_ROOM_ID;
 
-    /*
-      The server, not the browser, decides the role.
-      We start with false and update it when "joined"
-      arrives from the server.
-    */
-    isHost = false;
+    isHost =
+      false;
 
     openRoom();
 
   }
 
   if(
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
   ){
 
     document.addEventListener(
