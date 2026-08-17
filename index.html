@@ -120,10 +120,10 @@ button{cursor:pointer}
 
 .main{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 420px;
-  gap:14px;
-  padding:14px;
-  max-width:1500px;
+  grid-template-columns:minmax(0,1fr) 360px;
+  gap:18px;
+  padding:18px;
+  max-width:1700px;
   margin:auto;
 }
 
@@ -204,7 +204,7 @@ button{cursor:pointer}
 
 .video-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr;
   gap:12px;
   max-height:none;
   overflow:visible;
@@ -346,7 +346,7 @@ button{cursor:pointer}
   }
 
  .video-grid{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr;
     gap:12px;
   }
 
@@ -2158,6 +2158,11 @@ function toggleCamera(){
 
 function leaveRoom(){
 
+  if(movieSyncTimer){
+    clearInterval(movieSyncTimer);
+    movieSyncTimer = null;
+  }
+
   if(ws){
 
     try{
@@ -2281,6 +2286,12 @@ function createYouTubePlayer(iframe, videoId){
         events:{
           onReady:()=>{
             if(movieState && movieState.currentTime) syncMovieState(movieState, true);
+            if(movieSyncTimer) clearInterval(movieSyncTimer);
+            movieSyncTimer = setInterval(()=>{
+              if(!suppressMovieSync && youtubePlayer && youtubePlayer.getPlayerState && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING){
+                movieEventState();
+              }
+            }, 1000);
           },
           onStateChange:(e)=>{
             if(suppressMovieSync) return;
