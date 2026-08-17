@@ -344,20 +344,37 @@ button{cursor:pointer}
 
 /* Landscape phone: movie stays dominant; call panel fits neatly in the viewport. */
 @media(max-width:850px) and (orientation:landscape){
+  /* Landscape phone: movie gets the clear majority of the screen.
+     The call column is deliberately compact and its two tiles are
+     constrained inside the visible viewport — no tile can overflow. */
   .main{
-    grid-template-columns:minmax(0,7.2fr) minmax(135px,2.8fr);
-    gap:8px;
-    padding:8px;
-    height:calc(100vh - 70px);
+    grid-template-columns:minmax(0,7.4fr) minmax(120px,2.6fr);
+    gap:7px;
+    padding:7px;
+    height:calc(100dvh - 64px);
+    max-height:calc(100dvh - 64px);
     box-sizing:border-box;
+    overflow:hidden;
   }
+
+  .main > section{
+    min-width:0;
+    min-height:0;
+  }
+
   .movie-card{
     height:100%;
     aspect-ratio:auto;
-  }
-  .side{
-    padding:6px;
     border-radius:10px;
+  }
+
+  .movie-info{
+    display:none;
+  }
+
+  .side{
+    padding:5px;
+    border-radius:9px;
     height:100%;
     max-height:100%;
     min-height:0;
@@ -366,30 +383,70 @@ button{cursor:pointer}
     flex-direction:column;
     overflow:hidden;
   }
-  .side-title{font-size:12px;padding:1px 3px 5px;flex:0 0 auto;}
+
+  .side-title{
+    font-size:10px;
+    line-height:14px;
+    padding:0 2px 3px;
+    flex:0 0 17px;
+  }
+
   .video-grid{
     flex:1 1 auto;
     min-height:0;
+    height:auto;
     grid-template-columns:1fr;
     grid-template-rows:repeat(2,minmax(0,1fr));
-    gap:5px;
+    gap:4px;
     max-height:none;
     overflow:hidden;
   }
+
   .video-tile{
     min-height:0;
-    height:auto;
+    height:100%;
+    max-height:100%;
     aspect-ratio:auto;
-    border-radius:7px;
+    border-radius:6px;
+    overflow:hidden;
   }
-  .video-name{font-size:9px;left:5px;bottom:4px;padding:3px 5px;}
-  .controls{padding-top:5px;gap:4px;flex:0 0 auto;}
-  .control{width:28px;height:28px;}
-  .control.end{width:36px;border-radius:14px;}
-  .invite-box{padding:5px;margin-top:4px;flex:0 0 auto;}
-  .invite-label,.status,.people{font-size:8px;}
-  .invite-row input{padding:6px;font-size:9px;}
-  .small-button{padding:6px 7px;font-size:9px;}
+
+  .video-tile video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .video-name{
+    font-size:8px;
+    left:4px;
+    bottom:3px;
+    padding:2px 4px;
+  }
+
+  .controls{
+    padding-top:4px;
+    gap:4px;
+    flex:0 0 31px;
+  }
+
+  .control{
+    width:26px;
+    height:26px;
+  }
+
+  .control.end{
+    width:34px;
+    border-radius:13px;
+  }
+
+  /* Room sharing is automatic now, so these extra boxes don't consume
+     valuable landscape height. */
+  .invite-box,
+  .status,
+  .people{
+    display:none;
+  }
 }
 
 @media(max-width:520px) and (orientation:portrait){
