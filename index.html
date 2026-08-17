@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -12,448 +10,272 @@
 
   <title>Jell & James</title>
 
-
   <style>
-
     * {
       box-sizing: border-box;
     }
 
-
     body {
       margin: 0;
-      font-family:
-        Arial,
-        sans-serif;
-
-      background:
-        #eef5ee;
-
-      color:
-        #26352a;
+      font-family: Arial, sans-serif;
+      background: #eef5ee;
+      color: #26352a;
     }
-
 
     button,
     input {
       font: inherit;
     }
 
-
     button {
       cursor: pointer;
     }
 
-
     .header {
       height: 64px;
-
-      background:
-        #dcebdc;
-
+      background: #dcebdc;
       display: flex;
-
       align-items: center;
-
-      justify-content:
-        space-between;
-
-      padding:
-        0 18px;
-
-      border-bottom:
-        1px solid #c9dcc9;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid #c9dcc9;
     }
-
 
     .logo {
       font-weight: 700;
       font-size: 20px;
     }
 
-
     .status {
       font-size: 13px;
       color: #55705b;
     }
 
-
     .main {
       display: grid;
-
-      grid-template-columns:
-        minmax(0, 7fr)
-        minmax(220px, 3fr);
-
+      grid-template-columns: minmax(0, 7fr) minmax(220px, 3fr);
       gap: 12px;
-
       padding: 14px;
-
       max-width: 1700px;
-
       margin: auto;
     }
 
-
     .movie-card {
       background: #000;
-
       border-radius: 16px;
-
       overflow: hidden;
-
       aspect-ratio: 16 / 9;
     }
-
 
     .movie-card iframe,
     .movie-card video {
       width: 100%;
       height: 100%;
-
       border: 0;
-
       display: block;
     }
 
-
     .placeholder {
       height: 100%;
-
       display: flex;
-
       align-items: center;
-
       justify-content: center;
-
       color: #aaa;
-
       text-align: center;
-
       padding: 20px;
     }
 
-
     .movie-info {
       background: white;
-
       border-radius: 14px;
-
       margin-top: 12px;
-
       padding: 16px;
     }
 
-
     .movie-title {
       font-size: 20px;
-
       font-weight: 700;
     }
 
-
     .movie-input {
       display: flex;
-
       gap: 8px;
-
       margin-top: 12px;
     }
 
-
     .movie-input input {
       flex: 1;
-
       min-width: 0;
-
       padding: 11px;
-
-      border:
-        1px solid #ccd8cc;
-
+      border: 1px solid #ccd8cc;
       border-radius: 10px;
-
       outline: none;
     }
 
-
     .primary {
       border: 0;
-
-      background:
-        #739b78;
-
+      background: #739b78;
       color: white;
-
       border-radius: 10px;
-
-      padding:
-        11px 15px;
+      padding: 11px 15px;
     }
-
 
     .side {
       background: white;
-
       border-radius: 16px;
-
       padding: 10px;
     }
 
-
     .video-grid {
       display: grid;
-
-      grid-template-columns:
-        1fr;
-
+      grid-template-columns: 1fr;
       gap: 8px;
     }
 
-
     .video-tile {
       position: relative;
-
       background: #101510;
-
       border-radius: 14px;
-
       overflow: hidden;
-
       aspect-ratio: 16 / 9;
     }
-
 
     .video-tile video {
       width: 100%;
       height: 100%;
-
       object-fit: cover;
-
       display: block;
-
       background: #000;
     }
 
-
     #localVideo {
-      transform:
-        scaleX(-1);
+      transform: scaleX(-1);
     }
-
 
     .video-name {
       position: absolute;
-
       left: 8px;
       bottom: 7px;
-
-      background:
-        rgba(0, 0, 0, .6);
-
+      background: rgba(0, 0, 0, .6);
       color: white;
-
-      padding:
-        4px 7px;
-
+      padding: 4px 7px;
       border-radius: 6px;
-
       font-size: 12px;
     }
 
+    .waiting {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+      background: #101510;
+    }
 
     .camera-off {
       position: absolute;
-
       inset: 0;
-
       display: none;
-
       align-items: center;
-
       justify-content: center;
-
       color: white;
-
       background: #101510;
     }
-
-
-    .waiting {
-      position: absolute;
-
-      inset: 0;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      text-align: center;
-
-      padding: 20px;
-
-      color: #aaa;
-
-      background: #101510;
-    }
-
 
     .controls {
       display: flex;
-
       justify-content: center;
-
       gap: 9px;
-
       padding-top: 12px;
     }
-
 
     .control {
       width: 46px;
       height: 46px;
-
       border: 0;
-
       border-radius: 50%;
-
-      background:
-        #edf2ed;
+      background: #edf2ed;
     }
-
 
     .control.off {
-      background:
-        #c96f6f;
-
+      background: #c96f6f;
       color: white;
     }
-
 
     .end {
-      background:
-        #bd5555;
-
+      background: #bd5555;
       color: white;
     }
-
 
     .join-overlay {
       position: fixed;
-
       inset: 0;
-
       z-index: 1000;
-
       display: flex;
-
       align-items: center;
-
       justify-content: center;
-
       padding: 20px;
-
-      background:
-        rgba(0, 0, 0, .65);
+      background: rgba(0, 0, 0, .65);
     }
-
 
     .join-box {
       width: 100%;
-
       max-width: 380px;
-
       background: white;
-
       border-radius: 18px;
-
       padding: 25px;
-
       text-align: center;
     }
-
 
     .join-box h2 {
       margin-top: 0;
     }
 
-
     .join-box p {
       color: #657067;
-
       font-size: 14px;
-
       line-height: 1.5;
     }
 
-
     .join-button {
       width: 100%;
-
       border: 0;
-
       border-radius: 12px;
-
       padding: 13px;
-
-      background:
-        #739b78;
-
+      background: #739b78;
       color: white;
-
       font-weight: 700;
-
       margin-top: 10px;
     }
 
-
     .error-box {
       display: none;
-
       margin-top: 12px;
-
       padding: 10px;
-
       border-radius: 10px;
-
-      background:
-        #f8dddd;
-
-      color:
-        #8d3030;
-
+      background: #f8dddd;
+      color: #8d3030;
       font-size: 13px;
     }
 
-
     @media (max-width: 850px) {
-
       .main {
-        grid-template-columns:
-          1fr;
+        grid-template-columns: 1fr;
       }
-
     }
-
   </style>
-
 </head>
-
 
 <body>
 
-
-  <!-- ======================================
-       JOIN OVERLAY
-       ====================================== -->
-
+  <!-- JOIN -->
   <div
     class="join-overlay"
     id="joinOverlay"
   >
-
     <div class="join-box">
 
       <h2>
@@ -461,10 +283,8 @@
       </h2>
 
       <p>
-        You will automatically join
-        the only available room.
-        Camera and microphone access
-        are needed for the video call.
+        You will automatically join the
+        only available room.
       </p>
 
       <button
@@ -480,14 +300,10 @@
       ></div>
 
     </div>
-
   </div>
 
 
-  <!-- ======================================
-       HEADER
-       ====================================== -->
-
+  <!-- HEADER -->
   <header class="header">
 
     <div class="logo">
@@ -504,37 +320,25 @@
   </header>
 
 
-  <!-- ======================================
-       MAIN
-       ====================================== -->
-
   <main class="main">
 
-
-    <!-- ====================================
-         MOVIE AREA
-         ==================================== -->
-
+    <!-- MOVIE -->
     <section>
 
       <div
         class="movie-card"
         id="movieContainer"
       >
-
         <div class="placeholder">
           Paste a video URL below.
         </div>
-
       </div>
-
 
       <div class="movie-info">
 
         <div class="movie-title">
           Watch Together
         </div>
-
 
         <div class="movie-input">
 
@@ -543,7 +347,6 @@
             type="text"
             placeholder="Paste video URL..."
           >
-
 
           <button
             class="primary"
@@ -559,17 +362,12 @@
     </section>
 
 
-    <!-- ====================================
-         VIDEO CALL AREA
-         ==================================== -->
-
+    <!-- VIDEO CALL -->
     <aside class="side">
 
       <div class="video-grid">
 
-
-        <!-- LOCAL VIDEO -->
-
+        <!-- LOCAL -->
         <div class="video-tile">
 
           <video
@@ -579,14 +377,12 @@
             playsinline
           ></video>
 
-
           <div
             class="camera-off"
             id="cameraOff"
           >
             Camera Off
           </div>
-
 
           <div class="video-name">
             You
@@ -595,8 +391,7 @@
         </div>
 
 
-        <!-- REMOTE VIDEO -->
-
+        <!-- REMOTE -->
         <div
           class="video-tile"
           id="guestTile"
@@ -608,7 +403,6 @@
             playsinline
           ></video>
 
-
           <div
             class="waiting"
             id="remoteWaiting"
@@ -616,18 +410,14 @@
             Waiting for your friend...
           </div>
 
-
           <div class="video-name">
             Friend
           </div>
 
         </div>
 
-
       </div>
 
-
-      <!-- CONTROLS -->
 
       <div class="controls">
 
@@ -639,7 +429,6 @@
           🎙️
         </button>
 
-
         <button
           class="control"
           id="cameraButton"
@@ -647,7 +436,6 @@
         >
           📹
         </button>
-
 
         <button
           class="control end"
@@ -661,33 +449,33 @@
 
     </aside>
 
-
   </main>
 
 
   <script>
 
-
-    // ======================================
-    // IMPORTANT
-    // ======================================
+    // ==========================================
+    // WEBSOCKET ADDRESS
+    // ==========================================
     //
-    // PALITAN LANG ITO NG ACTUAL RENDER
-    // WEBSOCKET URL NG SERVER MO.
+    // Kung ang index.html at server.js ay nasa
+    // SAME Render service, automatic itong gagamit
+    // ng parehong domain.
     //
-    // Example:
+    // Hindi mo na kailangang maglagay ng
+    // YOUR-RENDER-DOMAIN.
     //
-    // wss://my-video-server.onrender.com
-    //
-    // ======================================
+    // ==========================================
 
     const SIGNALING_URL =
-      "wss://YOUR-RENDER-DOMAIN.onrender.com";
+      location.protocol === "https:"
+        ? `wss://${location.host}`
+        : `ws://${location.host}`;
 
 
-    // ======================================
+    // ==========================================
     // STATE
-    // ======================================
+    // ==========================================
 
     let socket = null;
 
@@ -701,8 +489,6 @@
 
     let peerPresent = false;
 
-    let joined = false;
-
     let stopped = false;
 
     let reconnectTimer = null;
@@ -713,145 +499,85 @@
 
     let remoteDescriptionReady = false;
 
+    let callStarting = false;
 
-    // ======================================
+
+    // ==========================================
     // DOM
-    // ======================================
+    // ==========================================
 
     const joinOverlay =
-      document.getElementById(
-        "joinOverlay"
-      );
-
+      document.getElementById("joinOverlay");
 
     const joinButton =
-      document.getElementById(
-        "joinButton"
-      );
-
+      document.getElementById("joinButton");
 
     const joinError =
-      document.getElementById(
-        "joinError"
-      );
-
+      document.getElementById("joinError");
 
     const roomStatus =
-      document.getElementById(
-        "roomStatus"
-      );
-
+      document.getElementById("roomStatus");
 
     const localVideo =
-      document.getElementById(
-        "localVideo"
-      );
-
+      document.getElementById("localVideo");
 
     const remoteVideo =
-      document.getElementById(
-        "remoteVideo"
-      );
-
-
-    const guestTile =
-      document.getElementById(
-        "guestTile"
-      );
-
+      document.getElementById("remoteVideo");
 
     const remoteWaiting =
-      document.getElementById(
-        "remoteWaiting"
-      );
-
+      document.getElementById("remoteWaiting");
 
     const cameraOff =
-      document.getElementById(
-        "cameraOff"
-      );
-
+      document.getElementById("cameraOff");
 
     const micButton =
-      document.getElementById(
-        "micButton"
-      );
-
+      document.getElementById("micButton");
 
     const cameraButton =
-      document.getElementById(
-        "cameraButton"
-      );
-
+      document.getElementById("cameraButton");
 
     const leaveButton =
-      document.getElementById(
-        "leaveButton"
-      );
+      document.getElementById("leaveButton");
 
 
-    // ======================================
+    // ==========================================
     // CLIENT ID
-    // ======================================
-    //
-    // First join:
-    // server creates the ID.
-    //
-    // After that:
-    // browser stores it for reconnect.
-    // ======================================
+    // ==========================================
 
-    function getSavedClientId() {
-
-      return localStorage.getItem(
+    clientId =
+      localStorage.getItem(
         "jell-client-id"
       );
 
-    }
-
 
     function saveClientId(id) {
-
       if (!id) return;
 
       localStorage.setItem(
         "jell-client-id",
         id
       );
-
     }
 
 
-    clientId =
-      getSavedClientId();
-
-
-    // ======================================
+    // ==========================================
     // STATUS
-    // ======================================
+    // ==========================================
 
     function setStatus(text) {
-
-      roomStatus.textContent =
-        text;
-
+      roomStatus.textContent = text;
     }
 
 
     function showJoinError(text) {
-
-      joinError.textContent =
-        text;
-
-      joinError.style.display =
-        "block";
-
+      joinError.textContent = text;
+      joinError.style.display = "block";
     }
 
 
-    // ======================================
-    // LOCAL CAMERA + MICROPHONE
-    // ======================================
+    // ==========================================
+    // CAMERA + MICROPHONE
+    // ==========================================
 
     async function startLocalMedia() {
 
@@ -859,23 +585,19 @@
         return true;
       }
 
-
       try {
 
         localStream =
           await navigator
             .mediaDevices
             .getUserMedia({
-
               video: {
                 width: {
                   ideal: 1280
                 },
-
                 height: {
                   ideal: 720
                 },
-
                 frameRate: {
                   ideal: 30,
                   max: 30
@@ -884,14 +606,10 @@
 
               audio: {
                 echoCancellation: true,
-
                 noiseSuppression: true,
-
                 autoGainControl: true,
-
                 channelCount: 1
               }
-
             });
 
 
@@ -909,30 +627,26 @@
       } catch (error) {
 
         console.error(
-          "Camera/microphone error:",
+          "getUserMedia error:",
           error
         );
 
-
         showJoinError(
-          "Please allow camera and microphone access, then try again."
+          "Please allow camera and microphone access."
         );
-
 
         setStatus(
-          "Camera/microphone permission needed"
+          "Camera/microphone permission required"
         );
-
 
         return false;
       }
-
     }
 
 
-    // ======================================
-    // CONNECT WEBSOCKET
-    // ======================================
+    // ==========================================
+    // WEBSOCKET
+    // ==========================================
 
     function connectSocket() {
 
@@ -940,25 +654,18 @@
         return;
       }
 
-
       if (
         socket &&
         (
-          socket.readyState ===
-            WebSocket.OPEN ||
-
-          socket.readyState ===
-            WebSocket.CONNECTING
+          socket.readyState === WebSocket.OPEN ||
+          socket.readyState === WebSocket.CONNECTING
         )
       ) {
-
         return;
       }
 
 
-      setStatus(
-        "Connecting..."
-      );
+      setStatus("Connecting...");
 
 
       socket =
@@ -967,89 +674,58 @@
         );
 
 
-      // ====================================
-      // OPEN
-      // ====================================
+      socket.onopen = () => {
 
-      socket.onopen =
-        () => {
+        reconnectAttempts = 0;
 
-          reconnectAttempts = 0;
-
-
-          setStatus(
-            "Joining the room..."
-          );
+        setStatus(
+          "Joining the room..."
+        );
 
 
-          /*
-           * IMPORTANT:
-           *
-           * Walang room ID dito.
-           *
-           * Server mismo ang
-           * naglalagay sa "main".
-           */
+        // IMPORTANT:
+        // Walang room ID.
+        // Server ang naglalagay sa "main".
 
-          socket.send(
-            JSON.stringify({
+        socket.send(
+          JSON.stringify({
+            type: "join",
+            clientId: clientId || undefined
+          })
+        );
+      };
 
-              type: "join",
-
-              clientId:
-                clientId || undefined
-
-            })
-          );
-
-        };
-
-
-      // ====================================
-      // MESSAGE
-      // ====================================
 
       socket.onmessage =
         async event => {
 
           let message;
 
-
           try {
-
             message =
               JSON.parse(
                 event.data
               );
-
           } catch {
-
             return;
-
           }
 
 
-          // ==================================
+          // ====================================
           // JOINED
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "joined"
+            message.type === "joined"
           ) {
 
             clientId =
               message.clientId;
 
-
-            saveClientId(
-              clientId
-            );
-
+            saveClientId(clientId);
 
             role =
               message.role;
-
 
             peerPresent =
               Boolean(
@@ -1057,11 +733,15 @@
               );
 
 
-            joined = true;
+            console.log(
+              "Joined room:",
+              message.room
+            );
 
-
-            joinOverlay.style.display =
-              "none";
+            console.log(
+              "Role:",
+              role
+            );
 
 
             if (peerPresent) {
@@ -1071,16 +751,13 @@
               );
 
 
-              /*
-               * HOST creates offer.
-               */
+              // HOST LANG ang gagawa
+              // ng initial offer.
 
               if (
                 role === "host"
               ) {
-
                 await startCall();
-
               }
 
             } else {
@@ -1091,40 +768,31 @@
 
               remoteWaiting.style.display =
                 "flex";
-
             }
-
 
             return;
           }
 
 
-          // ==================================
-          // SECOND USER JOINED
-          // ==================================
+          // ====================================
+          // PEER JOINED
+          // ====================================
 
           if (
-            message.type ===
-            "peer-joined"
+            message.type === "peer-joined"
           ) {
 
             peerPresent = true;
 
-
             remoteWaiting.style.display =
               "none";
 
-
             setStatus(
-              "Friend joined — connecting video..."
+              "Friend joined — connecting..."
             );
 
 
-            /*
-             * Only HOST starts
-             * the offer.
-             */
-
+            // Existing user is host.
             if (
               role === "host"
             ) {
@@ -1133,14 +801,13 @@
 
             }
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // PEER RECONNECTED
-          // ==================================
+          // ====================================
 
           if (
             message.type ===
@@ -1149,13 +816,8 @@
 
             peerPresent = true;
 
-
-            remoteWaiting.style.display =
-              "none";
-
-
             setStatus(
-              "Friend reconnected — connecting..."
+              "Friend reconnected — reconnecting video..."
             );
 
 
@@ -1167,71 +829,63 @@
 
             }
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // OFFER
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "offer"
+            message.type === "offer"
           ) {
 
             peerPresent = true;
-
 
             await handleOffer(
               message.offer
             );
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // ANSWER
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "answer"
+            message.type === "answer"
           ) {
 
             await handleAnswer(
               message.answer
             );
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // ICE
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "candidate"
+            message.type === "candidate"
           ) {
 
             await handleCandidate(
               message.candidate
             );
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // PEER DISCONNECTED
-          // ==================================
+          // ====================================
 
           if (
             message.type ===
@@ -1240,73 +894,62 @@
 
             peerPresent = false;
 
-
             closePeer();
 
+            remoteVideo.srcObject =
+              null;
 
-            removeRemoteVideo();
-
+            remoteWaiting.style.display =
+              "flex";
 
             setStatus(
               "Friend disconnected — waiting..."
             );
 
-
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // ROOM FULL
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "room-full"
+            message.type === "room-full"
           ) {
 
             setStatus(
               "Room is full — maximum 2 users."
             );
 
-
             showJoinError(
               "The room already has two users."
             );
-
 
             return;
           }
 
 
-          // ==================================
+          // ====================================
           // ERROR
-          // ==================================
+          // ====================================
 
           if (
-            message.type ===
-            "error"
+            message.type === "error"
           ) {
-
-            console.error(
-              message.message
-            );
-
 
             setStatus(
               message.message
             );
 
+            console.error(
+              message.message
+            );
 
             return;
           }
-
         };
 
-
-      // ====================================
-      // ERROR
-      // ====================================
 
       socket.onerror =
         error => {
@@ -1319,13 +962,8 @@
           setStatus(
             "Connection error..."
           );
-
         };
 
-
-      // ====================================
-      // CLOSE
-      // ====================================
 
       socket.onclose =
         () => {
@@ -1333,10 +971,6 @@
           if (stopped) {
             return;
           }
-
-
-          joined = false;
-
 
           setStatus(
             "Disconnected — reconnecting..."
@@ -1353,7 +987,6 @@
                 1.5,
                 reconnectAttempts
               ),
-
               5000
             );
 
@@ -1365,33 +998,276 @@
 
           reconnectTimer =
             setTimeout(
-              () => {
-
-                connectSocket();
-
-              },
+              connectSocket,
               delay
             );
-
         };
-
     }
 
 
-    // ======================================
-    // START CALL
-    // ======================================
+    // ==========================================
+    // CREATE PEER CONNECTION
+    // ==========================================
+
+    async function createPeerConnection() {
+
+      closePeer();
+
+
+      peerConnection =
+        new RTCPeerConnection({
+
+          iceServers: [
+            {
+              urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun1.l.google.com:19302"
+              ]
+            }
+          ],
+
+          bundlePolicy: "max-bundle",
+
+          rtcpMuxPolicy: "require"
+        });
+
+
+      remoteDescriptionReady = false;
+
+      pendingCandidates = [];
+
+
+      // ========================================
+      // LOCAL TRACKS
+      // ========================================
+
+      if (localStream) {
+
+        localStream
+          .getTracks()
+          .forEach(track => {
+
+            peerConnection.addTrack(
+              track,
+              localStream
+            );
+
+          });
+      }
+
+
+      // ========================================
+      // ICE
+      // ========================================
+
+      peerConnection.onicecandidate =
+        event => {
+
+          if (
+            event.candidate
+          ) {
+
+            sendSignal({
+              type: "candidate",
+              candidate:
+                event.candidate
+            });
+          }
+        };
+
+
+      // ========================================
+      // REMOTE VIDEO + AUDIO
+      // ========================================
+
+      peerConnection.ontrack =
+        async event => {
+
+          console.log(
+            "Remote track:",
+            event.track.kind
+          );
+
+
+          let stream =
+            event.streams &&
+            event.streams[0];
+
+
+          if (!stream) {
+
+            stream =
+              remoteVideo.srcObject ||
+              new MediaStream();
+
+            if (
+              !stream
+                .getTracks()
+                .includes(
+                  event.track
+                )
+            ) {
+
+              stream.addTrack(
+                event.track
+              );
+            }
+          }
+
+
+          remoteVideo.srcObject =
+            stream;
+
+
+          remoteWaiting.style.display =
+            "none";
+
+
+          /*
+           * IMPORTANT:
+           * Remote video is NOT muted.
+           * Therefore audio can play.
+           */
+
+          remoteVideo.muted = false;
+
+
+          try {
+
+            await remoteVideo.play();
+
+          } catch (error) {
+
+            console.warn(
+              "Remote autoplay blocked:",
+              error
+            );
+
+            setStatus(
+              "Connected — tap the video once if audio is muted."
+            );
+          }
+        };
+
+
+      // ========================================
+      // CONNECTION STATE
+      // ========================================
+
+      peerConnection.onconnectionstatechange =
+        () => {
+
+          if (!peerConnection) {
+            return;
+          }
+
+
+          const state =
+            peerConnection.connectionState;
+
+
+          console.log(
+            "WebRTC:",
+            state
+          );
+
+
+          if (
+            state === "connected"
+          ) {
+
+            setStatus(
+              "Connected ✓"
+            );
+
+            return;
+          }
+
+
+          if (
+            state === "connecting"
+          ) {
+
+            setStatus(
+              "Connecting video..."
+            );
+
+            return;
+          }
+
+
+          if (
+            state === "disconnected"
+          ) {
+
+            setStatus(
+              "Video connection interrupted..."
+            );
+
+            return;
+          }
+
+
+          if (
+            state === "failed"
+          ) {
+
+            setStatus(
+              "Connection failed — retrying..."
+            );
+
+
+            if (
+              role === "host" &&
+              peerPresent
+            ) {
+
+              setTimeout(
+                () => {
+
+                  if (
+                    !stopped &&
+                    peerPresent
+                  ) {
+
+                    startCall();
+                  }
+
+                },
+                1500
+              );
+            }
+          }
+        };
+    }
+
+
+    // ==========================================
+    // START OFFER
+    // ==========================================
 
     async function startCall() {
 
       if (
         !peerPresent ||
-        stopped
+        stopped ||
+        role !== "host" ||
+        callStarting
       ) {
-
         return;
-
       }
+
+
+      if (
+        !socket ||
+        socket.readyState !==
+          WebSocket.OPEN
+      ) {
+        return;
+      }
+
+
+      callStarting = true;
 
 
       try {
@@ -1411,341 +1287,29 @@
 
 
         sendSignal({
-
           type: "offer",
-
           offer:
-            peerConnection
-              .localDescription
-
+            peerConnection.localDescription
         });
 
 
       } catch (error) {
 
         console.error(
-          "Could not create offer:",
+          "Offer creation failed:",
           error
         );
 
+      } finally {
 
-        setStatus(
-          "Could not start video call."
-        );
-
+        callStarting = false;
       }
-
     }
 
 
-    // ======================================
-    // CREATE PEER CONNECTION
-    // ======================================
-
-    async function createPeerConnection() {
-
-      closePeer();
-
-
-      peerConnection =
-        new RTCPeerConnection({
-
-          iceServers: [
-
-            {
-              urls: [
-                "stun:stun.l.google.com:19302",
-                "stun:stun1.l.google.com:19302"
-              ]
-            }
-
-          ],
-
-          bundlePolicy:
-            "max-bundle",
-
-          rtcpMuxPolicy:
-            "require"
-
-        });
-
-
-      remoteDescriptionReady =
-        false;
-
-
-      pendingCandidates =
-        [];
-
-
-      // ====================================
-      // ADD LOCAL AUDIO + VIDEO
-      // ====================================
-
-      if (localStream) {
-
-        for (
-          const track of
-          localStream.getTracks()
-        ) {
-
-          peerConnection.addTrack(
-            track,
-            localStream
-          );
-
-        }
-
-      }
-
-
-      // ====================================
-      // ICE
-      // ====================================
-
-      peerConnection.onicecandidate =
-        event => {
-
-          if (
-            event.candidate
-          ) {
-
-            sendSignal({
-
-              type:
-                "candidate",
-
-              candidate:
-                event.candidate
-
-            });
-
-          }
-
-        };
-
-
-      // ====================================
-      // REMOTE MEDIA
-      // ====================================
-
-      peerConnection.ontrack =
-        async event => {
-
-          console.log(
-            "Remote track:",
-            event.track.kind
-          );
-
-
-          let stream =
-            event.streams &&
-            event.streams[0];
-
-
-          /*
-           * Fallback para sa browser
-           * na walang event.streams[0].
-           */
-
-          if (!stream) {
-
-            stream =
-              remoteVideo.srcObject ||
-              new MediaStream();
-
-
-            if (
-              !stream
-                .getTracks()
-                .includes(
-                  event.track
-                )
-            ) {
-
-              stream.addTrack(
-                event.track
-              );
-
-            }
-
-          }
-
-
-          remoteVideo.srcObject =
-            stream;
-
-
-          guestTile.style.display =
-            "block";
-
-
-          remoteWaiting.style.display =
-            "none";
-
-
-          /*
-           * Audio + video.
-           */
-
-          remoteVideo.muted =
-            false;
-
-
-          await remoteVideo
-            .play()
-            .catch(error => {
-
-              console.warn(
-                "Remote autoplay blocked:",
-                error
-              );
-
-
-              setStatus(
-                "Connected — tap the page if audio is muted."
-              );
-
-            });
-
-        };
-
-
-      // ====================================
-      // CONNECTION STATE
-      // ====================================
-
-      peerConnection
-        .onconnectionstatechange =
-        () => {
-
-          if (!peerConnection) {
-            return;
-          }
-
-
-          const state =
-            peerConnection
-              .connectionState;
-
-
-          console.log(
-            "WebRTC connection:",
-            state
-          );
-
-
-          if (
-            state ===
-            "connected"
-          ) {
-
-            setStatus(
-              "Connected ✓"
-            );
-
-
-            return;
-          }
-
-
-          if (
-            state ===
-            "connecting"
-          ) {
-
-            setStatus(
-              "Connecting video..."
-            );
-
-
-            return;
-          }
-
-
-          if (
-            state ===
-            "disconnected"
-          ) {
-
-            setStatus(
-              "Video connection interrupted..."
-            );
-
-
-            return;
-          }
-
-
-          if (
-            state ===
-            "failed"
-          ) {
-
-            setStatus(
-              "Video connection failed — retrying..."
-            );
-
-
-            /*
-             * Host can retry negotiation.
-             */
-
-            if (
-              role === "host" &&
-              peerPresent
-            ) {
-
-              setTimeout(
-                async () => {
-
-                  if (
-                    peerPresent &&
-                    !stopped
-                  ) {
-
-                    await startCall();
-
-                  }
-
-                },
-                1500
-              );
-
-            }
-
-          }
-
-        };
-
-
-      // ====================================
-      // ICE STATE
-      // ====================================
-
-      peerConnection
-        .oniceconnectionstatechange =
-        () => {
-
-          if (!peerConnection) {
-            return;
-          }
-
-
-          console.log(
-            "ICE state:",
-            peerConnection
-              .iceConnectionState
-          );
-
-        };
-
-    }
-
-
-    // ======================================
+    // ==========================================
     // HANDLE OFFER
-    // ======================================
+    // ==========================================
 
     async function handleOffer(
       offer
@@ -1783,37 +1347,29 @@
 
 
         sendSignal({
-
-          type:
-            "answer",
-
+          type: "answer",
           answer:
-            peerConnection
-              .localDescription
-
+            peerConnection.localDescription
         });
 
 
       } catch (error) {
 
         console.error(
-          "Offer error:",
+          "Offer handling failed:",
           error
         );
-
 
         setStatus(
           "Video connection error."
         );
-
       }
-
     }
 
 
-    // ======================================
+    // ==========================================
     // HANDLE ANSWER
-    // ======================================
+    // ==========================================
 
     async function handleAnswer(
       answer
@@ -1840,33 +1396,23 @@
 
         await flushCandidates();
 
-
       } catch (error) {
 
         console.error(
-          "Answer error:",
+          "Answer handling failed:",
           error
         );
-
       }
-
     }
 
 
-    // ======================================
+    // ==========================================
     // HANDLE ICE
-    // ======================================
+    // ==========================================
 
     async function handleCandidate(
       candidate
     ) {
-
-      /*
-       * Candidate may arrive BEFORE
-       * remote description.
-       *
-       * Queue muna.
-       */
 
       if (
         !peerConnection ||
@@ -1878,7 +1424,6 @@
         );
 
         return;
-
       }
 
 
@@ -1894,18 +1439,16 @@
       } catch (error) {
 
         console.warn(
-          "ICE candidate error:",
+          "ICE candidate failed:",
           error
         );
-
       }
-
     }
 
 
-    // ======================================
-    // FLUSH QUEUED ICE
-    // ======================================
+    // ==========================================
+    // FLUSH ICE
+    // ==========================================
 
     async function flushCandidates() {
 
@@ -1913,23 +1456,19 @@
         !peerConnection ||
         !remoteDescriptionReady
       ) {
-
         return;
-
       }
 
 
-      const candidates =
+      const queued =
         pendingCandidates;
 
 
-      pendingCandidates =
-        [];
+      pendingCandidates = [];
 
 
       for (
-        const candidate of
-        candidates
+        const candidate of queued
       ) {
 
         try {
@@ -1944,24 +1483,19 @@
         } catch (error) {
 
           console.warn(
-            "Queued ICE error:",
+            "Queued ICE failed:",
             error
           );
-
         }
-
       }
-
     }
 
 
-    // ======================================
-    // SEND SIGNALING MESSAGE
-    // ======================================
+    // ==========================================
+    // SEND SIGNAL
+    // ==========================================
 
-    function sendSignal(
-      data
-    ) {
+    function sendSignal(data) {
 
       if (
         !socket ||
@@ -1970,82 +1504,45 @@
       ) {
 
         return false;
-
       }
 
 
       socket.send(
-        JSON.stringify(
-          data
-        )
+        JSON.stringify(data)
       );
 
 
       return true;
-
     }
 
 
-    // ======================================
+    // ==========================================
     // CLOSE PEER
-    // ======================================
+    // ==========================================
 
     function closePeer() {
 
       if (peerConnection) {
 
         try {
-
-          peerConnection.ontrack =
-            null;
-
-          peerConnection.onicecandidate =
-            null;
-
           peerConnection.close();
-
         } catch {}
-
       }
 
 
-      peerConnection =
-        null;
+      peerConnection = null;
 
+      remoteDescriptionReady = false;
 
-      remoteDescriptionReady =
-        false;
+      pendingCandidates = [];
 
-
-      pendingCandidates =
-        [];
-
+      callStarting = false;
     }
 
 
-    // ======================================
-    // REMOVE REMOTE VIDEO
-    // ======================================
-
-    function removeRemoteVideo() {
-
-      remoteVideo.srcObject =
-        null;
-
-
-      guestTile.style.display =
-        "block";
-
-
-      remoteWaiting.style.display =
-        "flex";
-
-    }
-
-
-    // ======================================
+    // ==========================================
     // MICROPHONE
-    // ======================================
+    // ==========================================
 
     micButton.onclick =
       () => {
@@ -2056,19 +1553,13 @@
 
 
         const tracks =
-          localStream
-            .getAudioTracks();
+          localStream.getAudioTracks();
 
 
-        for (
-          const track of
-          tracks
-        ) {
-
+        tracks.forEach(track => {
           track.enabled =
             !track.enabled;
-
-        }
+        });
 
 
         const muted =
@@ -2080,13 +1571,12 @@
           "off",
           muted
         );
-
       };
 
 
-    // ======================================
+    // ==========================================
     // CAMERA
-    // ======================================
+    // ==========================================
 
     cameraButton.onclick =
       () => {
@@ -2097,43 +1587,36 @@
 
 
         const tracks =
-          localStream
-            .getVideoTracks();
+          localStream.getVideoTracks();
 
 
-        for (
-          const track of
-          tracks
-        ) {
-
+        tracks.forEach(track => {
           track.enabled =
             !track.enabled;
+        });
 
-        }
 
-
-        const cameraOffState =
+        const cameraDisabled =
           tracks.length > 0 &&
           !tracks[0].enabled;
 
 
         cameraButton.classList.toggle(
           "off",
-          cameraOffState
+          cameraDisabled
         );
 
 
         cameraOff.style.display =
-          cameraOffState
+          cameraDisabled
             ? "flex"
             : "none";
-
       };
 
 
-    // ======================================
+    // ==========================================
     // LEAVE
-    // ======================================
+    // ==========================================
 
     leaveButton.onclick =
       () => {
@@ -2153,14 +1636,11 @@
 
           localStream
             .getTracks()
-            .forEach(
-              track =>
-                track.stop()
-            );
+            .forEach(track => {
+              track.stop();
+            });
 
-          localStream =
-            null;
-
+          localStream = null;
         }
 
 
@@ -2169,82 +1649,61 @@
           try {
             socket.close();
           } catch {}
-
         }
 
 
-        localVideo.srcObject =
-          null;
+        localVideo.srcObject = null;
 
-
-        remoteVideo.srcObject =
-          null;
+        remoteVideo.srcObject = null;
 
 
         setStatus(
           "Disconnected"
         );
-
       };
 
 
-    // ======================================
+    // ==========================================
     // JOIN
-    // ======================================
+    // ==========================================
 
     joinButton.onclick =
       async () => {
 
-        joinButton.disabled =
-          true;
-
+        joinButton.disabled = true;
 
         joinError.style.display =
           "none";
 
 
         setStatus(
-          "Requesting camera and microphone..."
+          "Starting camera and microphone..."
         );
 
 
-        const mediaOK =
+        const mediaReady =
           await startLocalMedia();
 
 
-        if (!mediaOK) {
+        if (!mediaReady) {
 
-          joinButton.disabled =
-            false;
+          joinButton.disabled = false;
 
           return;
-
         }
 
-
-        /*
-         * User interaction happened here,
-         * which also helps browsers permit
-         * audio/video playback.
-         */
 
         joinOverlay.style.display =
           "none";
 
 
-        setStatus(
-          "Connecting..."
-        );
-
-
         connectSocket();
-
       };
 
 
-    // ======================================
+    // ==========================================
     // MOVIE
-    // ======================================
+    // ==========================================
 
     document
       .getElementById(
@@ -2272,9 +1731,7 @@
 
 
       const youtubeId =
-        getYouTubeId(
-          url
-        );
+        getYouTubeId(url);
 
 
       const container =
@@ -2292,9 +1749,7 @@
 
 
         iframe.src =
-          "https://www.youtube.com/embed/" +
-          youtubeId +
-          "?rel=0";
+          `https://www.youtube.com/embed/${youtubeId}?rel=0`;
 
 
         iframe.allow =
@@ -2305,9 +1760,7 @@
           true;
 
 
-        container.innerHTML =
-          "";
-
+        container.innerHTML = "";
 
         container.appendChild(
           iframe
@@ -2322,32 +1775,23 @@
           );
 
 
-        video.src =
-          url;
+        video.src = url;
 
-        video.controls =
-          true;
+        video.controls = true;
 
-        video.playsInline =
-          true;
+        video.playsInline = true;
 
 
-        container.innerHTML =
-          "";
-
+        container.innerHTML = "";
 
         container.appendChild(
           video
         );
-
       }
-
     }
 
 
-    function getYouTubeId(
-      url
-    ) {
+    function getYouTubeId(url) {
 
       const match =
         url.match(
@@ -2358,12 +1802,9 @@
       return match
         ? match[1]
         : null;
-
     }
-
 
   </script>
 
 </body>
-
 </html>
