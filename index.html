@@ -120,9 +120,9 @@ button{cursor:pointer}
 
 .main{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 360px;
-  gap:18px;
-  padding:18px;
+  grid-template-columns:minmax(0,7fr) minmax(190px,3fr);
+  gap:12px;
+  padding:14px;
   max-width:1700px;
   margin:auto;
 }
@@ -193,8 +193,8 @@ button{cursor:pointer}
 .side{
   background:white;
   border-radius:16px;
-  padding:12px;
-  min-height:500px;
+  padding:8px;
+  min-height:0;
 }
 
 .side-title{
@@ -205,7 +205,7 @@ button{cursor:pointer}
 .video-grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:12px;
+  gap:8px;
   max-height:none;
   overflow:visible;
 }
@@ -214,9 +214,9 @@ button{cursor:pointer}
   background:#18221b;
   border-radius:14px;
   overflow:hidden;
-  aspect-ratio:4/3;
+  aspect-ratio:16/9;
   position:relative;
-  min-height:150px;
+  min-height:0;
 }
 
 .video-tile video{
@@ -336,34 +336,65 @@ button{cursor:pointer}
 }
 
 @media(max-width:850px){
-  .main{
-    grid-template-columns:1fr;
-  }
-
-  .side{
-    min-height:0;
-    padding:14px;
-  }
-
- .video-grid{
-    grid-template-columns:1fr;
-    gap:12px;
-  }
-
-  .video-tile{
-    min-height:180px;
-  }
+  .main{grid-template-columns:1fr;}
+  .side{min-height:0;padding:14px;}
+  .video-grid{grid-template-columns:1fr;gap:12px;}
+  .video-tile{min-height:0;}
 }
 
-@media(max-width:520px){
- .video-grid{
+/* Landscape phone: movie stays dominant; call panel fits neatly in the viewport. */
+@media(max-width:850px) and (orientation:landscape){
+  .main{
+    grid-template-columns:minmax(0,7.2fr) minmax(135px,2.8fr);
+    gap:8px;
+    padding:8px;
+    height:calc(100vh - 70px);
+    box-sizing:border-box;
+  }
+  .movie-card{
+    height:100%;
+    aspect-ratio:auto;
+  }
+  .side{
+    padding:6px;
+    border-radius:10px;
+    height:100%;
+    max-height:100%;
+    min-height:0;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .side-title{font-size:12px;padding:1px 3px 5px;flex:0 0 auto;}
+  .video-grid{
+    flex:1 1 auto;
+    min-height:0;
     grid-template-columns:1fr;
+    grid-template-rows:repeat(2,minmax(0,1fr));
+    gap:5px;
+    max-height:none;
+    overflow:hidden;
   }
-
   .video-tile{
-    min-height:220px;
-    aspect-ratio:16/10;
+    min-height:0;
+    height:auto;
+    aspect-ratio:auto;
+    border-radius:7px;
   }
+  .video-name{font-size:9px;left:5px;bottom:4px;padding:3px 5px;}
+  .controls{padding-top:5px;gap:4px;flex:0 0 auto;}
+  .control{width:28px;height:28px;}
+  .control.end{width:36px;border-radius:14px;}
+  .invite-box{padding:5px;margin-top:4px;flex:0 0 auto;}
+  .invite-label,.status,.people{font-size:8px;}
+  .invite-row input{padding:6px;font-size:9px;}
+  .small-button{padding:6px 7px;font-size:9px;}
+}
+
+@media(max-width:520px) and (orientation:portrait){
+  .video-grid{grid-template-columns:1fr;}
+  .video-tile{min-height:0;aspect-ratio:16/9;}
 }
 </style>
 </head>
