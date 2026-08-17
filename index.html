@@ -120,7 +120,7 @@ button{cursor:pointer}
 
 .main{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 330px;
+  grid-template-columns:minmax(0,1fr) 420px;
   gap:14px;
   padding:14px;
   max-width:1500px;
@@ -205,17 +205,18 @@ button{cursor:pointer}
 .video-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
-  max-height:190px;
-  overflow:hidden;
+  gap:12px;
+  max-height:none;
+  overflow:visible;
 }
 
 .video-tile{
   background:#18221b;
-  border-radius:12px;
+  border-radius:14px;
   overflow:hidden;
-  aspect-ratio:16/10;
+  aspect-ratio:4/3;
   position:relative;
+  min-height:150px;
 }
 
 .video-tile video{
@@ -337,6 +338,31 @@ button{cursor:pointer}
 @media(max-width:850px){
   .main{
     grid-template-columns:1fr;
+  }
+
+  .side{
+    min-height:0;
+    padding:14px;
+  }
+
+ .video-grid{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .video-tile{
+    min-height:180px;
+  }
+}
+
+@media(max-width:520px){
+ .video-grid{
+    grid-template-columns:1fr;
+  }
+
+  .video-tile{
+    min-height:220px;
+    aspect-ratio:16/10;
   }
 }
 </style>
@@ -671,6 +697,22 @@ let localStream = null;
 
 let roomId = null;
 let isHost = false;
+let lastMovieUrl = "";
+let movieState = { currentTime: 0, paused: true, playbackRate: 1, volume: 1 };
+let movieSyncTimer = null;
+let suppressMovieSync = false;
+let activeMovieType = null;
+let activeMovieElement = null;
+let youtubePlayer = null;
+let vimeoPlayer = null;
+
+// Load the YouTube IFrame API once so play/pause/seek can be synchronized.
+if (!document.getElementById("youtube-api")) {
+  const ytScript = document.createElement("script");
+  ytScript.id = "youtube-api";
+  ytScript.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(ytScript);
+}
 
 
 /* =========================
@@ -1399,6 +1441,18 @@ function connectSignaling(){
         isHost =
           data.role === "host";
 
+        if(data.movie){
+          if(typeof data.movie === "string") {
+            lastMovieUrl = data.movie;
+            movieState = { currentTime:0, paused:true, playbackRate:1, volume:1 };
+            restoreMovie(data.movie);
+          } else {
+            lastMovieUrl = data.movie.url || "";
+            movieState = data.movie.state || movieState;
+            if(lastMovieUrl) { restoreMovie(lastMovieUrl); setTimeout(()=>syncMovieState(movieState, true), 1200); }
+          }
+        }
+
         if(
           isHost
         ){
@@ -1441,6 +1495,14 @@ function connectSignaling(){
           the initial offer.
         */
         if(isHost){
+
+          if(lastMovieUrl){
+            sendSignal({
+              type:"movie",
+              room:roomId,
+              url:lastMovieUrl
+            });
+          }
 
           await createOffer();
 
@@ -1498,6 +1560,29 @@ function connectSignaling(){
 
         return;
 
+      }
+
+
+      if(data.type === "movie"){
+        if(data.url){
+          lastMovieUrl = data.url;
+          movieState = { currentTime:0, paused:true, playbackRate:1, volume:1 };
+          renderMovie(data.url, false);
+          setStatus("Movie synced");
+        }
+        return;
+      }
+
+      if(data.type === "movie-state"){
+        if(data.url && data.url !== lastMovieUrl){
+          lastMovieUrl = data.url;
+          renderMovie(data.url, false);
+        }
+        if(data.state){
+          syncMovieState(data.state);
+          setStatus("Playback synced");
+        }
+        return;
       }
 
 
@@ -2113,118 +2198,233 @@ function leaveRoom(){
    MOVIE
 ========================= */
 
+function extractVideoUrl(url){
+
+  return String(url || "").trim();
+
+}
+
+
+function sendMovieState(force=false){
+  if(suppressMovieSync || !ws || ws.readyState !== WebSocket.OPEN || !roomId) return;
+  const state = getMovieState();
+  if(!state) return;
+  movieState = state;
+  sendSignal({ type:"movie-state", room:roomId, url:lastMovieUrl, state });
+}
+
+function getMovieState(){
+  try{
+    if(activeMovieType === "youtube" && youtubePlayer && youtubePlayer.getCurrentTime){
+      return { currentTime:Number(youtubePlayer.getCurrentTime()||0), paused:youtubePlayer.getPlayerState() !== 1, playbackRate:Number(youtubePlayer.getPlaybackRate()||1), volume:Number((youtubePlayer.getVolume()||100)/100) };
+    }
+    if(activeMovieType === "vimeo" && vimeoPlayer){
+      // Vimeo is synchronized through its event callbacks; the latest state is kept in movieState.
+      return { ...movieState };
+    }
+    if(activeMovieElement){
+      return { currentTime:Number(activeMovieElement.currentTime||0), paused:!!activeMovieElement.paused, playbackRate:Number(activeMovieElement.playbackRate||1), volume:Number(activeMovieElement.volume||1) };
+    }
+  }catch(e){ console.warn("Movie state read failed", e); }
+  return null;
+}
+
+function syncMovieState(state, isInitial=false){
+  if(!state) return;
+  movieState = { ...movieState, ...state };
+  suppressMovieSync = true;
+  const finish = ()=>{ suppressMovieSync=false; };
+  try{
+    if(activeMovieType === "youtube" && youtubePlayer && youtubePlayer.seekTo){
+      youtubePlayer.seekTo(Number(state.currentTime||0), true);
+      if(state.playbackRate && youtubePlayer.setPlaybackRate) youtubePlayer.setPlaybackRate(Number(state.playbackRate));
+      if(typeof state.volume === "number" && youtubePlayer.setVolume) youtubePlayer.setVolume(Math.round(state.volume*100));
+      if(state.paused) youtubePlayer.pauseVideo(); else youtubePlayer.playVideo();
+      setTimeout(finish, 250);
+      return;
+    }
+    if(activeMovieElement){
+      if(Number.isFinite(Number(state.currentTime))) activeMovieElement.currentTime = Number(state.currentTime);
+      if(state.playbackRate) activeMovieElement.playbackRate = Number(state.playbackRate);
+      if(typeof state.volume === "number") activeMovieElement.volume = Math.max(0, Math.min(1, Number(state.volume)));
+      if(state.paused) activeMovieElement.pause();
+      else activeMovieElement.play().catch(()=>{});
+    }
+  }catch(e){ console.warn("Movie sync failed", e); }
+  setTimeout(finish, 150);
+}
+
+function movieEventState(extra={}){
+  const base = getMovieState() || movieState;
+  movieState = { ...base, ...extra };
+  sendMovieState(true);
+}
+
+function attachHtmlVideoSync(video){
+  activeMovieElement = video;
+  ["play","pause","seeked","ratechange","volumechange"].forEach(ev=>{
+    video.addEventListener(ev, ()=>{
+      if(suppressMovieSync) return;
+      movieEventState();
+    });
+  });
+  if(movieSyncTimer) clearInterval(movieSyncTimer);
+  movieSyncTimer = setInterval(()=>{
+    if(!suppressMovieSync && !video.paused) movieEventState();
+  }, 1000);
+}
+
+function createYouTubePlayer(iframe, videoId){
+  const startPlayer = ()=>{
+    try{
+      youtubePlayer = new YT.Player(iframe, {
+        events:{
+          onReady:()=>{
+            if(movieState && movieState.currentTime) syncMovieState(movieState, true);
+          },
+          onStateChange:(e)=>{
+            if(suppressMovieSync) return;
+            if(e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.BUFFERING){
+              movieEventState({ paused:e.data !== YT.PlayerState.PLAYING });
+            }
+          },
+          onPlaybackRateChange:()=>{ if(!suppressMovieSync) movieEventState(); }
+        }
+      });
+    }catch(e){ console.warn("YouTube API player error", e); }
+  };
+  if(window.YT && YT.Player) startPlayer();
+  else window.onYouTubeIframeAPIReady = startPlayer;
+}
+
+function renderMovie(url, announce=true){
+  url = extractVideoUrl(url);
+  if(!url) return false;
+  const container = document.getElementById("movieContainer");
+  if(!container) return false;
+
+  if(movieSyncTimer) { clearInterval(movieSyncTimer); movieSyncTimer=null; }
+  youtubePlayer=null; vimeoPlayer=null; activeMovieElement=null; activeMovieType=null;
+
+  const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/);
+  if(youtube){
+    activeMovieType="youtube";
+    const iframe=document.createElement("iframe");
+    iframe.id="sharedYoutubePlayer";
+    iframe.src="https://www.youtube.com/embed/"+youtube[1]+"?enablejsapi=1&origin="+encodeURIComponent(location.origin)+"&rel=0";
+    iframe.allow="autoplay; fullscreen; picture-in-picture";
+    iframe.allowFullscreen=true; iframe.title="Shared movie";
+    container.innerHTML=""; container.appendChild(iframe);
+    createYouTubePlayer(iframe, youtube[1]);
+    return true;
+  }
+
+  const vimeo=url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if(vimeo){
+    activeMovieType="vimeo";
+    const iframe=document.createElement("iframe");
+    iframe.id="sharedVimeoPlayer";
+    iframe.src="https://player.vimeo.com/video/"+vimeo[1]+"?api=1";
+    iframe.allow="autoplay; fullscreen; picture-in-picture"; iframe.allowFullscreen=true; iframe.title="Shared movie";
+    container.innerHTML=""; container.appendChild(iframe);
+    // Vimeo control sync requires its Player SDK; load it once.
+    if(!window.Vimeo){ const sc=document.createElement("script"); sc.src="https://player.vimeo.com/api/player.js"; sc.onload=()=>attachVimeoPlayer(iframe); document.head.appendChild(sc); } else attachVimeoPlayer(iframe);
+    return true;
+  }
+
+  const video=document.createElement("video");
+  video.src=url; video.controls=true; video.playsInline=true; video.autoplay=false;
+  video.addEventListener("error",()=>setStatus("Hindi ma-play ang video URL"));
+  container.innerHTML=""; container.appendChild(video);
+  attachHtmlVideoSync(video);
+  return true;
+}
+
+function attachVimeoPlayer(iframe){
+  try{
+    vimeoPlayer = new Vimeo.Player(iframe);
+    vimeoPlayer.on("play",()=>{ if(!suppressMovieSync) movieEventState({paused:false}); });
+    vimeoPlayer.on("pause",()=>{ if(!suppressMovieSync) movieEventState({paused:true}); });
+    vimeoPlayer.on("seeked",d=>{ if(!suppressMovieSync) movieEventState({currentTime:Number(d.seconds||0)}); });
+    vimeoPlayer.on("timeupdate",d=>{ movieState.currentTime=Number(d.seconds||0); });
+    vimeoPlayer.on("playbackratechange",d=>{ if(!suppressMovieSync) movieEventState({playbackRate:Number(d.playbackRate||1)}); });
+    vimeoPlayer.on("volumechange",d=>{ if(!suppressMovieSync) movieEventState({volume:Number(d.volume||0)}); });
+    if(movieState) syncMovieState(movieState, true);
+  }catch(e){ console.warn("Vimeo API player error", e); }
+}
+
+
 function loadMovie(){
 
   const url =
-    document.getElementById(
-      "movieUrl"
-    ).value.trim();
+    extractVideoUrl(
+      document.getElementById(
+        "movieUrl"
+      ).value
+    );
 
+
+  if(!url){
+
+    setStatus(
+      "Maglagay muna ng movie/video URL"
+    );
+
+    return;
+
+  }
+
+
+  if(!renderMovie(url, true)){
+
+    return;
+
+  }
+
+
+  lastMovieUrl =
+    url;
+
+
+  /*
+    Tell the signaling server which movie
+    the room is currently watching.
+    The server stores it so a person who
+    joins later receives the same movie.
+  */
+  sendSignal({
+
+    type:"movie",
+
+    room:roomId,
+
+    url:url
+
+  });
+
+
+  setStatus(
+    "Movie loaded — syncing to friend..."
+  );
+
+}
+
+function restoreMovie(url){
 
   if(!url) return;
 
-
-  const container =
+  const input =
     document.getElementById(
-      "movieContainer"
+      "movieUrl"
     );
 
-
-  const youtube =
-    url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/
-    );
-
-
-  if(youtube){
-
-    const iframe =
-      document.createElement(
-        "iframe"
-      );
-
-
-    iframe.src =
-      "https://www.youtube.com/embed/" +
-      youtube[1];
-
-
-    iframe.allow =
-      "autoplay; fullscreen";
-
-
-    iframe.allowFullscreen =
-      true;
-
-
-    container.innerHTML =
-      "";
-
-    container.appendChild(
-      iframe
-    );
-
-    return;
-
+  if(input){
+    input.value = url;
   }
 
-
-  const vimeo =
-    url.match(
-      /vimeo\.com\/(\d+)/
-    );
-
-
-  if(vimeo){
-
-    const iframe =
-      document.createElement(
-        "iframe"
-      );
-
-
-    iframe.src =
-      "https://player.vimeo.com/video/" +
-      vimeo[1];
-
-
-    iframe.allowFullscreen =
-      true;
-
-
-    container.innerHTML =
-      "";
-
-    container.appendChild(
-      iframe
-    );
-
-    return;
-
-  }
-
-
-  const video =
-    document.createElement(
-      "video"
-    );
-
-
-  video.src =
-    url;
-
-  video.controls =
-    true;
-
-  video.playsInline =
-    true;
-
-
-  container.innerHTML =
-    "";
-
-  container.appendChild(
-    video
+  renderMovie(
+    url,
+    false
   );
 
 }
@@ -2305,4 +2505,4 @@ setTimeout(
 </script>
 
 </body>
-</html
+</html>
