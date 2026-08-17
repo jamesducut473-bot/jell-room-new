@@ -4,95 +4,140 @@ const { WebSocketServer } = require("ws");
 const PORT = Number(process.env.PORT) || 10000;
 const HOST = "0.0.0.0";
 
-const rooms = new Map();
+const ROOM_ID = "main";
+const RECONNECT_GRACE_MS = 30000;
 
-const server = http.createServer((req, res) => {
+// ONE ROOM ONLY
+const room = {
+  host: null,
+  guest: null,
+  movie: null
+};
+
+const httpServer = http.createServer((req, res) => {
   if (req.url === "/health") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({
-      ok: true,
-      service: "jell-room-server",
-      rooms: rooms.size
-    }));
+    res.writeHead(200, {
+      "Content-Type": "application/json"
+    });
+
+    res.end(
+      JSON.stringify({
+        ok: true,
+        service: "jell-room-server",
+        room: ROOM_ID,
+        hostConnected: !!room.host,
+        guestConnected: !!room.guest
+      })
+    );
+
     return;
   }
 
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Jell room signaling server is running.");
+  res.writeHead(200, {
+    "Content-Type": "text/plain"
+  });
+
+  res.end("Jell one-room signaling server is running.");
 });
 
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({
+  server: httpServer
+});
 
 function send(ws, data) {
   if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify(data));
+    try {
+      ws.send(JSON.stringify(data));
+    } catch (err) {
+      console.error("Send error:", err.message);
+    }
   }
+}
+
+function getPeer(ws) {
+  if (room.host?.ws === ws) {
+    return room.guest?.ws || null;
+  }
+
+  if (room.guest?.ws === ws) {
+    return room.host?.ws || null;
+  }
+
+  return null;
 }
 
 function sendToPeer(ws, data) {
-  if (!ws || !ws.roomId) return;
+  const peer = getPeer(ws);
 
-  const room = rooms.get(ws.roomId);
-  if (!room) return;
-
-  const peer =
-    ws === room.host
-      ? room.guest
-      : ws === room.guest
-      ? room.host
-      : null;
-
-  if (peer) send(peer, data);
+  if (peer) {
+    send(peer, data);
+  }
 }
 
-function broadcastRoom(room, data, except = null) {
-  if (room.host && room.host !== except) send(room.host, data);
-  if (room.guest && room.guest !== except) send(room.guest, data);
+function slotFor(ws) {
+  if (room.host?.ws === ws) return "host";
+  if (room.guest?.ws === ws) return "guest";
+  return null;
 }
 
-function leaveRoom(ws) {
-  const roomId = ws.roomId;
-  if (!roomId) return;
+function cleanupExpiredSlots() {
+  const now = Date.now();
 
-  const room = rooms.get(roomId);
-  if (!room) {
-    ws.roomId = null;
-    ws.role = null;
-    return;
+  if (
+    room.host &&
+    !room.host.ws &&
+    room.host.disconnectedAt &&
+    now - room.host.disconnectedAt > RECONNECT_GRACE_MS
+  ) {
+    console.log("Host reconnect window expired.");
+    room.host = null;
   }
 
-  if (room.host === ws) {
-    if (room.guest) {
-      send(room.guest, {
-        type: "peer-left",
-        room: roomId
-      });
-
-      room.guest.roomId = null;
-      room.guest.role = null;
-    }
-
-    rooms.delete(roomId);
-  } else if (room.guest === ws) {
+  if (
+    room.guest &&
+    !room.guest.ws &&
+    room.guest.disconnectedAt &&
+    now - room.guest.disconnectedAt > RECONNECT_GRACE_MS
+  ) {
+    console.log("Guest reconnect window expired.");
     room.guest = null;
-
-    if (room.host) {
-      send(room.host, {
-        type: "peer-left",
-        room: roomId
-      });
-    }
   }
+}
 
-  ws.roomId = null;
-  ws.role = null;
+function notifyPeerLeft(ws) {
+  const peer = getPeer(ws);
 
-  console.log(`Left room: ${roomId}`);
+  if (peer) {
+    send(peer, {
+      type: "peer-left",
+      room: ROOM_ID
+    });
+  }
+}
+
+function disconnectSlot(ws) {
+  const slot = slotFor(ws);
+
+  if (!slot) return;
+
+  const record = room[slot];
+
+  if (!record) return;
+
+  /*
+   * Keep the identity for a short time so a refresh/reconnect
+   * does not immediately create a false "room full".
+   */
+  record.ws = null;
+  record.disconnectedAt = Date.now();
+
+  console.log(
+    `${slot} disconnected. Reconnect grace started.`
+  );
 }
 
 wss.on("connection", (ws) => {
-  ws.roomId = null;
-  ws.role = null;
+  ws.clientId = null;
 
   console.log("WebSocket connected");
 
@@ -111,91 +156,165 @@ wss.on("connection", (ws) => {
 
     /*
     =========================================
-    JOIN ROOM
+    JOIN THE ONLY ROOM
     =========================================
     */
 
     if (data.type === "join") {
-      const roomId = String(data.room || "").trim();
+      cleanupExpiredSlots();
 
-      if (!roomId) {
+      const clientId = String(
+        data.clientId || ""
+      ).trim();
+
+      if (!clientId) {
         send(ws, {
           type: "error",
-          message: "Missing room ID"
+          message: "Missing client ID"
         });
+
         return;
       }
 
-      if (ws.roomId) {
-        leaveRoom(ws);
-      }
-
-      let room = rooms.get(roomId);
+      ws.clientId = clientId;
 
       /*
-      FIRST USER = HOST
-      */
+       * RECONNECT EXISTING HOST
+       */
 
-      if (!room) {
-        room = {
-          host: ws,
-          guest: null,
-          movie: null
-        };
-
-        rooms.set(roomId, room);
-
-        ws.roomId = roomId;
-        ws.role = "host";
+      if (
+        room.host &&
+        room.host.clientId === clientId
+      ) {
+        room.host.ws = ws;
+        room.host.disconnectedAt = null;
 
         send(ws, {
           type: "joined",
           role: "host",
-          room: roomId,
-          peerPresent: false,
+          room: ROOM_ID,
+          peerPresent: !!room.guest?.ws,
           movie: room.movie
         });
 
-        console.log(`Room created: ${roomId}`);
+        if (room.guest?.ws) {
+          send(room.guest.ws, {
+            type: "peer-rejoined",
+            room: ROOM_ID
+          });
+        }
+
+        console.log("Host reconnected.");
+
         return;
       }
 
       /*
-      SECOND USER = GUEST
-      */
+       * RECONNECT EXISTING GUEST
+       */
 
-      if (room.guest) {
+      if (
+        room.guest &&
+        room.guest.clientId === clientId
+      ) {
+        room.guest.ws = ws;
+        room.guest.disconnectedAt = null;
+
         send(ws, {
-          type: "room-full",
-          room: roomId
+          type: "joined",
+          role: "guest",
+          room: ROOM_ID,
+          peerPresent: !!room.host?.ws,
+          movie: room.movie
         });
+
+        if (room.host?.ws) {
+          send(room.host.ws, {
+            type: "peer-rejoined",
+            room: ROOM_ID
+          });
+        }
+
+        console.log("Guest reconnected.");
+
         return;
       }
 
-      room.guest = ws;
+      /*
+       * FIRST USER
+       */
 
-      ws.roomId = roomId;
-      ws.role = "guest";
+      if (!room.host) {
+        room.host = {
+          clientId,
+          ws,
+          disconnectedAt: null
+        };
+
+        send(ws, {
+          type: "joined",
+          role: "host",
+          room: ROOM_ID,
+          peerPresent: !!room.guest?.ws,
+          movie: room.movie
+        });
+
+        console.log("Host joined the only room.");
+
+        if (room.guest?.ws) {
+          send(room.guest.ws, {
+            type: "peer-rejoined",
+            room: ROOM_ID
+          });
+        }
+
+        return;
+      }
+
+      /*
+       * SECOND USER
+       */
+
+      if (!room.guest) {
+        room.guest = {
+          clientId,
+          ws,
+          disconnectedAt: null
+        };
+
+        send(ws, {
+          type: "joined",
+          role: "guest",
+          room: ROOM_ID,
+          peerPresent: !!room.host?.ws,
+          movie: room.movie
+        });
+
+        if (room.host?.ws) {
+          send(room.host.ws, {
+            type: "peer-joined",
+            room: ROOM_ID
+          });
+        }
+
+        console.log("Guest joined the only room.");
+
+        return;
+      }
+
+      /*
+       * BOTH SLOTS ARE USED
+       */
 
       send(ws, {
-        type: "joined",
-        role: "guest",
-        room: roomId,
-        peerPresent: true,
-        movie: room.movie
+        type: "room-full",
+        room: ROOM_ID
       });
 
-      /*
-      Tell host that a new guest has arrived.
-      Host is responsible for starting WebRTC.
-      */
+      console.log(
+        "Rejected third user: room full."
+      );
 
-      send(room.host, {
-        type: "peer-joined",
-        room: roomId
-      });
-
-      console.log(`Guest joined: ${roomId}`);
       return;
     }
 
@@ -210,15 +329,24 @@ wss.on("connection", (ws) => {
       data.type === "answer" ||
       data.type === "candidate"
     ) {
-      sendToPeer(ws, {
+      const peer = getPeer(ws);
+
+      if (!peer) {
+        return;
+      }
+
+      send(peer, {
         type: data.type,
-        room: ws.roomId,
+        room: ROOM_ID,
+
         ...(data.type === "offer"
           ? { offer: data.offer }
           : {}),
+
         ...(data.type === "answer"
           ? { answer: data.answer }
           : {}),
+
         ...(data.type === "candidate"
           ? { candidate: data.candidate }
           : {})
@@ -229,16 +357,11 @@ wss.on("connection", (ws) => {
 
     /*
     =========================================
-    MOVIE
+    MOVIE URL
     =========================================
     */
 
     if (data.type === "movie") {
-      const roomId = ws.roomId;
-      const room = rooms.get(roomId);
-
-      if (!room) return;
-
       room.movie = {
         url: String(data.url || ""),
         state: data.state || {
@@ -250,17 +373,13 @@ wss.on("connection", (ws) => {
         updatedAt: Date.now()
       };
 
-      broadcastRoom(
-        room,
-        {
-          type: "movie",
-          room: roomId,
-          url: room.movie.url,
-          state: room.movie.state,
-          updatedAt: room.movie.updatedAt
-        },
-        ws
-      );
+      sendToPeer(ws, {
+        type: "movie",
+        room: ROOM_ID,
+        url: room.movie.url,
+        state: room.movie.state,
+        updatedAt: room.movie.updatedAt
+      });
 
       return;
     }
@@ -272,41 +391,36 @@ wss.on("connection", (ws) => {
     */
 
     if (data.type === "movie-state") {
-      const roomId = ws.roomId;
-      const room = rooms.get(roomId);
-
-      if (!room) return;
-
       if (!room.movie) {
         room.movie = {
           url: String(data.url || ""),
           state: data.state || {},
-          updatedAt: Date.now()
+          updatedAt:
+            Number(data.updatedAt) || Date.now()
         };
       } else {
         if (data.url) {
-          room.movie.url = String(data.url);
+          room.movie.url =
+            String(data.url);
         }
 
         if (data.state) {
-          room.movie.state = data.state;
+          room.movie.state =
+            data.state;
         }
 
         room.movie.updatedAt =
-          Number(data.updatedAt) || Date.now();
+          Number(data.updatedAt) ||
+          Date.now();
       }
 
-      broadcastRoom(
-        room,
-        {
-          type: "movie-state",
-          room: roomId,
-          url: room.movie.url,
-          state: room.movie.state,
-          updatedAt: room.movie.updatedAt
-        },
-        ws
-      );
+      sendToPeer(ws, {
+        type: "movie-state",
+        room: ROOM_ID,
+        url: room.movie.url,
+        state: room.movie.state,
+        updatedAt: room.movie.updatedAt
+      });
 
       return;
     }
@@ -327,19 +441,54 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("close", () => {
-    leaveRoom(ws);
+    /*
+     * Only mark the slot disconnected if this
+     * websocket is still the active websocket.
+     *
+     * This prevents an old connection from
+     * kicking out a newly reconnected user.
+     */
+
+    if (
+      room.host &&
+      room.host.ws === ws
+    ) {
+      notifyPeerLeft(ws);
+      disconnectSlot(ws);
+    }
+
+    if (
+      room.guest &&
+      room.guest.ws === ws
+    ) {
+      notifyPeerLeft(ws);
+      disconnectSlot(ws);
+    }
+
+    cleanupExpiredSlots();
+
+    console.log("WebSocket closed.");
   });
 
-  ws.on("error", (error) => {
+  ws.on("error", (err) => {
     console.error(
       "WebSocket error:",
-      error.message
+      err.message
     );
   });
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(
-    `Jell room server listening on ${HOST}:${PORT}`
-  );
-});
+setInterval(
+  cleanupExpiredSlots,
+  5000
+);
+
+httpServer.listen(
+  PORT,
+  HOST,
+  () => {
+    console.log(
+      `Jell one-room server listening on ${HOST}:${PORT}`
+    );
+  }
+);
