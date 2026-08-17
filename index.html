@@ -1,1945 +1,716 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+<title>Video Room</title>
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<style>
+* {
+  box-sizing: border-box;
+}
 
-  <title>Jell & James</title>
+body {
+  margin: 0;
+  background: #101510;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+header {
+  height: 60px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1d291f;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #eef5ee;
-      color: #26352a;
-    }
+#status {
+  font-size: 14px;
+  color: #b9cbbd;
+}
 
-    button,
-    input {
-      font: inherit;
-    }
+.videos {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+}
 
-    button {
-      cursor: pointer;
-    }
+.videoBox {
+  position: relative;
+  min-height: 300px;
+  background: #000;
+  border-radius: 14px;
+  overflow: hidden;
+}
 
-    .header {
-      height: 64px;
-      background: #dcebdc;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 18px;
-      border-bottom: 1px solid #c9dcc9;
-    }
+video {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  object-fit: cover;
+  background: #000;
+}
 
-    .logo {
-      font-weight: 700;
-      font-size: 20px;
-    }
+#localVideo {
+  transform: scaleX(-1);
+}
 
-    .status {
-      font-size: 13px;
-      color: #55705b;
-    }
+.label {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 6px 9px;
+  background: rgba(0,0,0,.65);
+  border-radius: 7px;
+  font-size: 13px;
+}
 
-    .main {
-      display: grid;
-      grid-template-columns:
-        minmax(0, 7fr)
-        minmax(220px, 3fr);
-      gap: 12px;
-      padding: 14px;
-      max-width: 1700px;
-      margin: auto;
-    }
+#waiting {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  background: #000;
+  text-align: center;
+}
 
-    .movie-card {
-      background: #000;
-      border-radius: 16px;
-      overflow: hidden;
-      aspect-ratio: 16 / 9;
-    }
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
 
-    .movie-card iframe,
-    .movie-card video {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
+button {
+  border: 0;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  font-size: 20px;
+}
 
-    .placeholder {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #aaa;
-      text-align: center;
-      padding: 20px;
-    }
+.off {
+  background: #c65353;
+  color: white;
+}
 
-    .movie-info {
-      background: white;
-      border-radius: 14px;
-      margin-top: 12px;
-      padding: 16px;
-    }
-
-    .movie-title {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .movie-input {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .movie-input input {
-      flex: 1;
-      min-width: 0;
-      padding: 11px;
-      border: 1px solid #ccd8cc;
-      border-radius: 10px;
-      outline: none;
-    }
-
-    .primary {
-      border: 0;
-      background: #739b78;
-      color: white;
-      border-radius: 10px;
-      padding: 11px 15px;
-    }
-
-    .side {
-      background: white;
-      border-radius: 16px;
-      padding: 10px;
-    }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .video-tile {
-      position: relative;
-      background: #101510;
-      border-radius: 14px;
-      overflow: hidden;
-      aspect-ratio: 16 / 9;
-    }
-
-    .video-tile video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      background: #000;
-    }
-
-    #localVideo {
-      transform: scaleX(-1);
-    }
-
-    .video-name {
-      position: absolute;
-      left: 8px;
-      bottom: 7px;
-      background: rgba(0, 0, 0, .6);
-      color: white;
-      padding: 4px 7px;
-      border-radius: 6px;
-      font-size: 12px;
-    }
-
-    .waiting {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
-      color: #aaa;
-      background: #101510;
-    }
-
-    .camera-off {
-      position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      background: #101510;
-    }
-
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 9px;
-      padding-top: 12px;
-    }
-
-    .control {
-      width: 46px;
-      height: 46px;
-      border: 0;
-      border-radius: 50%;
-      background: #edf2ed;
-    }
-
-    .control.off {
-      background: #c96f6f;
-      color: white;
-    }
-
-    .end {
-      background: #bd5555;
-      color: white;
-    }
-
-    .join-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(0, 0, 0, .65);
-    }
-
-    .join-box {
-      width: 100%;
-      max-width: 380px;
-      background: white;
-      border-radius: 18px;
-      padding: 25px;
-      text-align: center;
-    }
-
-    .join-box h2 {
-      margin-top: 0;
-    }
-
-    .join-box p {
-      color: #657067;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .join-button {
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      padding: 13px;
-      background: #739b78;
-      color: white;
-      font-weight: 700;
-      margin-top: 10px;
-    }
-
-    .error-box {
-      display: none;
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 10px;
-      background: #f8dddd;
-      color: #8d3030;
-      font-size: 13px;
-    }
-
-    @media (max-width: 850px) {
-      .main {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+@media (max-width: 700px) {
+  .videos {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <div
-    class="join-overlay"
-    id="joinOverlay"
-  >
-    <div class="join-box">
+<header>
+  <strong>Video Room</strong>
+  <span id="status">Connecting...</span>
+</header>
 
-      <h2>Jell & James</h2>
+<div class="videos">
 
-      <p>
-        You will automatically join
-        the only room.
-      </p>
-
-      <button
-        class="join-button"
-        id="joinButton"
-      >
-        Join Room
-      </button>
-
-      <div
-        class="error-box"
-        id="joinError"
-      ></div>
-
-    </div>
+  <div class="videoBox">
+    <video
+      id="localVideo"
+      autoplay
+      muted
+      playsinline
+    ></video>
+    <div class="label">You</div>
   </div>
 
+  <div class="videoBox">
 
-  <header class="header">
+    <video
+      id="remoteVideo"
+      autoplay
+      playsinline
+    ></video>
 
-    <div class="logo">
-      Jell & James
+    <div id="waiting">
+      Waiting for your friend...
     </div>
 
-    <div
-      class="status"
-      id="roomStatus"
-    >
-      Not connected
-    </div>
-
-  </header>
-
-
-  <main class="main">
-
-    <section>
-
-      <div
-        class="movie-card"
-        id="movieContainer"
-      >
-        <div class="placeholder">
-          Paste a video URL below.
-        </div>
-      </div>
-
-      <div class="movie-info">
-
-        <div class="movie-title">
-          Watch Together
-        </div>
-
-        <div class="movie-input">
-
-          <input
-            id="movieUrl"
-            type="text"
-            placeholder="Paste video URL..."
-          >
-
-          <button
-            class="primary"
-            id="playMovieButton"
-          >
-            Play
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <aside class="side">
-
-      <div class="video-grid">
-
-        <div class="video-tile">
-
-          <video
-            id="localVideo"
-            autoplay
-            muted
-            playsinline
-          ></video>
-
-          <div
-            class="camera-off"
-            id="cameraOff"
-          >
-            Camera Off
-          </div>
-
-          <div class="video-name">
-            You
-          </div>
-
-        </div>
-
-
-        <div class="video-tile">
-
-          <video
-            id="remoteVideo"
-            autoplay
-            playsinline
-          ></video>
-
-          <div
-            class="waiting"
-            id="remoteWaiting"
-          >
-            Waiting for your friend...
-          </div>
-
-          <div class="video-name">
-            Friend
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="controls">
-
-        <button
-          class="control"
-          id="micButton"
-        >
-          🎙️
-        </button>
-
-        <button
-          class="control"
-          id="cameraButton"
-        >
-          📹
-        </button>
-
-        <button
-          class="control end"
-          id="leaveButton"
-        >
-          ✕
-        </button>
-
-      </div>
-
-    </aside>
-
-  </main>
-
-
-  <script>
-    // ==========================================
-    // STATE
-    // ==========================================
-
-    let socket = null;
-
-    let localStream = null;
-
-    let peerConnection = null;
-
-    let clientId =
-      localStorage.getItem(
-        "jell-client-id"
-      );
-
-    let role = null;
-
-    let peerPresent = false;
-
-    let stopped = false;
-
-    let reconnectTimer = null;
-
-    let reconnectAttempts = 0;
-
-    let pendingCandidates = [];
-
-    let remoteDescriptionReady = false;
-
-    let makingOffer = false;
-
-    let callGeneration = 0;
-
-
-    // ==========================================
-    // DOM
-    // ==========================================
-
-    const joinOverlay =
-      document.getElementById(
-        "joinOverlay"
-      );
-
-    const joinButton =
-      document.getElementById(
-        "joinButton"
-      );
-
-    const joinError =
-      document.getElementById(
-        "joinError"
-      );
-
-    const roomStatus =
-      document.getElementById(
-        "roomStatus"
-      );
-
-    const localVideo =
-      document.getElementById(
-        "localVideo"
-      );
-
-    const remoteVideo =
-      document.getElementById(
-        "remoteVideo"
-      );
-
-    const remoteWaiting =
-      document.getElementById(
-        "remoteWaiting"
-      );
-
-    const cameraOff =
-      document.getElementById(
-        "cameraOff"
-      );
-
-    const micButton =
-      document.getElementById(
-        "micButton"
-      );
-
-    const cameraButton =
-      document.getElementById(
-        "cameraButton"
-      );
-
-    const leaveButton =
-      document.getElementById(
-        "leaveButton"
-      );
-
-
-    // ==========================================
-    // HELPERS
-    // ==========================================
-
-    function setStatus(text) {
-      roomStatus.textContent = text;
+    <div class="label">Friend</div>
+  </div>
+
+</div>
+
+<div id="controls">
+  <button id="mic">🎙️</button>
+  <button id="camera">📹</button>
+</div>
+
+<script>
+const localVideo =
+  document.getElementById("localVideo");
+
+const remoteVideo =
+  document.getElementById("remoteVideo");
+
+const status =
+  document.getElementById("status");
+
+const waiting =
+  document.getElementById("waiting");
+
+const micButton =
+  document.getElementById("mic");
+
+const cameraButton =
+  document.getElementById("camera");
+
+let socket = null;
+let localStream = null;
+let peerConnection = null;
+
+let clientId =
+  localStorage.getItem("video-client-id");
+
+let role = null;
+let peerPresent = false;
+
+let candidates = [];
+let remoteDescriptionSet = false;
+
+let stopped = false;
+let reconnectTimer = null;
+let makingOffer = false;
+
+function setStatus(text) {
+  status.textContent = text;
+}
+
+function send(data) {
+  if (
+    socket &&
+    socket.readyState === WebSocket.OPEN
+  ) {
+    socket.send(JSON.stringify(data));
+  }
+}
+
+async function getIceServers() {
+  try {
+    const response =
+      await fetch("/ice-config", {
+        cache: "no-store"
+      });
+
+    const data = await response.json();
+
+    return data.iceServers || [];
+  } catch {
+    return [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302"
+        ]
+      }
+    ];
+  }
+}
+
+async function startCamera() {
+  if (localStream) return;
+
+  localStream =
+    await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+  localVideo.srcObject = localStream;
+
+  await localVideo.play().catch(() => {});
+}
+
+async function createPeer() {
+  if (peerConnection) {
+    peerConnection.close();
+  }
+
+  const servers =
+    await getIceServers();
+
+  const pc =
+    new RTCPeerConnection({
+      iceServers: servers,
+      iceCandidatePoolSize: 10
+    });
+
+  peerConnection = pc;
+  candidates = [];
+  remoteDescriptionSet = false;
+
+  localStream
+    .getTracks()
+    .forEach(track => {
+      pc.addTrack(track, localStream);
+    });
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      send({
+        type: "candidate",
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    let stream = event.streams[0];
+
+    if (!stream) {
+      stream =
+        remoteVideo.srcObject ||
+        new MediaStream();
+
+      if (
+        !stream
+          .getTracks()
+          .some(
+            t => t.id === event.track.id
+          )
+      ) {
+        stream.addTrack(event.track);
+      }
     }
 
-    function showError(text) {
-      joinError.textContent = text;
-      joinError.style.display = "block";
+    remoteVideo.srcObject = stream;
+
+    waiting.style.display = "none";
+
+    remoteVideo.play().catch(() => {});
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    console.log(
+      "ICE:",
+      pc.iceConnectionState
+    );
+
+    if (
+      pc.iceConnectionState === "checking"
+    ) {
+      setStatus("Connecting video...");
     }
 
-    function saveClientId(id) {
-      if (!id) return;
+    if (
+      pc.iceConnectionState === "connected" ||
+      pc.iceConnectionState === "completed"
+    ) {
+      setStatus("Connected ✓");
+    }
+
+    if (
+      pc.iceConnectionState === "failed"
+    ) {
+      setStatus("Retrying connection...");
+
+      if (role === "host") {
+        restartCall();
+      }
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === "connected") {
+      setStatus("Connected ✓");
+    }
+
+    if (pc.connectionState === "failed") {
+      if (role === "host") {
+        restartCall();
+      }
+    }
+  };
+
+  return pc;
+}
+
+async function startCall() {
+  if (
+    !peerPresent ||
+    role !== "host" ||
+    makingOffer
+  ) {
+    return;
+  }
+
+  makingOffer = true;
+
+  try {
+    const pc =
+      await createPeer();
+
+    const offer =
+      await pc.createOffer();
+
+    await pc.setLocalDescription(offer);
+
+    send({
+      type: "offer",
+      offer: pc.localDescription
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  makingOffer = false;
+}
+
+async function handleOffer(offer) {
+  try {
+    const pc =
+      await createPeer();
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(offer)
+    );
+
+    remoteDescriptionSet = true;
+
+    await flushCandidates();
+
+    const answer =
+      await pc.createAnswer();
+
+    await pc.setLocalDescription(answer);
+
+    send({
+      type: "answer",
+      answer: pc.localDescription
+    });
+
+  } catch (error) {
+    console.error(
+      "Offer error:",
+      error
+    );
+  }
+}
+
+async function handleAnswer(answer) {
+  if (!peerConnection) return;
+
+  try {
+    await peerConnection.setRemoteDescription(
+      new RTCSessionDescription(answer)
+    );
+
+    remoteDescriptionSet = true;
+
+    await flushCandidates();
+
+  } catch (error) {
+    console.error(
+      "Answer error:",
+      error
+    );
+  }
+}
+
+async function handleCandidate(candidate) {
+  if (
+    !peerConnection ||
+    !remoteDescriptionSet
+  ) {
+    candidates.push(candidate);
+    return;
+  }
+
+  try {
+    await peerConnection.addIceCandidate(
+      new RTCIceCandidate(candidate)
+    );
+  } catch (error) {
+    console.warn(
+      "ICE error:",
+      error
+    );
+  }
+}
+
+async function flushCandidates() {
+  if (
+    !peerConnection ||
+    !remoteDescriptionSet
+  ) {
+    return;
+  }
+
+  const queued = candidates;
+  candidates = [];
+
+  for (const candidate of queued) {
+    try {
+      await peerConnection.addIceCandidate(
+        new RTCIceCandidate(candidate)
+      );
+    } catch (error) {
+      console.warn(
+        "Queued ICE error:",
+        error
+      );
+    }
+  }
+}
+
+function restartCall() {
+  clearTimeout(reconnectTimer);
+
+  reconnectTimer =
+    setTimeout(() => {
+      if (
+        !stopped &&
+        role === "host" &&
+        peerPresent
+      ) {
+        startCall();
+      }
+    }, 1500);
+}
+
+function connectSocket() {
+  if (stopped) return;
+
+  const protocol =
+    location.protocol === "https:"
+      ? "wss:"
+      : "ws:";
+
+  socket =
+    new WebSocket(
+      `${protocol}//${location.host}`
+    );
+
+  socket.onopen = () => {
+    setStatus("Joining room...");
+
+    send({
+      type: "join",
+      clientId: clientId || undefined
+    });
+  };
+
+  socket.onmessage = async event => {
+    let msg;
+
+    try {
+      msg = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+
+    if (msg.type === "joined") {
+      clientId = msg.clientId;
 
       localStorage.setItem(
-        "jell-client-id",
-        id
-      );
-    }
-
-    function sendSignal(data) {
-      if (
-        !socket ||
-        socket.readyState !==
-          WebSocket.OPEN
-      ) {
-        return false;
-      }
-
-      socket.send(
-        JSON.stringify(data)
+        "video-client-id",
+        clientId
       );
 
-      return true;
-    }
+      role = msg.role;
+      peerPresent = !!msg.peerPresent;
 
-
-    // ==========================================
-    // GET ICE CONFIG FROM SERVER
-    // ==========================================
-
-    async function getIceServers() {
-      try {
-        const response =
-          await fetch(
-            "/ice-config",
-            {
-              cache: "no-store"
-            }
-          );
-
-        if (!response.ok) {
-          throw new Error(
-            "ICE configuration failed."
-          );
-        }
-
-        const data =
-          await response.json();
-
-        return (
-          data.iceServers || []
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "Could not load ICE config:",
-          error
-        );
-
-        return [
-          {
-            urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:stun1.l.google.com:19302"
-            ]
-          }
-        ];
-      }
-    }
-
-
-    // ==========================================
-    // LOCAL MEDIA
-    // ==========================================
-
-    async function startLocalMedia() {
-
-      if (localStream) {
-        return true;
-      }
-
-      try {
-
-        localStream =
-          await navigator
-            .mediaDevices
-            .getUserMedia({
-              video: {
-                width: {
-                  ideal: 1280
-                },
-                height: {
-                  ideal: 720
-                },
-                frameRate: {
-                  ideal: 30,
-                  max: 30
-                }
-              },
-
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-              }
-            });
-
-
-        localVideo.srcObject =
-          localStream;
-
-        await localVideo
-          .play()
-          .catch(() => {});
-
-        return true;
-
-      } catch (error) {
-
-        console.error(
-          "Camera/microphone error:",
-          error
-        );
-
-        showError(
-          "Please allow camera and microphone access."
-        );
-
+      if (peerPresent) {
         setStatus(
-          "Camera/microphone permission required"
+          "Friend found — connecting..."
         );
 
-        return false;
-      }
-    }
-
-
-    // ==========================================
-    // CREATE PEER CONNECTION
-    // ==========================================
-
-    async function createPeerConnection() {
-
-      closePeer();
-
-      const iceServers =
-        await getIceServers();
-
-      const pc =
-        new RTCPeerConnection({
-          iceServers,
-
-          bundlePolicy:
-            "max-bundle",
-
-          rtcpMuxPolicy:
-            "require",
-
-          iceCandidatePoolSize: 10
-        });
-
-      peerConnection = pc;
-
-      remoteDescriptionReady =
-        false;
-
-      pendingCandidates = [];
-
-
-      // ----------------------------------------
-      // LOCAL TRACKS
-      // ----------------------------------------
-
-      if (localStream) {
-
-        for (
-          const track of
-          localStream.getTracks()
-        ) {
-          pc.addTrack(
-            track,
-            localStream
-          );
+        if (role === "host") {
+          await startCall();
         }
-      }
-
-
-      // ----------------------------------------
-      // ICE
-      // ----------------------------------------
-
-      pc.onicecandidate =
-        event => {
-
-          if (
-            event.candidate
-          ) {
-
-            sendSignal({
-              type: "candidate",
-              candidate:
-                event.candidate
-            });
-          }
-        };
-
-
-      pc.onicecandidateerror =
-        event => {
-
-          console.warn(
-            "ICE candidate error:",
-            event.errorText,
-            event.url
-          );
-        };
-
-
-      // ----------------------------------------
-      // REMOTE TRACK
-      // ----------------------------------------
-
-      pc.ontrack =
-        async event => {
-
-          console.log(
-            "Remote track:",
-            event.track.kind
-          );
-
-
-          let stream =
-            event.streams &&
-            event.streams[0];
-
-
-          if (!stream) {
-
-            stream =
-              remoteVideo.srcObject ||
-              new MediaStream();
-
-            if (
-              !stream
-                .getTracks()
-                .some(
-                  track =>
-                    track.id ===
-                    event.track.id
-                )
-            ) {
-              stream.addTrack(
-                event.track
-              );
-            }
-          }
-
-
-          remoteVideo.srcObject =
-            stream;
-
-          remoteVideo.muted =
-            false;
-
-          remoteWaiting.style.display =
-            "none";
-
-
-          try {
-            await remoteVideo.play();
-          } catch (error) {
-            console.warn(
-              "Remote autoplay blocked:",
-              error
-            );
-
-            setStatus(
-              "Connected — tap the video to enable audio."
-            );
-          }
-        };
-
-
-      // ----------------------------------------
-      // ICE STATE
-      // ----------------------------------------
-
-      pc.oniceconnectionstatechange =
-        () => {
-
-          console.log(
-            "ICE state:",
-            pc.iceConnectionState
-          );
-
-
-          if (
-            pc.iceConnectionState ===
-              "connected" ||
-            pc.iceConnectionState ===
-              "completed"
-          ) {
-            setStatus(
-              "Connected ✓"
-            );
-          }
-
-
-          if (
-            pc.iceConnectionState ===
-            "checking"
-          ) {
-            setStatus(
-              "Connecting video..."
-            );
-          }
-
-
-          if (
-            pc.iceConnectionState ===
-            "failed"
-          ) {
-
-            setStatus(
-              "Connection failed — retrying..."
-            );
-
-
-            if (
-              role === "host" &&
-              peerPresent
-            ) {
-
-              restartCall();
-            }
-          }
-        };
-
-
-      // ----------------------------------------
-      // CONNECTION STATE
-      // ----------------------------------------
-
-      pc.onconnectionstatechange =
-        () => {
-
-          console.log(
-            "Connection state:",
-            pc.connectionState
-          );
-
-
-          if (
-            pc.connectionState ===
-            "connected"
-          ) {
-            setStatus(
-              "Connected ✓"
-            );
-          }
-
-
-          if (
-            pc.connectionState ===
-            "disconnected"
-          ) {
-            setStatus(
-              "Connection interrupted..."
-            );
-          }
-
-
-          if (
-            pc.connectionState ===
-            "failed"
-          ) {
-
-            setStatus(
-              "Connection failed — retrying..."
-            );
-
-            if (
-              role === "host" &&
-              peerPresent
-            ) {
-              restartCall();
-            }
-          }
-        };
-
-
-      // ----------------------------------------
-      // LOG SIGNALING
-      // ----------------------------------------
-
-      pc.onsignalingstatechange =
-        () => {
-
-          console.log(
-            "Signaling state:",
-            pc.signalingState
-          );
-        };
-
-
-      return pc;
-    }
-
-
-    // ==========================================
-    // START CALL
-    // ==========================================
-
-    async function startCall() {
-
-      if (
-        stopped ||
-        !peerPresent ||
-        role !== "host" ||
-        makingOffer
-      ) {
-        return;
-      }
-
-      if (
-        !socket ||
-        socket.readyState !==
-          WebSocket.OPEN
-      ) {
-        return;
-      }
-
-      makingOffer = true;
-
-      const generation =
-        ++callGeneration;
-
-      try {
-
-        const pc =
-          await createPeerConnection();
-
-
-        const offer =
-          await pc.createOffer();
-
-
-        if (
-          generation !==
-          callGeneration
-        ) {
-          return;
-        }
-
-
-        await pc.setLocalDescription(
-          offer
-        );
-
-
-        sendSignal({
-          type: "offer",
-          offer:
-            pc.localDescription
-        });
-
-      } catch (error) {
-
-        console.error(
-          "Failed to create offer:",
-          error
-        );
-
-      } finally {
-
-        makingOffer = false;
-      }
-    }
-
-
-    // ==========================================
-    // RESTART CALL
-    // ==========================================
-
-    let restartTimer = null;
-
-    function restartCall() {
-
-      clearTimeout(
-        restartTimer
-      );
-
-      restartTimer =
-        setTimeout(
-          async () => {
-
-            if (
-              stopped ||
-              !peerPresent ||
-              role !== "host"
-            ) {
-              return;
-            }
-
-            await startCall();
-
-          },
-          1000
-        );
-    }
-
-
-    // ==========================================
-    // HANDLE OFFER
-    // ==========================================
-
-    async function handleOffer(
-      offer
-    ) {
-
-      try {
-
-        const pc =
-          await createPeerConnection();
-
-
-        await pc.setRemoteDescription(
-          new RTCSessionDescription(
-            offer
-          )
-        );
-
-
-        remoteDescriptionReady =
-          true;
-
-
-        await flushCandidates();
-
-
-        const answer =
-          await pc.createAnswer();
-
-
-        await pc.setLocalDescription(
-          answer
-        );
-
-
-        sendSignal({
-          type: "answer",
-          answer:
-            pc.localDescription
-        });
-
-
-      } catch (error) {
-
-        console.error(
-          "Offer handling error:",
-          error
-        );
-
+      } else {
         setStatus(
-          "Video negotiation failed."
+          "Waiting for your friend..."
         );
       }
+
+      return;
     }
 
-
-    // ==========================================
-    // HANDLE ANSWER
-    // ==========================================
-
-    async function handleAnswer(
-      answer
-    ) {
-
-      const pc =
-        peerConnection;
-
-      if (!pc) {
-        return;
-      }
-
-
-      try {
-
-        await pc.setRemoteDescription(
-          new RTCSessionDescription(
-            answer
-          )
-        );
-
-
-        remoteDescriptionReady =
-          true;
-
-
-        await flushCandidates();
-
-      } catch (error) {
-
-        console.error(
-          "Answer handling error:",
-          error
-        );
-      }
-    }
-
-
-    // ==========================================
-    // HANDLE ICE CANDIDATE
-    // ==========================================
-
-    async function handleCandidate(
-      candidate
-    ) {
-
-      if (
-        !peerConnection ||
-        !remoteDescriptionReady
-      ) {
-
-        pendingCandidates.push(
-          candidate
-        );
-
-        return;
-      }
-
-
-      try {
-
-        await peerConnection
-          .addIceCandidate(
-            new RTCIceCandidate(
-              candidate
-            )
-          );
-
-      } catch (error) {
-
-        console.warn(
-          "ICE candidate error:",
-          error
-        );
-      }
-    }
-
-
-    // ==========================================
-    // FLUSH QUEUED ICE
-    // ==========================================
-
-    async function flushCandidates() {
-
-      if (
-        !peerConnection ||
-        !remoteDescriptionReady
-      ) {
-        return;
-      }
-
-
-      const candidates =
-        pendingCandidates;
-
-      pendingCandidates = [];
-
-
-      for (
-        const candidate of
-        candidates
-      ) {
-
-        try {
-
-          await peerConnection
-            .addIceCandidate(
-              new RTCIceCandidate(
-                candidate
-              )
-            );
-
-        } catch (error) {
-
-          console.warn(
-            "Queued ICE error:",
-            error
-          );
-        }
-      }
-    }
-
-
-    // ==========================================
-    // CLOSE PEER
-    // ==========================================
-
-    function closePeer() {
-
-      if (peerConnection) {
-
-        try {
-          peerConnection.ontrack =
-            null;
-
-          peerConnection.onicecandidate =
-            null;
-
-          peerConnection.close();
-
-        } catch {}
-      }
-
-
-      peerConnection = null;
-
-      remoteDescriptionReady =
-        false;
-
-      pendingCandidates = [];
-
-      makingOffer = false;
-    }
-
-
-    // ==========================================
-    // WEBSOCKET CONNECTION
-    // ==========================================
-
-    function connectSocket() {
-
-      if (stopped) {
-        return;
-      }
-
-
-      if (
-        socket &&
-        (
-          socket.readyState ===
-            WebSocket.OPEN ||
-          socket.readyState ===
-            WebSocket.CONNECTING
-        )
-      ) {
-        return;
-      }
-
-
-      const protocol =
-        location.protocol ===
-        "https:"
-          ? "wss:"
-          : "ws:";
-
-
-      const socketUrl =
-        `${protocol}//${location.host}`;
-
+    if (msg.type === "peer-joined") {
+      peerPresent = true;
 
       setStatus(
-        "Connecting..."
+        "Friend joined — connecting..."
       );
 
-
-      socket =
-        new WebSocket(
-          socketUrl
-        );
-
-
-      socket.onopen =
-        () => {
-
-          reconnectAttempts = 0;
-
-
-          setStatus(
-            "Joining room..."
-          );
-
-
-          sendSignal({
-            type: "join",
-            clientId:
-              clientId || undefined
-          });
-        };
-
-
-      socket.onmessage =
-        async event => {
-
-          let message;
-
-          try {
-
-            message =
-              JSON.parse(
-                event.data
-              );
-
-          } catch {
-            return;
-          }
-
-
-          // --------------------------------------
-          // JOINED
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "joined"
-          ) {
-
-            clientId =
-              message.clientId;
-
-            saveClientId(
-              clientId
-            );
-
-            role =
-              message.role;
-
-            peerPresent =
-              Boolean(
-                message.peerPresent
-              );
-
-
-            console.log(
-              "Joined room:",
-              message.room
-            );
-
-            console.log(
-              "Role:",
-              role
-            );
-
-
-            if (peerPresent) {
-
-              setStatus(
-                "Friend found — connecting..."
-              );
-
-
-              if (
-                role ===
-                "host"
-              ) {
-                await startCall();
-              }
-
-            } else {
-
-              setStatus(
-                "Waiting for your friend..."
-              );
-
-              remoteWaiting.style.display =
-                "flex";
-            }
-
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // PEER JOINED
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "peer-joined"
-          ) {
-
-            peerPresent = true;
-
-            remoteWaiting.style.display =
-              "none";
-
-
-            setStatus(
-              "Friend joined — connecting..."
-            );
-
-
-            if (
-              role === "host"
-            ) {
-              await startCall();
-            }
-
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // PEER RECONNECTED
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "peer-reconnected"
-          ) {
-
-            peerPresent = true;
-
-
-            setStatus(
-              "Friend reconnected — reconnecting..."
-            );
-
-
-            if (
-              role === "host"
-            ) {
-              await startCall();
-            }
-
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // OFFER
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "offer"
-          ) {
-
-            peerPresent = true;
-
-            await handleOffer(
-              message.offer
-            );
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // ANSWER
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "answer"
-          ) {
-
-            await handleAnswer(
-              message.answer
-            );
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // ICE
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "candidate"
-          ) {
-
-            await handleCandidate(
-              message.candidate
-            );
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // PEER DISCONNECTED
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "peer-disconnected"
-          ) {
-
-            peerPresent = false;
-
-            closePeer();
-
-            remoteVideo.srcObject =
-              null;
-
-            remoteWaiting.style.display =
-              "flex";
-
-            setStatus(
-              "Friend disconnected — waiting..."
-            );
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // ROOM FULL
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "room-full"
-          ) {
-
-            setStatus(
-              "Room is full."
-            );
-
-            showError(
-              "Only two users can be in this room."
-            );
-
-            return;
-          }
-
-
-          // --------------------------------------
-          // ERROR
-          // --------------------------------------
-
-          if (
-            message.type ===
-            "error"
-          ) {
-
-            setStatus(
-              message.message
-            );
-
-            console.error(
-              message.message
-            );
-          }
-        };
-
-
-      socket.onerror =
-        error => {
-
-          console.error(
-            "WebSocket error:",
-            error
-          );
-
-          setStatus(
-            "Connection error..."
-          );
-        };
-
-
-      socket.onclose =
-        () => {
-
-          if (stopped) {
-            return;
-          }
-
-
-          setStatus(
-            "Disconnected — reconnecting..."
-          );
-
-
-          reconnectAttempts++;
-
-
-          const delay =
-            Math.min(
-              1000 *
-              Math.pow(
-                1.5,
-                reconnectAttempts
-              ),
-              5000
-            );
-
-
-          clearTimeout(
-            reconnectTimer
-          );
-
-
-          reconnectTimer =
-            setTimeout(
-              connectSocket,
-              delay
-            );
-        };
-    }
-
-
-    // ==========================================
-    // JOIN BUTTON
-    // ==========================================
-
-    joinButton.onclick =
-      async () => {
-
-        joinButton.disabled =
-          true;
-
-        joinError.style.display =
-          "none";
-
-
-        setStatus(
-          "Starting camera and microphone..."
-        );
-
-
-        const ready =
-          await startLocalMedia();
-
-
-        if (!ready) {
-
-          joinButton.disabled =
-            false;
-
-          return;
-        }
-
-
-        joinOverlay.style.display =
-          "none";
-
-
-        connectSocket();
-      };
-
-
-    // ==========================================
-    // MICROPHONE
-    // ==========================================
-
-    micButton.onclick =
-      () => {
-
-        if (!localStream) {
-          return;
-        }
-
-
-        const tracks =
-          localStream
-            .getAudioTracks();
-
-
-        tracks.forEach(
-          track => {
-            track.enabled =
-              !track.enabled;
-          }
-        );
-
-
-        const muted =
-          tracks.length > 0 &&
-          !tracks[0].enabled;
-
-
-        micButton.classList.toggle(
-          "off",
-          muted
-        );
-      };
-
-
-    // ==========================================
-    // CAMERA
-    // ==========================================
-
-    cameraButton.onclick =
-      () => {
-
-        if (!localStream) {
-          return;
-        }
-
-
-        const tracks =
-          localStream
-            .getVideoTracks();
-
-
-        tracks.forEach(
-          track => {
-            track.enabled =
-              !track.enabled;
-          }
-        );
-
-
-        const disabled =
-          tracks.length > 0 &&
-          !tracks[0].enabled;
-
-
-        cameraButton.classList.toggle(
-          "off",
-          disabled
-        );
-
-
-        cameraOff.style.display =
-          disabled
-            ? "flex"
-            : "none";
-      };
-
-
-    // ==========================================
-    // LEAVE
-    // ==========================================
-
-    leaveButton.onclick =
-      () => {
-
-        stopped = true;
-
-
-        clearTimeout(
-          reconnectTimer
-        );
-
-        clearTimeout(
-          restartTimer
-        );
-
-
-        closePeer();
-
-
-        if (localStream) {
-
-          localStream
-            .getTracks()
-            .forEach(
-              track =>
-                track.stop()
-            );
-
-          localStream = null;
-        }
-
-
-        if (socket) {
-
-          try {
-            socket.close();
-          } catch {}
-        }
-
-
-        localVideo.srcObject =
-          null;
-
-        remoteVideo.srcObject =
-          null;
-
-
-        setStatus(
-          "Disconnected"
-        );
-      };
-
-
-    // ==========================================
-    // MOVIE
-    // ==========================================
-
-    document
-      .getElementById(
-        "playMovieButton"
-      )
-      .onclick =
-      loadMovie;
-
-
-    function loadMovie() {
-
-      const input =
-        document.getElementById(
-          "movieUrl"
-        );
-
-
-      const url =
-        input.value.trim();
-
-
-      if (!url) {
-        return;
+      if (role === "host") {
+        await startCall();
       }
 
+      return;
+    }
 
-      const youtubeId =
-        getYouTubeId(url);
+    if (msg.type === "peer-reconnected") {
+      peerPresent = true;
 
-
-      const container =
-        document.getElementById(
-          "movieContainer"
-        );
-
-
-      if (youtubeId) {
-
-        const iframe =
-          document.createElement(
-            "iframe"
-          );
-
-
-        iframe.src =
-          `https://www.youtube.com/embed/${youtubeId}?rel=0`;
-
-
-        iframe.allow =
-          "autoplay; fullscreen";
-
-
-        iframe.allowFullscreen =
-          true;
-
-
-        container.innerHTML =
-          "";
-
-        container.appendChild(
-          iframe
-        );
-
-      } else {
-
-        const video =
-          document.createElement(
-            "video"
-          );
-
-
-        video.src = url;
-
-        video.controls = true;
-
-        video.playsInline = true;
-
-
-        container.innerHTML =
-          "";
-
-        container.appendChild(
-          video
-        );
+      if (role === "host") {
+        await startCall();
       }
+
+      return;
     }
 
-
-    function getYouTubeId(url) {
-
-      const match =
-        url.match(
-          /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/
-        );
-
-
-      return match
-        ? match[1]
-        : null;
+    if (msg.type === "offer") {
+      peerPresent = true;
+      await handleOffer(msg.offer);
+      return;
     }
 
-  </script>
+    if (msg.type === "answer") {
+      await handleAnswer(msg.answer);
+      return;
+    }
+
+    if (msg.type === "candidate") {
+      await handleCandidate(
+        msg.candidate
+      );
+      return;
+    }
+
+    if (msg.type === "peer-disconnected") {
+      peerPresent = false;
+
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+
+      remoteVideo.srcObject = null;
+      waiting.style.display = "flex";
+
+      setStatus(
+        "Waiting for your friend..."
+      );
+
+      return;
+    }
+
+    if (msg.type === "room-full") {
+      setStatus("Room is full.");
+    }
+  };
+
+  socket.onerror = () => {
+    setStatus("Connection error...");
+  };
+
+  socket.onclose = () => {
+    if (stopped) return;
+
+    setStatus(
+      "Disconnected — reconnecting..."
+    );
+
+    reconnectTimer =
+      setTimeout(
+        connectSocket,
+        2000
+      );
+  };
+}
+
+// ==========================================
+// AUTOMATIC JOIN
+// ==========================================
+
+async function start() {
+  try {
+    setStatus(
+      "Starting camera and microphone..."
+    );
+
+    await startCamera();
+
+    // Walang Join Room button.
+    // Automatic na pumapasok sa main room.
+    connectSocket();
+
+  } catch (error) {
+    console.error(error);
+
+    setStatus(
+      "Camera/microphone permission required."
+    );
+  }
+}
+
+// ==========================================
+// MICROPHONE
+// ==========================================
+
+micButton.onclick = () => {
+  if (!localStream) return;
+
+  const tracks =
+    localStream.getAudioTracks();
+
+  tracks.forEach(track => {
+    track.enabled = !track.enabled;
+  });
+
+  const off =
+    tracks.length &&
+    !tracks[0].enabled;
+
+  micButton.classList.toggle(
+    "off",
+    off
+  );
+};
+
+// ==========================================
+// CAMERA
+// ==========================================
+
+cameraButton.onclick = () => {
+  if (!localStream) return;
+
+  const tracks =
+    localStream.getVideoTracks();
+
+  tracks.forEach(track => {
+    track.enabled = !track.enabled;
+  });
+
+  const off =
+    tracks.length &&
+    !tracks[0].enabled;
+
+  cameraButton.classList.toggle(
+    "off",
+    off
+  );
+};
+
+// Start automatically
+start();
+</script>
 
 </body>
 </html>
