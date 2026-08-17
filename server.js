@@ -21,7 +21,9 @@ const httpServer = http.createServer((req, res) => {
   res.end("Jell room signaling server is running.");
 });
 
-const wss = new WebSocketServer({ server: httpServer });
+const wss = new WebSocketServer({
+  server: httpServer
+});
 
 function send(ws, data) {
   if (ws && ws.readyState === 1) {
@@ -29,19 +31,47 @@ function send(ws, data) {
   }
 }
 
-function getOtherPeer(room, ws) {
-  if (!room) return null;
-  if (ws === room.host) return room.guest;
-  if (ws === room.guest) return room.host;
-  return null;
+function broadcastToRoom(room, data, except = null) {
+  if (!room) return;
+
+  if (room.host && room.host !== except) {
+    send(room.host, data);
+  }
+
+  if (room.guest && room.guest !== except) {
+    send(room.guest, data);
+  }
+}
+
+function getMovieState(room) {
+  if (!room || !room.movie) return null;
+
+  return {
+    url: room.movie.url,
+    state: {
+      currentTime: Number(room.movie.state?.currentTime || 0),
+      paused: room.movie.state?.paused !== false,
+      playbackRate: Number(room.movie.state?.playbackRate || 1),
+      volume: typeof room.movie.state?.volume === "number"
+        ? room.movie.state.volume
+        : 1
+    },
+    updatedAt: Number(room.movie.updatedAt || Date.now())
+  };
 }
 
 function leaveRoom(ws) {
   const roomId = ws.roomId;
+
   if (!roomId) return;
 
   const room = rooms.get(roomId);
-  if (!room) return;
+
+  if (!room) {
+    ws.roomId = null;
+    ws.role = null;
+    return;
+  }
 
   if (room.host === ws) {
     if (room.guest) {
@@ -111,14 +141,13 @@ wss.on("connection", (ws) => {
 
       let room = rooms.get(roomId);
 
-      /* CREATE ROOM */
+      /* FIRST PERSON = HOST */
 
       if (!room) {
         room = {
           host: ws,
           guest: null,
-          movie: null,
-          movieState: null
+          movie: null
         };
 
         rooms.set(roomId, room);
@@ -130,15 +159,15 @@ wss.on("connection", (ws) => {
           type: "joined",
           role: "host",
           room: roomId,
-          peerPresent: false
+          peerPresent: false,
+          movie: null
         });
 
         console.log(`Room created: ${roomId}`);
-
         return;
       }
 
-      /* ROOM FULL */
+      /* THIRD PERSON = FULL */
 
       if (room.guest) {
         send(ws, {
@@ -149,7 +178,7 @@ wss.on("connection", (ws) => {
         return;
       }
 
-      /* JOIN AS GUEST */
+      /* SECOND PERSON = GUEST */
 
       room.guest = ws;
 
@@ -161,41 +190,16 @@ wss.on("connection", (ws) => {
         role: "guest",
         room: roomId,
         peerPresent: true,
-        movie: room.movie,
-        movieState: room.movieState
+        movie: getMovieState(room)
       });
 
       send(room.host, {
         type: "peer-joined",
-        room: roomId
+        room: roomId,
+        movie: getMovieState(room)
       });
 
-      /* SEND CURRENT MOVIE */
-
-      if (room.movie) {
-        send(ws, {
-          type: "movie",
-          room: roomId,
-          url: room.movie
-        });
-      }
-
-      /* SEND CURRENT PLAYBACK STATE */
-
-      if (room.movieState) {
-        send(ws, {
-          type: "movie-state",
-          room: roomId,
-          url: room.movie || "",
-          state: room.movieState,
-          updatedAt:
-            room.movieState.updatedAt ||
-            Date.now()
-        });
-      }
-
       console.log(`Guest joined: ${roomId}`);
-
       return;
     }
 
@@ -213,182 +217,131 @@ wss.on("connection", (ws) => {
 
       if (!room) return;
 
-      const target = getOtherPeer(room, ws);
+      const target =
+        ws === room.host
+          ? room.guest
+          : ws === room.guest
+          ? room.host
+          : null;
 
       if (!target) return;
 
-      send(target, {
-        type: data.type,
-        room: roomId,
+      if (data.type === "offer") {
+        send(target, {
+          type: "offer",
+          room: roomId,
+          offer: data.offer
+        });
+      }
 
-        ...(data.type === "offer"
-          ? { offer: data.offer }
-          : {}),
+      if (data.type === "answer") {
+        send(target, {
+          type: "answer",
+          room: roomId,
+          answer: data.answer
+        });
+      }
 
-        ...(data.type === "answer"
-          ? { answer: data.answer }
-          : {}),
-
-        ...(data.type === "candidate"
-          ? { candidate: data.candidate }
-          : {})
-      });
+      if (data.type === "candidate") {
+        send(target, {
+          type: "candidate",
+          room: roomId,
+          candidate: data.candidate
+        });
+      }
 
       return;
     }
 
     /* =========================
-       MOVIE URL
+       NEW MOVIE
+       ONLY HOST MAY CHANGE IT
     ========================= */
 
     if (data.type === "movie") {
       const roomId = ws.roomId;
       const room = rooms.get(roomId);
 
-      if (!room) return;
+      if (!room || ws !== room.host) return;
 
-      const url =
-        String(data.url || "").trim();
+      const url = String(data.url || "").trim();
 
       if (!url) return;
 
-      room.movie = url;
-
-      room.movieState = {
-        currentTime: 0,
-        paused: true,
-        playbackRate: 1,
-        volume: 1,
+      room.movie = {
+        url,
+        state: {
+          currentTime: 0,
+          paused: true,
+          playbackRate: 1,
+          volume: 1
+        },
         updatedAt: Date.now()
       };
 
-      const target =
-        getOtherPeer(room, ws);
-
-      if (target) {
-
-        send(target, {
+      broadcastToRoom(
+        room,
+        {
           type: "movie",
           room: roomId,
-          url: url
-        });
-
-        send(target, {
-          type: "movie-state",
-          room: roomId,
-          url: url,
-          state: room.movieState,
-          updatedAt:
-            room.movieState.updatedAt
-        });
-
-      }
-
-      console.log(
-        `Movie updated in room ${roomId}: ${url}`
+          url,
+          state: room.movie.state,
+          updatedAt: room.movie.updatedAt
+        },
+        ws
       );
 
       return;
     }
 
     /* =========================
-       MOVIE PLAY / PAUSE / SEEK
+       MOVIE PLAYBACK STATE
+       ONLY HOST MAY SEND
     ========================= */
 
     if (data.type === "movie-state") {
-
       const roomId = ws.roomId;
       const room = rooms.get(roomId);
 
-      if (!room) return;
+      if (!room || ws !== room.host) return;
+      if (!room.movie) return;
 
-      const target =
-        getOtherPeer(room, ws);
+      const state = data.state || {};
 
-      /* Save movie URL */
+      room.movie.state = {
+        currentTime: Number(state.currentTime || 0),
+        paused: state.paused !== false,
+        playbackRate: Number(state.playbackRate || 1),
+        volume:
+          typeof state.volume === "number"
+            ? Math.max(0, Math.min(1, state.volume))
+            : 1
+      };
+
+      room.movie.updatedAt = Number(
+        data.updatedAt || Date.now()
+      );
 
       if (data.url) {
-        room.movie =
-          String(data.url);
+        room.movie.url = String(data.url);
       }
 
-      /* Save playback state */
+      /* Send ONLY to guest.
+         This prevents an infinite sync loop. */
 
-      if (
-        data.state &&
-        typeof data.state === "object"
-      ) {
-
-        room.movieState = {
-
-          currentTime:
-            Number(
-              data.state.currentTime || 0
-            ),
-
-          paused:
-            Boolean(
-              data.state.paused
-            ),
-
-          playbackRate:
-            Number(
-              data.state.playbackRate || 1
-            ),
-
-          volume:
-            Number(
-              typeof data.state.volume === "number"
-                ? data.state.volume
-                : 1
-            ),
-
-          updatedAt:
-            Number(
-              data.updatedAt ||
-              data.state.updatedAt ||
-              Date.now()
-            )
-        };
+      if (room.guest) {
+        send(room.guest, {
+          type: "movie-state",
+          room: roomId,
+          url: room.movie.url,
+          state: room.movie.state,
+          updatedAt: room.movie.updatedAt
+        });
       }
-
-      if (
-        !target ||
-        !room.movieState
-      ) {
-        return;
-      }
-
-      /* Send state to the other person */
-
-      send(target, {
-
-        type: "movie-state",
-
-        room: roomId,
-
-        url:
-          room.movie || "",
-
-        state:
-          room.movieState,
-
-        updatedAt:
-          room.movieState.updatedAt
-      });
 
       return;
     }
-
-    console.log(
-      "Unknown message type:",
-      data.type
-    );
   });
-
-  /* =========================
-     DISCONNECT
-  ========================= */
 
   ws.on("close", () => {
     leaveRoom(ws);
@@ -402,16 +355,8 @@ wss.on("connection", (ws) => {
   });
 });
 
-/* =========================
-   START SERVER
-========================= */
-
-httpServer.listen(
-  PORT,
-  HOST,
-  () => {
-    console.log(
-      `Jell room server listening on ${HOST}:${PORT}`
-    );
-  }
-);
+httpServer.listen(PORT, HOST, () => {
+  console.log(
+    `Jell room server listening on ${HOST}:${PORT}`
+  );
+});
