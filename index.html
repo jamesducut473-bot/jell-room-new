@@ -3,419 +3,338 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
 <title>Jell & James Movie</title>
 
 <style>
 
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#eef5ee;
-  color:#26352a;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef5ee;
+  color: #26352a;
 }
 
 button,
-input{
-  font:inherit;
+input {
+  font: inherit;
 }
 
-button{
-  cursor:pointer;
+button {
+  cursor: pointer;
 }
 
-/* =========================
-START
-========================= */
-
-.start-screen{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+.intro {
+  height: 64px;
+  background: #dcebdc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid #c9dcc9;
 }
 
-.start-card{
-  width:min(420px,100%);
-  background:white;
-  border-radius:22px;
-  padding:30px 24px;
-  text-align:center;
-  box-shadow:0 10px 35px rgba(40,70,45,.12);
+.logo {
+  font-size: 20px;
+  font-weight: 700;
 }
 
-.start-title{
-  font-size:28px;
-  font-weight:700;
-  margin-bottom:8px;
+.room-status {
+  font-size: 13px;
+  color: #55705b;
 }
 
-.start-subtitle{
-  color:#718073;
-  font-size:14px;
-  margin-bottom:25px;
+.main {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 7fr)
+    minmax(190px, 3fr);
+
+  gap: 12px;
+
+  padding: 14px;
+
+  max-width: 1700px;
+
+  margin: auto;
 }
 
-.start-button{
-  width:100%;
-  border:0;
-  border-radius:12px;
-  padding:14px;
-  margin-top:10px;
-  background:#739b78;
-  color:white;
-  font-weight:700;
-}
-
-.start-button.secondary{
-  background:#edf3ed;
-  color:#456049;
-}
-
-/* =========================
-INTRO
-========================= */
-
-.intro{
-  height:64px;
-  background:#dcebdc;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-  border-bottom:1px solid #c9dcc9;
-  transition:.5s;
-}
-
-.intro.hidden{
-  height:0;
-  opacity:0;
-  padding:0;
-  border:0;
-  overflow:hidden;
-}
-
-.logo{
-  font-size:20px;
-  font-weight:700;
-}
-
-.room-status{
-  font-size:13px;
-  color:#55705b;
-}
-
-/* =========================
-MAIN
-========================= */
-
-.main{
-  display:grid;
-  grid-template-columns:minmax(0,7fr) minmax(190px,3fr);
-  gap:12px;
-  padding:14px;
-  max-width:1700px;
-  margin:auto;
-}
-
-.movie-card{
-  background:#000;
-  border-radius:16px;
-  overflow:hidden;
-  aspect-ratio:16/9;
+.movie-card {
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
 }
 
 .movie-card iframe,
-.movie-card video{
-  width:100%;
-  height:100%;
-  border:0;
-  display:block;
+.movie-card video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 
-.movie-placeholder{
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#aaa;
-  text-align:center;
-  padding:30px;
+.movie-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  text-align: center;
+  padding: 30px;
 }
 
-.movie-info{
-  background:white;
-  border-radius:14px;
-  margin-top:12px;
-  padding:16px;
+.movie-info {
+  background: white;
+  border-radius: 14px;
+  margin-top: 12px;
+  padding: 16px;
 }
 
-.movie-title{
-  font-size:21px;
-  font-weight:700;
+.movie-title {
+  font-size: 21px;
+  font-weight: 700;
 }
 
-.movie-input{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
+.movie-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.movie-input input{
-  flex:1;
-  border:1px solid #ccd8cc;
-  border-radius:10px;
-  padding:11px;
-  outline:none;
+.movie-input input {
+  flex: 1;
+  border: 1px solid #ccd8cc;
+  border-radius: 10px;
+  padding: 11px;
+  outline: none;
 }
 
-.primary{
-  border:0;
-  background:#739b78;
-  color:white;
-  border-radius:10px;
-  padding:11px 15px;
+.primary {
+  border: 0;
+  background: #739b78;
+  color: white;
+  border-radius: 10px;
+  padding: 11px 15px;
 }
 
-/* =========================
-VIDEO CALL
-========================= */
-
-.side{
-  background:white;
-  border-radius:16px;
-  padding:8px;
-  min-height:0;
+.side {
+  background: white;
+  border-radius: 16px;
+  padding: 8px;
+  min-height: 0;
 }
 
-.side-title{
-  font-weight:700;
-  padding:4px 4px 12px;
+.side-title {
+  font-weight: 700;
+  padding: 4px 4px 12px;
 }
 
-.video-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:8px;
+.video-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
-.video-tile{
-  background:#18221b;
-  border-radius:14px;
-  overflow:hidden;
-  aspect-ratio:16/9;
-  position:relative;
-  min-height:0;
+.video-tile {
+  background: #18221b;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  min-height: 0;
 }
 
-.video-tile video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-#localVideo{
-  transform:scaleX(-1);
+#localVideo {
+  transform: scaleX(-1);
 }
 
-.video-name{
-  position:absolute;
-  left:8px;
-  bottom:7px;
-  background:rgba(0,0,0,.6);
-  color:white;
-  padding:4px 7px;
-  border-radius:6px;
-  font-size:12px;
+.video-off {
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: #39483c;
 }
 
-.video-off{
-  width:100%;
-  height:100%;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  color:white;
-  background:#39483c;
+.video-name {
+  position: absolute;
+  left: 8px;
+  bottom: 7px;
+  background: rgba(0, 0, 0, .6);
+  color: white;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
-/* =========================
-CONTROLS
-========================= */
-
-.controls{
-  display:flex;
-  justify-content:center;
-  gap:9px;
-  padding-top:12px;
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  padding-top: 12px;
 }
 
-.control{
-  width:46px;
-  height:46px;
-  border:0;
-  border-radius:50%;
-  background:#edf2ed;
-  color:#26352a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.control {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: #edf2ed;
+  color: #26352a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.control.off{
-  background:#c96f6f;
-  color:white;
+.control.off {
+  background: #c96f6f;
+  color: white;
 }
 
-.control.end{
-  background:#bd5555;
-  color:white;
-  width:58px;
-  border-radius:23px;
+.control.end {
+  background: #bd5555;
+  color: white;
+  width: 58px;
+  border-radius: 23px;
 }
 
-.icon{
-  width:21px;
-  height:21px;
+.status {
+  font-size: 12px;
+  color: #68756b;
+  margin-top: 8px;
+  text-align: center;
 }
 
-/* =========================
-STATUS
-========================= */
+@media (max-width: 850px) {
 
-.status{
-  font-size:12px;
-  color:#68756b;
-  margin-top:8px;
-}
-
-/* =========================
-MOBILE
-========================= */
-
-@media(max-width:850px){
-
-  .main{
-    grid-template-columns:1fr;
+  .main {
+    grid-template-columns: 1fr;
   }
 
-  .side{
-    min-height:0;
-    padding:14px;
-  }
-
-  .video-grid{
-    grid-template-columns:1fr;
-    gap:12px;
+  .side {
+    min-height: 0;
+    padding: 14px;
   }
 
 }
 
-/* =========================
-LANDSCAPE PHONE
-========================= */
+@media (max-width: 850px)
+and (orientation: landscape) {
 
-@media(max-width:850px) and (orientation:landscape){
+  .main {
+    grid-template-columns:
+      minmax(0, 7.4fr)
+      minmax(120px, 2.6fr);
 
-  .main{
-    grid-template-columns:minmax(0,7.4fr) minmax(120px,2.6fr);
-    gap:7px;
-    padding:7px;
-    height:calc(100dvh - 64px);
-    max-height:calc(100dvh - 64px);
-    overflow:hidden;
+    gap: 7px;
+    padding: 7px;
+
+    height: calc(100dvh - 64px);
+    max-height: calc(100dvh - 64px);
+
+    overflow: hidden;
   }
 
-  .main > section{
-    min-width:0;
-    min-height:0;
+  .movie-card {
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 10px;
   }
 
-  .movie-card{
-    height:100%;
-    aspect-ratio:auto;
-    border-radius:10px;
+  .movie-info {
+    display: none;
   }
 
-  .movie-info{
-    display:none;
+  .side {
+    padding: 5px;
+    border-radius: 9px;
+
+    height: 100%;
+    max-height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
   }
 
-  .side{
-    padding:5px;
-    border-radius:9px;
-    height:100%;
-    max-height:100%;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
+  .side-title {
+    font-size: 10px;
+    line-height: 14px;
+    padding: 0 2px 3px;
   }
 
-  .side-title{
-    font-size:10px;
-    line-height:14px;
-    padding:0 2px 3px;
-    flex:0 0 17px;
+  .video-grid {
+    flex: 1;
+    min-height: 0;
+
+    grid-template-rows:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 4px;
+
+    overflow: hidden;
   }
 
-  .video-grid{
-    flex:1;
-    min-height:0;
-    grid-template-rows:repeat(2,minmax(0,1fr));
-    gap:4px;
-    overflow:hidden;
+  .video-tile {
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: auto;
+    border-radius: 6px;
   }
 
-  .video-tile{
-    height:100%;
-    max-height:100%;
-    aspect-ratio:auto;
-    border-radius:6px;
+  .video-name {
+    font-size: 8px;
+    left: 4px;
+    bottom: 3px;
+    padding: 2px 4px;
   }
 
-  .video-name{
-    font-size:8px;
-    left:4px;
-    bottom:3px;
-    padding:2px 4px;
+  .controls {
+    padding-top: 4px;
+    gap: 4px;
   }
 
-  .controls{
-    padding-top:4px;
-    gap:4px;
-    flex:0 0 31px;
+  .control {
+    width: 26px;
+    height: 26px;
   }
 
-  .control{
-    width:26px;
-    height:26px;
-  }
-
-  .control.end{
-    width:34px;
-    border-radius:13px;
+  .control.end {
+    width: 34px;
+    border-radius: 13px;
   }
 
 }
 
-/* =========================
-PORTRAIT PHONE
-========================= */
+@media (max-width: 520px)
+and (orientation: portrait) {
 
-@media(max-width:520px) and (orientation:portrait){
-
-  .video-grid{
-    grid-template-columns:1fr;
+  .video-grid {
+    grid-template-columns: 1fr;
   }
 
-  .video-tile{
-    aspect-ratio:16/9;
+  .video-tile {
+    aspect-ratio: 16 / 9;
   }
 
 }
@@ -426,218 +345,185 @@ PORTRAIT PHONE
 
 <body>
 
-<!-- =========================
-START SCREEN
-========================= -->
+<div class="intro">
 
-<div
-  class="start-screen"
-  id="startScreen"
->
+  <div class="logo">
+    Jell & James Movie
+  </div>
 
-  <div class="start-card">
-
-    <div class="start-title">
-      Jell & James Movie
-    </div>
-
-    <div class="start-subtitle">
-      Watch together with someone
-    </div>
-
-    <button
-      class="start-button"
-      onclick="makeRoom()"
-    >
-      Make Room
-    </button>
-
-    <button
-      class="start-button secondary"
-      onclick="joinRoomPrompt()"
-    >
-      Join Room
-    </button>
-
+  <div
+    class="room-status"
+    id="roomStatus"
+  >
+    Connecting...
   </div>
 
 </div>
 
+<main class="main">
 
-<!-- =========================
-WATCH ROOM
-========================= -->
+  <section>
 
-<div
-  id="watchRoom"
-  style="display:none"
->
+    <div
+      class="movie-card"
+      id="movieContainer"
+    >
 
-  <div
-    class="intro"
-    id="intro"
-  >
+      <div class="movie-placeholder">
+        Paste a movie/video URL below to start watching.
+      </div>
 
-    <div class="logo">
-      Jell & James Movie
+    </div>
+
+    <div class="movie-info">
+
+      <div class="movie-title">
+        Watch Together
+      </div>
+
+      <div class="movie-input">
+
+        <input
+          id="movieUrl"
+          placeholder="Paste YouTube or video URL..."
+        >
+
+        <button
+          class="primary"
+          onclick="loadMovie()"
+        >
+          Play
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <aside class="side">
+
+    <div class="side-title">
+      Video Call
     </div>
 
     <div
-      class="room-status"
-      id="roomStatus"
+      class="video-grid"
+      id="videoGrid"
     >
-      Starting...
-    </div>
-
-  </div>
-
-
-  <main class="main">
-
-    <section>
 
       <div
-        class="movie-card"
-        id="movieContainer"
+        class="video-tile"
+        id="localTile"
       >
 
-        <div class="movie-placeholder">
-          Paste a movie/video URL below to start watching.
-        </div>
-
-      </div>
-
-
-      <div class="movie-info">
-
-        <div class="movie-title">
-          Watch Together
-        </div>
-
-        <div class="movie-input">
-
-          <input
-            id="movieUrl"
-            placeholder="Paste YouTube, Vimeo or video URL..."
-          >
-
-          <button
-            class="primary"
-            onclick="loadMovie()"
-          >
-            Play
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- VIDEO CALL -->
-
-    <aside class="side">
-
-      <div class="side-title">
-        Video Call
-      </div>
-
-
-      <div
-        class="video-grid"
-        id="videoGrid"
-      >
+        <video
+          id="localVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
 
         <div
-          class="video-tile"
-          id="localTile"
+          class="video-off"
+          id="localOff"
         >
+          Camera Off
+        </div>
 
-          <video
-            id="localVideo"
-            autoplay
-            muted
-            playsinline
-          ></video>
-
-          <div
-            class="video-off"
-            id="localOff"
-          >
-            Camera Off
-          </div>
-
-          <div class="video-name">
-            You
-          </div>
-
+        <div class="video-name">
+          You
         </div>
 
       </div>
 
+    </div>
 
-      <div class="controls">
+    <div class="controls">
 
-        <button
-          class="control"
-          id="micButton"
-          onclick="toggleMic()"
-          title="Mute"
-        >
-          🎙️
-        </button>
-
-        <button
-          class="control"
-          id="cameraButton"
-          onclick="toggleCamera()"
-          title="Turn camera off"
-        >
-          📹
-        </button>
-
-        <button
-          class="control end"
-          onclick="leaveRoom()"
-          title="Leave room"
-        >
-          ✕
-        </button>
-
-      </div>
-
-
-      <div
-        class="status"
-        id="connectionStatus"
+      <button
+        class="control"
+        id="micButton"
+        onclick="toggleMic()"
       >
-        Connecting...
-      </div>
+        🎙️
+      </button>
 
-    </aside>
+      <button
+        class="control"
+        id="cameraButton"
+        onclick="toggleCamera()"
+      >
+        📹
+      </button>
 
-  </main>
+      <button
+        class="control end"
+        onclick="leaveRoom()"
+      >
+        ✕
+      </button>
 
-</div>
+    </div>
+
+    <div
+      class="status"
+      id="connectionStatus"
+    >
+      Connecting...
+    </div>
+
+  </aside>
+
+</main>
 
 
 <script>
 
-/* =====================================================
-CONFIG
-===================================================== */
+/*
+=========================================================
+ONE ROOM ONLY
+=========================================================
+*/
 
 const SIGNALING_SERVER =
   "wss://jell-room-new.onrender.com";
 
-const AUTO_ROOM_ID =
-  "jell-auto-room";
+const ONE_ROOM =
+  "main";
 
 
-/* =====================================================
+/*
+=========================================================
+CLIENT ID
+=========================================================
+*/
+
+let clientId =
+  localStorage.getItem(
+    "jell-client-id"
+  );
+
+if (!clientId) {
+
+  clientId =
+    "client-" +
+    crypto.randomUUID();
+
+  localStorage.setItem(
+    "jell-client-id",
+    clientId
+  );
+
+}
+
+
+/*
+=========================================================
 STATE
-===================================================== */
+=========================================================
+*/
 
 let ws = null;
 
@@ -645,11 +531,15 @@ let pc = null;
 
 let localStream = null;
 
-let roomId = AUTO_ROOM_ID;
-
 let isHost = false;
 
 let peerPresent = false;
+
+let remoteDescriptionSet = false;
+
+let pendingCandidates = [];
+
+let makingOffer = false;
 
 let reconnectTimer = null;
 
@@ -657,54 +547,32 @@ let offerRetryTimer = null;
 
 let connectionRetryCount = 0;
 
-let pendingCandidates = [];
-
-let remoteDescriptionSet = false;
-
-let makingOffer = false;
-
 let lastMovieUrl = "";
 
 let movieState = {
-  currentTime:0,
-  paused:true,
-  playbackRate:1,
-  volume:1
+  currentTime: 0,
+  paused: true,
+  playbackRate: 1,
+  volume: 1,
+  updatedAt: Date.now()
 };
-
-let movieSyncTimer = null;
-
-let suppressMovieSync = false;
-
-let activeMovieType = null;
 
 let activeMovieElement = null;
 
 let youtubePlayer = null;
 
-let vimeoPlayer = null;
+let movieSyncTimer = null;
+
+let suppressMovieSync = false;
 
 
-/* =====================================================
-YOUTUBE API
-===================================================== */
-
-const ytScript =
-  document.createElement("script");
-
-ytScript.src =
-  "https://www.youtube.com/iframe_api";
-
-document.head.appendChild(
-  ytScript
-);
-
-
-/* =====================================================
+/*
+=========================================================
 STATUS
-===================================================== */
+=========================================================
+*/
 
-function setStatus(text){
+function setStatus(text) {
 
   const status =
     document.getElementById(
@@ -716,120 +584,72 @@ function setStatus(text){
       "roomStatus"
     );
 
-  if(status){
-    status.textContent =
-      text;
+  if (status) {
+    status.textContent = text;
   }
 
-  if(roomStatus){
-    roomStatus.textContent =
-      text;
+  if (roomStatus) {
+    roomStatus.textContent = text;
   }
 
 }
 
 
-/* =====================================================
+/*
+=========================================================
 START
-===================================================== */
+=========================================================
+*/
 
-function makeRoom(){
+window.addEventListener(
+  "load",
+  () => {
 
-  roomId =
-    "jell-" +
-    Math.random()
-      .toString(36)
-      .slice(2,10);
+    startCamera();
 
-  isHost = true;
-
-  openRoom();
-
-}
-
-
-function joinRoomPrompt(){
-
-  const value =
-    prompt(
-      "Paste the room ID or invitation link:"
-    );
-
-  if(!value) return;
-
-  try{
-
-    const url =
-      new URL(value);
-
-    roomId =
-      url.searchParams.get("room")
-      || value;
-
-  }catch{
-
-    roomId = value;
+    connectSignaling();
 
   }
-
-  isHost = false;
-
-  openRoom();
-
-}
+);
 
 
-/* =====================================================
-OPEN ROOM
-===================================================== */
+/*
+=========================================================
+CAMERA + MICROPHONE
+=========================================================
+*/
 
-function openRoom(){
+async function startCamera() {
 
-  document.getElementById(
-    "startScreen"
-  ).style.display =
-    "none";
-
-  document.getElementById(
-    "watchRoom"
-  ).style.display =
-    "block";
-
-  connectSignaling();
-
-  startCamera();
-
-}
-
-
-/* =====================================================
-CAMERA
-===================================================== */
-
-async function startCamera(){
-
-  if(localStream){
-
+  if (localStream) {
     return localStream;
-
   }
 
-  try{
+  try {
 
     localStream =
       await navigator.mediaDevices.getUserMedia({
 
-        video:{
-          width:{ideal:1280},
-          height:{ideal:720},
-          frameRate:{ideal:30,max:30}
+        video: {
+          width: {
+            ideal: 1280
+          },
+
+          height: {
+            ideal: 720
+          },
+
+          frameRate: {
+            ideal: 30,
+            max: 30
+          }
         },
 
-        audio:{
-          echoCancellation:true,
-          noiseSuppression:true,
-          autoGainControl:true,
-          channelCount:1
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1
         }
 
       });
@@ -847,32 +667,24 @@ async function startCamera(){
 
     video.playsInline = true;
 
-    video.play().catch(()=>{});
+    video.play().catch(() => {});
 
 
-    if(pc){
-
+    if (pc) {
       addLocalTracks();
-
-      if(peerPresent && isHost){
-
-        createOffer(true);
-
-      }
-
     }
 
 
     setStatus(
       peerPresent
-      ? "Camera ready — reconnecting..."
-      : "Camera ready — waiting..."
+        ? "Camera ready — connecting..."
+        : "Waiting for another person..."
     );
 
 
     return localStream;
 
-  }catch(error){
+  } catch (error) {
 
     console.error(
       "Camera error:",
@@ -880,7 +692,7 @@ async function startCamera(){
     );
 
     setStatus(
-      "Camera/mic permission needed"
+      "Allow camera and microphone permission."
     );
 
     return null;
@@ -890,26 +702,502 @@ async function startCamera(){
 }
 
 
-/* =====================================================
-WEBRTC PEER CONNECTION
-===================================================== */
+/*
+=========================================================
+SIGNALING
+=========================================================
+*/
 
-function createPeerConnection(){
+function connectSignaling() {
 
-  if(pc){
+  if (
+    ws &&
+    (
+      ws.readyState === WebSocket.OPEN ||
+      ws.readyState === WebSocket.CONNECTING
+    )
+  ) {
+    return;
+  }
 
+
+  setStatus(
+    "Connecting to the only room..."
+  );
+
+
+  ws =
+    new WebSocket(
+      SIGNALING_SERVER
+    );
+
+
+  ws.onopen = () => {
+
+    console.log(
+      "Signaling connected."
+    );
+
+
+    /*
+     * IMPORTANT:
+     * No room supplied by user.
+     * Server decides the only room.
+     */
+
+    sendSignal({
+
+      type: "join",
+
+      room: ONE_ROOM,
+
+      clientId
+
+    });
+
+
+    setStatus(
+      "Joining the room..."
+    );
+
+  };
+
+
+  ws.onmessage =
+    async event => {
+
+      let data;
+
+      try {
+
+        data =
+          JSON.parse(
+            event.data
+          );
+
+      } catch {
+
+        return;
+
+      }
+
+
+      /*
+      =========================================
+      JOINED
+      =========================================
+      */
+
+      if (data.type === "joined") {
+
+        isHost =
+          data.role === "host";
+
+        peerPresent =
+          !!data.peerPresent;
+
+
+        if (data.movie) {
+
+          lastMovieUrl =
+            data.movie.url || "";
+
+          movieState =
+            data.movie.state || movieState;
+
+
+          if (lastMovieUrl) {
+
+            renderMovie(
+              lastMovieUrl
+            );
+
+            setTimeout(
+              () => {
+
+                syncMovieState(
+                  movieState,
+                  true
+                );
+
+              },
+              1000
+            );
+
+          }
+
+        }
+
+
+        if (peerPresent) {
+
+          setStatus(
+            "Someone is here — connecting..."
+          );
+
+          if (isHost) {
+
+            await waitForCamera();
+
+            await rebuildConnection();
+
+            await createOffer(
+              true
+            );
+
+          }
+
+        } else {
+
+          setStatus(
+            "You're in the room — waiting for someone..."
+          );
+
+        }
+
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      SECOND USER ARRIVED
+      =========================================
+      */
+
+      if (
+        data.type === "peer-joined" ||
+        data.type === "peer-rejoined"
+      ) {
+
+        peerPresent = true;
+
+
+        setStatus(
+          "Someone joined — connecting video..."
+        );
+
+
+        /*
+         * HOST ALWAYS CREATES THE OFFER.
+         * This prevents offer collision.
+         */
+
+        if (isHost) {
+
+          await waitForCamera();
+
+          await rebuildConnection();
+
+          await createOffer(
+            true
+          );
+
+        }
+
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      OFFER
+      =========================================
+      */
+
+      if (data.type === "offer") {
+
+        peerPresent = true;
+
+        await receiveOffer(
+          data.offer
+        );
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      ANSWER
+      =========================================
+      */
+
+      if (data.type === "answer") {
+
+        await receiveAnswer(
+          data.answer
+        );
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      ICE
+      =========================================
+      */
+
+      if (data.type === "candidate") {
+
+        await receiveCandidate(
+          data.candidate
+        );
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      ROOM FULL
+      =========================================
+      */
+
+      if (data.type === "room-full") {
+
+        peerPresent = false;
+
+        setStatus(
+          "Room is full — only 2 people are allowed."
+        );
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      PEER LEFT
+      =========================================
+      */
+
+      if (data.type === "peer-left") {
+
+        peerPresent = false;
+
+        clearOfferRetry();
+
+        closePeerConnection();
+
+        removeGuestVideo();
+
+
+        setStatus(
+          "Someone left — waiting for the next connection..."
+        );
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      MOVIE
+      =========================================
+      */
+
+      if (data.type === "movie") {
+
+        if (data.url) {
+
+          lastMovieUrl =
+            data.url;
+
+          movieState =
+            data.state || movieState;
+
+
+          renderMovie(
+            data.url
+          );
+
+
+          setTimeout(
+            () => {
+
+              syncMovieState(
+                movieState,
+                true
+              );
+
+            },
+            800
+          );
+
+        }
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      MOVIE STATE
+      =========================================
+      */
+
+      if (
+        data.type === "movie-state"
+      ) {
+
+        if (
+          data.url &&
+          data.url !== lastMovieUrl
+        ) {
+
+          lastMovieUrl =
+            data.url;
+
+          renderMovie(
+            data.url
+          );
+
+        }
+
+
+        if (data.state) {
+
+          movieState = {
+            ...movieState,
+            ...data.state
+          };
+
+
+          syncMovieState(
+            {
+              ...movieState,
+              updatedAt:
+                data.updatedAt
+            }
+          );
+
+        }
+
+        return;
+      }
+
+
+      /*
+      =========================================
+      ERROR
+      =========================================
+      */
+
+      if (data.type === "error") {
+
+        setStatus(
+          data.message ||
+          "Server error."
+        );
+
+      }
+
+    };
+
+
+  ws.onerror = error => {
+
+    console.error(
+      "WebSocket error:",
+      error
+    );
+
+    setStatus(
+      "Connection error — retrying..."
+    );
+
+  };
+
+
+  ws.onclose = () => {
+
+    console.log(
+      "Signaling disconnected."
+    );
+
+
+    setStatus(
+      "Reconnecting..."
+    );
+
+
+    clearTimeout(
+      reconnectTimer
+    );
+
+
+    reconnectTimer =
+      setTimeout(
+        connectSignaling,
+        1500
+      );
+
+  };
+
+}
+
+
+/*
+=========================================================
+SEND SIGNAL
+=========================================================
+*/
+
+function sendSignal(data) {
+
+  if (
+    !ws ||
+    ws.readyState !== WebSocket.OPEN
+  ) {
+    return false;
+  }
+
+  try {
+
+    ws.send(
+      JSON.stringify(data)
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Signal send error:",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/*
+=========================================================
+PEER CONNECTION
+=========================================================
+*/
+
+function createPeerConnection() {
+
+  if (pc) {
     return pc;
-
   }
 
 
   pc =
     new RTCPeerConnection({
 
-      iceServers:[
+      iceServers: [
 
         {
-          urls:[
+          urls: [
             "stun:stun.l.google.com:19302",
             "stun:stun1.l.google.com:19302",
             "stun:stun2.l.google.com:19302"
@@ -918,31 +1206,37 @@ function createPeerConnection(){
 
       ],
 
-      bundlePolicy:"max-bundle",
+      bundlePolicy:
+        "max-bundle",
 
-      rtcpMuxPolicy:"require"
+      rtcpMuxPolicy:
+        "require"
 
     });
 
 
-  remoteDescriptionSet = false;
+  remoteDescriptionSet =
+    false;
 
-  pendingCandidates = [];
+  pendingCandidates =
+    [];
 
 
   addLocalTracks();
 
 
   pc.onicecandidate =
-    event=>{
+    event => {
 
-      if(event.candidate){
+      if (
+        event.candidate
+      ) {
 
         sendSignal({
 
-          type:"candidate",
+          type: "candidate",
 
-          room:roomId,
+          room: ONE_ROOM,
 
           candidate:
             event.candidate
@@ -955,16 +1249,15 @@ function createPeerConnection(){
 
 
   pc.ontrack =
-    event=>{
+    event => {
 
-      if(
+      if (
         !event.streams ||
         !event.streams[0]
-      ){
-
+      ) {
         return;
-
       }
+
 
       addGuestVideo(
         event.streams[0]
@@ -974,53 +1267,51 @@ function createPeerConnection(){
 
 
   pc.onconnectionstatechange =
-    ()=>{
+    () => {
 
-      if(!pc) return;
+      if (!pc) {
+        return;
+      }
+
 
       const state =
         pc.connectionState;
 
+
       console.log(
-        "Connection:",
+        "WebRTC connection:",
         state
       );
 
 
-      if(state === "connected"){
+      if (state === "connected") {
 
-        connectionRetryCount = 0;
+        connectionRetryCount =
+          0;
 
         clearOfferRetry();
 
         setStatus(
-          "Connected — 2 people in room"
+          "Connected ✓"
         );
 
         return;
-
       }
 
 
-      if(
+      if (
         state === "disconnected" ||
         state === "failed"
-      ){
+      ) {
 
         setStatus(
-          "Reconnecting..."
+          "Video connection lost — reconnecting..."
         );
 
-        scheduleReconnect();
 
-      }
-
-
-      if(state === "closed"){
-
-        setStatus(
-          "Connection closed"
-        );
+        if (isHost) {
+          scheduleOfferRetry();
+        }
 
       }
 
@@ -1028,25 +1319,25 @@ function createPeerConnection(){
 
 
   pc.oniceconnectionstatechange =
-    ()=>{
+    () => {
 
-      if(!pc) return;
+      if (!pc) {
+        return;
+      }
+
 
       const state =
         pc.iceConnectionState;
 
-      console.log(
-        "ICE:",
-        state
-      );
 
-
-      if(
+      if (
         state === "failed" ||
         state === "disconnected"
-      ){
+      ) {
 
-        scheduleReconnect();
+        if (isHost) {
+          scheduleOfferRetry();
+        }
 
       }
 
@@ -1058,16 +1349,19 @@ function createPeerConnection(){
 }
 
 
-/* =====================================================
+/*
+=========================================================
 ADD LOCAL TRACKS
-===================================================== */
+=========================================================
+*/
 
-function addLocalTracks(){
+function addLocalTracks() {
 
-  if(!pc || !localStream){
-
+  if (
+    !pc ||
+    !localStream
+  ) {
     return;
-
   }
 
 
@@ -1075,10 +1369,10 @@ function addLocalTracks(){
     pc.getSenders();
 
 
-  for(
+  for (
     const track of
     localStream.getTracks()
-  ){
+  ) {
 
     const existing =
       senders.find(
@@ -1089,9 +1383,12 @@ function addLocalTracks(){
       );
 
 
-    if(existing){
+    if (existing) {
 
-      if(existing.track !== track){
+      if (
+        existing.track !==
+        track
+      ) {
 
         existing.replaceTrack(
           track
@@ -1099,7 +1396,7 @@ function addLocalTracks(){
 
       }
 
-    }else{
+    } else {
 
       pc.addTrack(
         track,
@@ -1113,434 +1410,17 @@ function addLocalTracks(){
 }
 
 
-/* =====================================================
-SIGNALING
-===================================================== */
-
-function connectSignaling(){
-
-  if(
-    ws &&
-    (
-      ws.readyState ===
-      WebSocket.OPEN ||
-      ws.readyState ===
-      WebSocket.CONNECTING
-    )
-  ){
-
-    return;
-
-  }
-
-
-  setStatus(
-    "Connecting to room..."
-  );
-
-
-  ws =
-    new WebSocket(
-      SIGNALING_SERVER
-    );
-
-
-  ws.onopen =
-    ()=>{
-
-      console.log(
-        "Signaling connected"
-      );
-
-
-      sendSignal({
-
-        type:"join",
-
-        room:roomId
-
-      });
-
-
-      setStatus(
-        "Joining room..."
-      );
-
-    };
-
-
-  ws.onmessage =
-    async event=>{
-
-      let data;
-
-      try{
-
-        data =
-          JSON.parse(
-            event.data
-          );
-
-      }catch{
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      JOINED
-      =========================================
-      */
-
-      if(data.type === "joined"){
-
-        isHost =
-          data.role === "host";
-
-        peerPresent =
-          !!data.peerPresent;
-
-
-        if(data.movie){
-
-          lastMovieUrl =
-            data.movie.url || "";
-
-          movieState =
-            data.movie.state || movieState;
-
-          if(lastMovieUrl){
-
-            renderMovie(
-              lastMovieUrl,
-              false
-            );
-
-            setTimeout(
-              ()=>{
-                syncMovieState(
-                  movieState,
-                  true
-                );
-              },
-              1000
-            );
-
-          }
-
-        }
-
-
-        setStatus(
-          peerPresent
-          ? "Room connected — waiting for video call..."
-          : "Waiting for friend..."
-        );
-
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      PEER JOINED
-      =========================================
-      */
-
-      if(data.type === "peer-joined"){
-
-        peerPresent = true;
-
-        setStatus(
-          "Friend joined — connecting..."
-        );
-
-
-        /*
-        ONLY HOST STARTS THE OFFER.
-        This prevents offer collisions.
-        */
-
-        if(isHost){
-
-          await waitForCamera();
-
-          await rebuildConnection();
-
-          await createOffer(true);
-
-        }
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      OFFER
-      =========================================
-      */
-
-      if(data.type === "offer"){
-
-        peerPresent = true;
-
-        await receiveOffer(
-          data.offer
-        );
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      ANSWER
-      =========================================
-      */
-
-      if(data.type === "answer"){
-
-        await receiveAnswer(
-          data.answer
-        );
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      ICE
-      =========================================
-      */
-
-      if(data.type === "candidate"){
-
-        await receiveCandidate(
-          data.candidate
-        );
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      MOVIE
-      =========================================
-      */
-
-      if(data.type === "movie"){
-
-        if(data.url){
-
-          lastMovieUrl =
-            data.url;
-
-          movieState =
-            data.state || {
-              currentTime:0,
-              paused:true,
-              playbackRate:1,
-              volume:1
-            };
-
-          renderMovie(
-            data.url,
-            false
-          );
-
-          setTimeout(
-            ()=>{
-              syncMovieState(
-                movieState,
-                true
-              );
-            },
-            800
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      MOVIE STATE
-      =========================================
-      */
-
-      if(data.type === "movie-state"){
-
-        if(
-          data.url &&
-          data.url !==
-          lastMovieUrl
-        ){
-
-          lastMovieUrl =
-            data.url;
-
-          renderMovie(
-            data.url,
-            false
-          );
-
-        }
-
-
-        if(data.state){
-
-          movieState =
-            {
-              ...movieState,
-              ...data.state
-            };
-
-          syncMovieState(
-            {
-              ...movieState,
-              updatedAt:
-                data.updatedAt
-            }
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      /*
-      =========================================
-      PEER LEFT
-      =========================================
-      */
-
-      if(
-        data.type === "peer-left"
-      ){
-
-        peerPresent = false;
-
-        clearOfferRetry();
-
-        closePeerConnection();
-
-        removeGuestVideo();
-
-        setStatus(
-          "Friend left — waiting..."
-        );
-
-        return;
-
-      }
-
-
-      if(
-        data.type === "room-full"
-      ){
-
-        setStatus(
-          "Room is full"
-        );
-
-        return;
-
-      }
-
-
-      if(data.type === "error"){
-
-        setStatus(
-          data.message ||
-          "Room error"
-        );
-
-      }
-
-    };
-
-
-  ws.onerror =
-    error=>{
-
-      console.error(
-        "WebSocket error:",
-        error
-      );
-
-      setStatus(
-        "Room connection error"
-      );
-
-    };
-
-
-  ws.onclose =
-    ()=>{
-
-      console.log(
-        "Signaling disconnected"
-      );
-
-
-      if(
-        document.getElementById(
-          "watchRoom"
-        ).style.display !==
-        "none"
-      ){
-
-        setStatus(
-          "Reconnecting to room..."
-        );
-
-
-        clearTimeout(
-          reconnectTimer
-        );
-
-
-        reconnectTimer =
-          setTimeout(
-            connectSignaling,
-            1500
-          );
-
-      }
-
-    };
-
-}
-
-
-/* =====================================================
-WAIT FOR CAMERA
-===================================================== */
-
-async function waitForCamera(){
-
-  if(localStream){
-
+/*
+=========================================================
+WAIT CAMERA
+=========================================================
+*/
+
+async function waitForCamera() {
+
+  if (localStream) {
     return true;
-
   }
-
 
   const stream =
     await startCamera();
@@ -1550,11 +1430,13 @@ async function waitForCamera(){
 }
 
 
-/* =====================================================
+/*
+=========================================================
 REBUILD CONNECTION
-===================================================== */
+=========================================================
+*/
 
-async function rebuildConnection(){
+async function rebuildConnection() {
 
   closePeerConnection();
 
@@ -1571,37 +1453,39 @@ async function rebuildConnection(){
 }
 
 
-/* =====================================================
+/*
+=========================================================
 CREATE OFFER
-===================================================== */
+=========================================================
+*/
 
 async function createOffer(
   iceRestart = false
-){
+) {
 
-  if(
+  if (
     !isHost ||
     !peerPresent ||
+    makingOffer
+  ) {
+    return;
+  }
+
+
+  if (
     !ws ||
-    ws.readyState !== WebSocket.OPEN
-  ){
-
+    ws.readyState !==
+    WebSocket.OPEN
+  ) {
     return;
-
   }
 
 
-  if(makingOffer){
-
-    return;
-
-  }
+  makingOffer =
+    true;
 
 
-  makingOffer = true;
-
-
-  try{
+  try {
 
     createPeerConnection();
 
@@ -1621,9 +1505,9 @@ async function createOffer(
 
     sendSignal({
 
-      type:"offer",
+      type: "offer",
 
-      room:roomId,
+      room: ONE_ROOM,
 
       offer:
         pc.localDescription
@@ -1632,60 +1516,59 @@ async function createOffer(
 
 
     setStatus(
-      "Connecting video call..."
+      "Connecting video..."
     );
 
 
     scheduleOfferRetry();
 
-  }catch(error){
+  } catch (error) {
 
     console.error(
       "Offer error:",
       error
     );
 
-  }finally{
+  } finally {
 
-    makingOffer = false;
+    makingOffer =
+      false;
 
   }
 
 }
 
 
-/* =====================================================
+/*
+=========================================================
 OFFER RETRY
-===================================================== */
+=========================================================
+*/
 
-function scheduleOfferRetry(){
+function scheduleOfferRetry() {
 
   clearOfferRetry();
 
 
   offerRetryTimer =
     setTimeout(
-      async ()=>{
+      async () => {
 
-        if(
+        if (
           peerPresent &&
           isHost &&
           pc &&
           pc.connectionState !==
-          "connected"
-        ){
+            "connected"
+        ) {
 
           connectionRetryCount++;
 
 
-          if(
-            connectionRetryCount <= 8
-          ){
-
-            console.log(
-              "Retrying WebRTC connection..."
-            );
-
+          if (
+            connectionRetryCount <=
+            10
+          ) {
 
             await rebuildConnection();
 
@@ -1704,92 +1587,52 @@ function scheduleOfferRetry(){
 }
 
 
-function clearOfferRetry(){
+function clearOfferRetry() {
 
-  if(offerRetryTimer){
+  if (
+    offerRetryTimer
+  ) {
 
     clearTimeout(
       offerRetryTimer
     );
 
-    offerRetryTimer = null;
+    offerRetryTimer =
+      null;
 
   }
 
 }
 
 
-/* =====================================================
-RECONNECT
-===================================================== */
-
-function scheduleReconnect(){
-
-  if(!peerPresent){
-
-    return;
-
-  }
-
-
-  if(
-    !isHost
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    offerRetryTimer
-  ){
-
-    return;
-
-  }
-
-
-  scheduleOfferRetry();
-
-}
-
-
-/* =====================================================
+/*
+=========================================================
 RECEIVE OFFER
-===================================================== */
+=========================================================
+*/
 
 async function receiveOffer(
   offer
-){
+) {
 
-  try{
-
-    /*
-    Guest always accepts host offer.
-    */
-
-    if(!pc){
-
-      createPeerConnection();
-
-    }
-
+  try {
 
     await waitForCamera();
+
+
+    if (!pc) {
+      createPeerConnection();
+    }
+
 
     addLocalTracks();
 
 
-    /*
-    Clean old connection state if necessary.
-    */
-
-    if(
+    if (
       pc.signalingState !==
-      "stable" &&
+        "stable" &&
       pc.remoteDescription
-    ){
+    ) {
 
       closePeerConnection();
 
@@ -1827,9 +1670,9 @@ async function receiveOffer(
 
     sendSignal({
 
-      type:"answer",
+      type: "answer",
 
-      room:roomId,
+      room: ONE_ROOM,
 
       answer:
         pc.localDescription
@@ -1838,42 +1681,37 @@ async function receiveOffer(
 
 
     setStatus(
-      "Connecting video call..."
+      "Connecting video..."
     );
 
-  }catch(error){
+  } catch (error) {
 
     console.error(
-      "Receive offer error:",
+      "Offer error:",
       error
     );
-
-    /*
-    Ask host to retry by notifying through
-    a fresh room connection if necessary.
-    */
 
   }
 
 }
 
 
-/* =====================================================
+/*
+=========================================================
 RECEIVE ANSWER
-===================================================== */
+=========================================================
+*/
 
 async function receiveAnswer(
   answer
-){
+) {
 
-  if(!pc){
-
+  if (!pc) {
     return;
-
   }
 
 
-  try{
+  try {
 
     await pc.setRemoteDescription(
       new RTCSessionDescription(
@@ -1888,8 +1726,7 @@ async function receiveAnswer(
 
     await flushPendingCandidates();
 
-
-  }catch(error){
+  } catch (error) {
 
     console.error(
       "Answer error:",
@@ -1897,7 +1734,7 @@ async function receiveAnswer(
     );
 
 
-    if(isHost){
+    if (isHost) {
 
       await rebuildConnection();
 
@@ -1912,18 +1749,20 @@ async function receiveAnswer(
 }
 
 
-/* =====================================================
-ICE CANDIDATES
-===================================================== */
+/*
+=========================================================
+ICE
+=========================================================
+*/
 
 async function receiveCandidate(
   candidate
-){
+) {
 
-  if(
+  if (
     !pc ||
     !remoteDescriptionSet
-  ){
+  ) {
 
     pendingCandidates.push(
       candidate
@@ -1934,16 +1773,16 @@ async function receiveCandidate(
   }
 
 
-  try{
+  try {
 
     await pc.addIceCandidate(
       candidate
     );
 
-  }catch(error){
+  } catch (error) {
 
-    console.error(
-      "ICE error:",
+    console.warn(
+      "ICE candidate error:",
       error
     );
 
@@ -1952,15 +1791,13 @@ async function receiveCandidate(
 }
 
 
-async function flushPendingCandidates(){
+async function flushPendingCandidates() {
 
-  if(
+  if (
     !pc ||
     !remoteDescriptionSet
-  ){
-
+  ) {
     return;
-
   }
 
 
@@ -1968,23 +1805,24 @@ async function flushPendingCandidates(){
     pendingCandidates.slice();
 
 
-  pendingCandidates = [];
+  pendingCandidates =
+    [];
 
 
-  for(
+  for (
     const candidate of
     candidates
-  ){
+  ) {
 
-    try{
+    try {
 
       await pc.addIceCandidate(
         candidate
       );
 
-    }catch(error){
+    } catch (error) {
 
-      console.error(
+      console.warn(
         "Queued ICE error:",
         error
       );
@@ -1996,69 +1834,54 @@ async function flushPendingCandidates(){
 }
 
 
-/* =====================================================
-SEND SIGNAL
-===================================================== */
-
-function sendSignal(data){
-
-  if(
-    !ws ||
-    ws.readyState !==
-    WebSocket.OPEN
-  ){
-
-    return false;
-
-  }
-
-
-  ws.send(
-    JSON.stringify(data)
-  );
-
-
-  return true;
-
-}
-
-
-/* =====================================================
+/*
+=========================================================
 CLOSE PEER
-===================================================== */
+=========================================================
+*/
 
-function closePeerConnection(){
+function closePeerConnection() {
 
-  if(pc){
+  if (pc) {
 
-    try{
+    try {
 
-      pc.ontrack = null;
-      pc.onicecandidate = null;
+      pc.ontrack =
+        null;
+
+      pc.onicecandidate =
+        null;
 
       pc.close();
 
-    }catch{}
+    } catch {}
 
   }
 
 
   pc = null;
 
-  pendingCandidates = [];
+  pendingCandidates =
+    [];
 
-  remoteDescriptionSet = false;
+  remoteDescriptionSet =
+    false;
 
-  makingOffer = false;
+  makingOffer =
+    false;
 
 }
 
 
-/* =====================================================
+/*
+=========================================================
 GUEST VIDEO
-===================================================== */
+=========================================================
+*/
 
-function addGuestVideo(stream){
+function addGuestVideo(
+  stream
+) {
 
   let tile =
     document.getElementById(
@@ -2066,7 +1889,7 @@ function addGuestVideo(stream){
     );
 
 
-  if(!tile){
+  if (!tile) {
 
     tile =
       document.createElement(
@@ -2085,23 +1908,17 @@ function addGuestVideo(stream){
         "video"
       );
 
-    video.autoplay = true;
+    video.autoplay =
+      true;
 
-    video.playsInline = true;
-
-    video.controls = false;
-
-    /*
-    Remote audio stays enabled,
-    but we make sure there is only ONE
-    remote video element.
-    */
+    video.playsInline =
+      true;
 
     video.srcObject =
       stream;
 
-
-    video.volume = 1;
+    video.volume =
+      1;
 
 
     const name =
@@ -2133,27 +1950,20 @@ function addGuestVideo(stream){
         tile
       );
 
-  }else{
+  } else {
 
     const video =
       tile.querySelector(
         "video"
       );
 
-    if(video){
+    if (video) {
 
-      if(
-        video.srcObject !==
-        stream
-      ){
-
-        video.srcObject =
-          stream;
-
-      }
+      video.srcObject =
+        stream;
 
       video.play().catch(
-        ()=>{}
+        () => {}
       );
 
     }
@@ -2163,29 +1973,30 @@ function addGuestVideo(stream){
 }
 
 
-/* =====================================================
-REMOVE GUEST VIDEO
-===================================================== */
+/*
+=========================================================
+REMOVE GUEST
+=========================================================
+*/
 
-function removeGuestVideo(){
+function removeGuestVideo() {
 
   const tile =
     document.getElementById(
       "guestTile"
     );
 
-  if(tile){
+
+  if (tile) {
 
     const video =
       tile.querySelector(
         "video"
       );
 
-    if(video){
-
+    if (video) {
       video.srcObject =
         null;
-
     }
 
     tile.remove();
@@ -2195,20 +2006,26 @@ function removeGuestVideo(){
 }
 
 
-/* =====================================================
+/*
+=========================================================
 MIC
-===================================================== */
+=========================================================
+*/
 
-function toggleMic(){
+function toggleMic() {
 
-  if(!localStream) return;
+  if (!localStream) {
+    return;
+  }
 
 
   const tracks =
     localStream.getAudioTracks();
 
 
-  if(!tracks.length) return;
+  if (!tracks.length) {
+    return;
+  }
 
 
   const enabled =
@@ -2216,7 +2033,7 @@ function toggleMic(){
 
 
   tracks.forEach(
-    track=>{
+    track => {
       track.enabled =
         !enabled;
     }
@@ -2235,20 +2052,26 @@ function toggleMic(){
 }
 
 
-/* =====================================================
+/*
+=========================================================
 CAMERA
-===================================================== */
+=========================================================
+*/
 
-function toggleCamera(){
+function toggleCamera() {
 
-  if(!localStream) return;
+  if (!localStream) {
+    return;
+  }
 
 
   const tracks =
     localStream.getVideoTracks();
 
 
-  if(!tracks.length) return;
+  if (!tracks.length) {
+    return;
+  }
 
 
   const enabled =
@@ -2256,7 +2079,7 @@ function toggleCamera(){
 
 
   tracks.forEach(
-    track=>{
+    track => {
       track.enabled =
         !enabled;
     }
@@ -2279,577 +2102,76 @@ function toggleCamera(){
     )
     .style.display =
       enabled
-      ? "flex"
-      : "none";
+        ? "flex"
+        : "none";
 
 }
 
 
-/* =====================================================
-MOVIE URL
-===================================================== */
-
-function extractVideoUrl(url){
-
-  return String(
-    url || ""
-  ).trim();
-
-}
-
-
-/* =====================================================
-GET MOVIE STATE
-===================================================== */
-
-function getMovieState(){
-
-  try{
-
-    if(
-      activeMovieType ===
-      "youtube" &&
-      youtubePlayer
-    ){
-
-      return {
-
-        currentTime:
-          Number(
-            youtubePlayer
-              .getCurrentTime() || 0
-          ),
-
-        paused:
-          youtubePlayer
-            .getPlayerState() !== 1,
-
-        playbackRate:
-          Number(
-            youtubePlayer
-              .getPlaybackRate() || 1
-          ),
-
-        volume:
-          Number(
-            (
-              youtubePlayer
-                .getVolume() || 100
-            ) / 100
-          )
-
-      };
-
-    }
-
-
-    if(activeMovieElement){
-
-      return {
-
-        currentTime:
-          Number(
-            activeMovieElement
-              .currentTime || 0
-          ),
-
-        paused:
-          !!activeMovieElement.paused,
-
-        playbackRate:
-          Number(
-            activeMovieElement
-              .playbackRate || 1
-          ),
-
-        volume:
-          Number(
-            activeMovieElement
-              .volume || 1
-          )
-
-      };
-
-    }
-
-  }catch(error){
-
-    console.warn(
-      "Movie state error:",
-      error
-    );
-
-  }
-
-
-  return null;
-
-}
-
-
-/* =====================================================
-SEND MOVIE STATE
-===================================================== */
-
-function sendMovieState(){
-
-  if(
-    suppressMovieSync ||
-    !ws ||
-    ws.readyState !==
-    WebSocket.OPEN ||
-    !roomId
-  ){
-
-    return;
-
-  }
-
-
-  const state =
-    getMovieState();
-
-
-  if(!state) return;
-
-
-  movieState =
-    state;
-
-
-  sendSignal({
-
-    type:"movie-state",
-
-    room:roomId,
-
-    url:lastMovieUrl,
-
-    state,
-
-    updatedAt:
-      Date.now()
-
-  });
-
-}
-
-
-/* =====================================================
-MOVIE EVENT
-===================================================== */
-
-function movieEvent(){
-
-  if(
-    suppressMovieSync
-  ){
-
-    return;
-
-  }
-
-
-  sendMovieState();
-
-}
-
-
-/* =====================================================
-HTML VIDEO SYNC
-===================================================== */
-
-function attachHtmlVideoSync(
-  video
-){
-
-  activeMovieElement =
-    video;
-
-
-  [
-    "play",
-    "pause",
-    "seeked",
-    "ratechange",
-    "volumechange"
-  ]
-  .forEach(
-    eventName=>{
-
-      video.addEventListener(
-        eventName,
-        movieEvent
+/*
+=========================================================
+MOVIE
+=========================================================
+*/
+
+function getYouTubeId(url) {
+
+  const match =
+    String(url)
+      .match(
+        /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/
       );
 
-    }
-  );
-
-
-  if(movieSyncTimer){
-
-    clearInterval(
-      movieSyncTimer
-    );
-
-  }
-
-
-  movieSyncTimer =
-    setInterval(
-      ()=>{
-
-        if(
-          !suppressMovieSync &&
-          !video.paused
-        ){
-
-          sendMovieState();
-
-        }
-
-      },
-      700
-    );
+  return match
+    ? match[1]
+    : null;
 
 }
 
 
-/* =====================================================
-SYNC MOVIE
-===================================================== */
-
-function syncMovieState(
-  state,
-  initial = false
-){
-
-  if(!state) return;
-
-
-  movieState =
-    {
-      ...movieState,
-      ...state
-    };
-
-
-  let targetTime =
-    Number(
-      state.currentTime || 0
-    );
-
-
-  if(
-    !state.paused &&
-    state.updatedAt
-  ){
-
-    const elapsed =
-      Math.max(
-        0,
-        (
-          Date.now() -
-          Number(
-            state.updatedAt
-          )
-        ) / 1000
-      );
-
-
-    targetTime +=
-      elapsed *
-      Number(
-        state.playbackRate || 1
-      );
-
-  }
-
-
-  suppressMovieSync =
-    true;
-
-
-  try{
-
-    if(
-      activeMovieType ===
-      "youtube" &&
-      youtubePlayer
-    ){
-
-      youtubePlayer.seekTo(
-        targetTime,
-        true
-      );
-
-
-      if(
-        state.playbackRate &&
-        youtubePlayer.setPlaybackRate
-      ){
-
-        youtubePlayer.setPlaybackRate(
-          Number(
-            state.playbackRate
-          )
-        );
-
-      }
-
-
-      if(
-        typeof state.volume ===
-        "number" &&
-        youtubePlayer.setVolume
-      ){
-
-        youtubePlayer.setVolume(
-          Math.round(
-            state.volume * 100
-          )
-        );
-
-      }
-
-
-      if(state.paused){
-
-        youtubePlayer.pauseVideo();
-
-      }else{
-
-        youtubePlayer.playVideo();
-
-      }
-
-    }else if(
-      activeMovieElement
-    ){
-
-      activeMovieElement.currentTime =
-        targetTime;
-
-
-      if(state.playbackRate){
-
-        activeMovieElement.playbackRate =
-          Number(
-            state.playbackRate
-          );
-
-      }
-
-
-      if(
-        typeof state.volume ===
-        "number"
-      ){
-
-        activeMovieElement.volume =
-          Math.max(
-            0,
-            Math.min(
-              1,
-              Number(
-                state.volume
-              )
-            )
-          );
-
-      }
-
-
-      if(state.paused){
-
-        activeMovieElement.pause();
-
-      }else{
-
-        activeMovieElement
-          .play()
-          .catch(
-            ()=>{}
-          );
-
-      }
-
-    }
-
-  }catch(error){
-
-    console.warn(
-      "Movie sync error:",
-      error
-    );
-
-  }
-
-
-  setTimeout(
-    ()=>{
-      suppressMovieSync =
-        false;
-    },
-    initial
-      ? 500
-      : 200
-  );
-
-}
-
-
-/* =====================================================
-YOUTUBE
-===================================================== */
-
-function createYouTubePlayer(
-  iframe
-){
-
-  const start =
-    ()=>{
-
-      if(!window.YT) return;
-
-
-      try{
-
-        youtubePlayer =
-          new YT.Player(
-            iframe,
-            {
-
-              events:{
-
-                onReady:()=>{
-
-                  if(movieState){
-
-                    syncMovieState(
-                      movieState,
-                      true
-                    );
-
-                  }
-
-
-                  if(movieSyncTimer){
-
-                    clearInterval(
-                      movieSyncTimer
-                    );
-
-                  }
-
-
-                  movieSyncTimer =
-                    setInterval(
-                      ()=>{
-
-                        if(
-                          !suppressMovieSync &&
-                          youtubePlayer &&
-                          youtubePlayer
-                            .getPlayerState &&
-                          youtubePlayer
-                            .getPlayerState()
-                            ===
-                            YT.PlayerState.PLAYING
-                        ){
-
-                          sendMovieState();
-
-                        }
-
-                      },
-                      700
-                    );
-
-                },
-
-
-                onStateChange:event=>{
-
-                  if(
-                    suppressMovieSync
-                  ){
-
-                    return;
-
-                  }
-
-
-                  if(
-                    event.data ===
-                    YT.PlayerState.PLAYING ||
-                    event.data ===
-                    YT.PlayerState.PAUSED
-                  ){
-
-                    sendMovieState();
-
-                  }
-
-                }
-
-              }
-
-            }
-          );
-
-      }catch(error){
-
-        console.error(
-          "YouTube error:",
-          error
-        );
-
-      }
-
-    };
-
-
-  if(
-    window.YT &&
-    window.YT.Player
-  ){
-
-    start();
-
-  }else{
-
-    window.onYouTubeIframeAPIReady =
-      start;
-
-  }
-
-}
-
-
-/* =====================================================
-RENDER MOVIE
-===================================================== */
-
-function renderMovie(
-  url,
-  announce = true
-){
+function renderMovie(url) {
 
   url =
-    extractVideoUrl(
-      url
+    String(url || "")
+      .trim();
+
+
+  if (!url) {
+    return;
+  }
+
+
+  const container =
+    document.getElementById(
+      "movieContainer"
     );
 
 
-  if(!url){
+  if (
+    container.dataset.movieUrl ===
+      url &&
+    container.querySelector(
+      "iframe, video"
+    )
+  ) {
 
-    return false;
+    return;
 
   }
 
 
-  if(movieSyncTimer){
+  container.dataset.movieUrl =
+    url;
+
+
+  activeMovieElement =
+    null;
+
+  youtubePlayer =
+    null;
+
+
+  if (movieSyncTimer) {
 
     clearInterval(
       movieSyncTimer
@@ -2861,78 +2183,29 @@ function renderMovie(
   }
 
 
-  youtubePlayer = null;
-
-  vimeoPlayer = null;
-
-  activeMovieElement = null;
-
-  activeMovieType = null;
-
-
-  const container =
-    document.getElementById(
-      "movieContainer"
+  const youtubeId =
+    getYouTubeId(
+      url
     );
 
 
-  /*
-  IMPORTANT:
-  Movie is only rebuilt when the URL actually changes.
-  This prevents unnecessary reloads when someone joins.
-  */
-
-  const current =
-    container.dataset.movieUrl || "";
-
-
-  if(
-    current === url &&
-    container.querySelector(
-      "iframe,video"
-    )
-  ){
-
-    return true;
-
-  }
-
-
-  container.dataset.movieUrl =
-    url;
-
-
-  const youtube =
-    url.match(
-      /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([^&?/]+)/
-    );
-
-
-  if(youtube){
-
-    activeMovieType =
-      "youtube";
-
+  if (youtubeId) {
 
     const iframe =
       document.createElement(
         "iframe"
       );
 
-
     iframe.id =
-      "sharedYoutubePlayer";
-
+      "youtubePlayer";
 
     iframe.src =
       "https://www.youtube.com/embed/" +
-      youtube[1] +
+      youtubeId +
       "?enablejsapi=1&rel=0";
-
 
     iframe.allow =
       "autoplay; fullscreen; picture-in-picture";
-
 
     iframe.allowFullscreen =
       true;
@@ -2940,7 +2213,6 @@ function renderMovie(
 
     container.innerHTML =
       "";
-
 
     container.appendChild(
       iframe
@@ -2952,7 +2224,7 @@ function renderMovie(
     );
 
 
-    return true;
+    return;
 
   }
 
@@ -2976,40 +2248,524 @@ function renderMovie(
     "metadata";
 
 
-  video.addEventListener(
-    "error",
-    ()=>{
-      setStatus(
-        "Hindi ma-play ang video URL"
-      );
-    }
-  );
-
-
   container.innerHTML =
     "";
-
 
   container.appendChild(
     video
   );
 
 
-  attachHtmlVideoSync(
-    video
+  activeMovieElement =
+    video;
+
+
+  const events = [
+    "play",
+    "pause",
+    "seeked",
+    "ratechange",
+    "volumechange"
+  ];
+
+
+  events.forEach(
+    eventName => {
+
+      video.addEventListener(
+        eventName,
+        sendMovieState
+      );
+
+    }
   );
 
 
-  return true;
+  movieSyncTimer =
+    setInterval(
+      () => {
+
+        if (
+          !suppressMovieSync &&
+          !video.paused
+        ) {
+
+          sendMovieState();
+
+        }
+
+      },
+      700
+    );
 
 }
 
 
-/* =====================================================
-LOAD MOVIE
-===================================================== */
+/*
+=========================================================
+YOUTUBE PLAYER
+=========================================================
+*/
 
-function loadMovie(){
+function createYouTubePlayer(
+  iframe
+) {
+
+  const start =
+    () => {
+
+      if (
+        !window.YT ||
+        !window.YT.Player
+      ) {
+        return;
+      }
+
+
+      try {
+
+        youtubePlayer =
+          new YT.Player(
+            iframe,
+            {
+
+              events: {
+
+                onReady: () => {
+
+                  syncMovieState(
+                    movieState,
+                    true
+                  );
+
+
+                  movieSyncTimer =
+                    setInterval(
+                      () => {
+
+                        if (
+                          !suppressMovieSync &&
+                          youtubePlayer &&
+                          youtubePlayer
+                            .getPlayerState &&
+                          youtubePlayer
+                            .getPlayerState()
+                            ===
+                            YT.PlayerState.PLAYING
+                        ) {
+
+                          sendMovieState();
+
+                        }
+
+                      },
+                      700
+                    );
+
+                },
+
+
+                onStateChange:
+                  event => {
+
+                    if (
+                      suppressMovieSync
+                    ) {
+                      return;
+                    }
+
+
+                    if (
+                      event.data ===
+                        YT.PlayerState.PLAYING ||
+                      event.data ===
+                        YT.PlayerState.PAUSED
+                    ) {
+
+                      sendMovieState();
+
+                    }
+
+                  }
+
+              }
+
+            }
+          );
+
+      } catch (error) {
+
+        console.error(
+          "YouTube error:",
+          error
+        );
+
+      }
+
+    };
+
+
+  if (
+    window.YT &&
+    window.YT.Player
+  ) {
+
+    start();
+
+  } else {
+
+    window.onYouTubeIframeAPIReady =
+      start;
+
+  }
+
+}
+
+
+/*
+=========================================================
+YOUTUBE API
+=========================================================
+*/
+
+const ytScript =
+  document.createElement(
+    "script"
+  );
+
+ytScript.src =
+  "https://www.youtube.com/iframe_api";
+
+document.head.appendChild(
+  ytScript
+);
+
+
+/*
+=========================================================
+GET MOVIE STATE
+=========================================================
+*/
+
+function getMovieState() {
+
+  try {
+
+    if (
+      youtubePlayer &&
+      youtubePlayer.getCurrentTime
+    ) {
+
+      return {
+
+        currentTime:
+          Number(
+            youtubePlayer
+              .getCurrentTime() || 0
+          ),
+
+        paused:
+          youtubePlayer
+            .getPlayerState() !== 1,
+
+        playbackRate:
+          Number(
+            youtubePlayer
+              .getPlaybackRate() || 1
+          ),
+
+        volume:
+          Number(
+            youtubePlayer
+              .getVolume() || 100
+          ) / 100
+
+      };
+
+    }
+
+
+    if (activeMovieElement) {
+
+      return {
+
+        currentTime:
+          Number(
+            activeMovieElement
+              .currentTime || 0
+          ),
+
+        paused:
+          activeMovieElement.paused,
+
+        playbackRate:
+          Number(
+            activeMovieElement
+              .playbackRate || 1
+          ),
+
+        volume:
+          Number(
+            activeMovieElement
+              .volume || 1
+          )
+
+      };
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Movie state error:",
+      error
+    );
+
+  }
+
+
+  return null;
+
+}
+
+
+/*
+=========================================================
+SEND MOVIE STATE
+=========================================================
+*/
+
+function sendMovieState() {
+
+  if (
+    suppressMovieSync ||
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ) {
+    return;
+  }
+
+
+  const state =
+    getMovieState();
+
+
+  if (!state) {
+    return;
+  }
+
+
+  movieState =
+    state;
+
+
+  sendSignal({
+
+    type: "movie-state",
+
+    room: ONE_ROOM,
+
+    url: lastMovieUrl,
+
+    state,
+
+    updatedAt:
+      Date.now()
+
+  });
+
+}
+
+
+/*
+=========================================================
+SYNC MOVIE
+=========================================================
+*/
+
+function syncMovieState(
+  state,
+  initial = false
+) {
+
+  if (!state) {
+    return;
+  }
+
+
+  suppressMovieSync =
+    true;
+
+
+  let targetTime =
+    Number(
+      state.currentTime || 0
+    );
+
+
+  if (
+    !state.paused &&
+    state.updatedAt
+  ) {
+
+    const elapsed =
+      Math.max(
+        0,
+        (
+          Date.now() -
+          Number(
+            state.updatedAt
+          )
+        ) / 1000
+      );
+
+
+    targetTime +=
+      elapsed *
+      Number(
+        state.playbackRate || 1
+      );
+
+  }
+
+
+  try {
+
+    if (
+      youtubePlayer &&
+      youtubePlayer.seekTo
+    ) {
+
+      youtubePlayer.seekTo(
+        targetTime,
+        true
+      );
+
+
+      if (
+        youtubePlayer.setPlaybackRate &&
+        state.playbackRate
+      ) {
+
+        youtubePlayer.setPlaybackRate(
+          Number(
+            state.playbackRate
+          )
+        );
+
+      }
+
+
+      if (
+        youtubePlayer.setVolume &&
+        typeof state.volume ===
+          "number"
+      ) {
+
+        youtubePlayer.setVolume(
+          Math.round(
+            state.volume * 100
+          )
+        );
+
+      }
+
+
+      if (state.paused) {
+
+        youtubePlayer.pauseVideo();
+
+      } else {
+
+        youtubePlayer.playVideo();
+
+      }
+
+    } else if (
+      activeMovieElement
+    ) {
+
+      activeMovieElement.currentTime =
+        targetTime;
+
+
+      if (
+        state.playbackRate
+      ) {
+
+        activeMovieElement
+          .playbackRate =
+          Number(
+            state.playbackRate
+          );
+
+      }
+
+
+      if (
+        typeof state.volume ===
+          "number"
+      ) {
+
+        activeMovieElement.volume =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              Number(
+                state.volume
+              )
+            )
+          );
+
+      }
+
+
+      if (state.paused) {
+
+        activeMovieElement.pause();
+
+      } else {
+
+        activeMovieElement
+          .play()
+          .catch(
+            () => {}
+          );
+
+      }
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Movie sync error:",
+      error
+    );
+
+  }
+
+
+  setTimeout(
+    () => {
+      suppressMovieSync =
+        false;
+    },
+    initial ? 600 : 250
+  );
+
+}
+
+
+/*
+=========================================================
+LOAD MOVIE
+=========================================================
+*/
+
+function loadMovie() {
 
   const input =
     document.getElementById(
@@ -3018,43 +2774,18 @@ function loadMovie(){
 
 
   const url =
-    extractVideoUrl(
-      input.value
-    );
+    String(
+      input.value || ""
+    ).trim();
 
 
-  if(!url){
+  if (!url) {
 
     setStatus(
-      "Maglagay muna ng movie/video URL"
+      "Enter a movie/video URL."
     );
 
     return;
-
-  }
-
-
-  /*
-  Do not reload the same movie.
-  */
-
-  const alreadyLoaded =
-    lastMovieUrl === url &&
-    document
-      .getElementById(
-        "movieContainer"
-      )
-      .querySelector(
-        "iframe,video"
-      );
-
-
-  if(!alreadyLoaded){
-
-    renderMovie(
-      url,
-      true
-    );
 
   }
 
@@ -3065,78 +2796,61 @@ function loadMovie(){
 
   movieState = {
 
-    currentTime:0,
+    currentTime: 0,
 
-    paused:true,
+    paused: true,
 
-    playbackRate:1,
+    playbackRate: 1,
 
-    volume:1
+    volume: 1,
+
+    updatedAt:
+      Date.now()
 
   };
 
 
+  renderMovie(
+    url
+  );
+
+
   sendSignal({
 
-    type:"movie",
+    type: "movie",
 
-    room:roomId,
+    room: ONE_ROOM,
 
     url,
 
-    state:movieState
+    state: movieState
 
   });
 
 
-  sendMovieState();
-
-
   setStatus(
-    "Movie loaded — syncing..."
+    "Movie loaded."
   );
 
 }
 
 
-/* =====================================================
-RESTORE MOVIE
-===================================================== */
-
-function restoreMovie(url){
-
-  if(!url) return;
-
-
-  const input =
-    document.getElementById(
-      "movieUrl"
-    );
-
-
-  if(input){
-
-    input.value =
-      url;
-
-  }
-
-
-  renderMovie(
-    url,
-    false
-  );
-
-}
-
-
-/* =====================================================
+/*
+=========================================================
 LEAVE
-===================================================== */
+=========================================================
+*/
 
-function leaveRoom(){
+function leaveRoom() {
 
-  if(movieSyncTimer){
+  clearOfferRetry();
+
+  clearTimeout(
+    reconnectTimer
+  );
+
+
+  if (movieSyncTimer) {
 
     clearInterval(
       movieSyncTimer
@@ -3148,27 +2862,15 @@ function leaveRoom(){
   }
 
 
-  clearOfferRetry();
-
-
-  if(ws){
-
-    try{
-      ws.close();
-    }catch{}
-
-  }
-
-
   closePeerConnection();
 
 
-  if(localStream){
+  if (localStream) {
 
     localStream
       .getTracks()
       .forEach(
-        track=>{
+        track => {
           track.stop();
         }
       );
@@ -3179,49 +2881,18 @@ function leaveRoom(){
   }
 
 
-  location.href =
-    location.pathname;
+  if (ws) {
 
-}
-
-
-/* =====================================================
-AUTOMATIC START
-===================================================== */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  ()=>{
-
-    /*
-    Automatic room.
-    First visitor becomes host.
-    Second visitor becomes guest.
-    */
-
-    openRoom();
-
-    setTimeout(
-      ()=>{
-        const intro =
-          document.getElementById(
-            "intro"
-          );
-
-        if(intro){
-
-          intro.classList.add(
-            "hidden"
-          );
-
-        }
-
-      },
-      10000
-    );
+    try {
+      ws.close();
+    } catch {}
 
   }
-);
+
+
+  location.reload();
+
+}
 
 </script>
 
