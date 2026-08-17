@@ -1536,7 +1536,7 @@ function connectSignaling(){
             restoreMovie(data.movie);
           } else {
             lastMovieUrl = data.movie.url || "";
-            movieState = data.movie.state || movieState;
+            movieState = { ...(data.movie.state || movieState), updatedAt: data.movie.updatedAt || Date.now() };
             if(lastMovieUrl) { restoreMovie(lastMovieUrl); setTimeout(()=>syncMovieState(movieState, true), 1200); }
           }
         }
@@ -1667,7 +1667,7 @@ function connectSignaling(){
           renderMovie(data.url, false);
         }
         if(data.state){
-          syncMovieState(data.state);
+          syncMovieState({ ...data.state, updatedAt: data.updatedAt || Date.now() });
           setStatus("Playback synced");
         }
         return;
@@ -2303,7 +2303,7 @@ function sendMovieState(force=false){
   const state = getMovieState();
   if(!state) return;
   movieState = state;
-  sendSignal({ type:"movie-state", room:roomId, url:lastMovieUrl, state });
+  sendSignal({ type:"movie-state", room:roomId, url:lastMovieUrl, state, updatedAt:Date.now() });
 }
 
 function getMovieState(){
@@ -2325,11 +2325,20 @@ function getMovieState(){
 function syncMovieState(state, isInitial=false){
   if(!state) return;
   movieState = { ...movieState, ...state };
+
+  // Compensate for network delay while playing so the guest stays close
+  // to the host instead of always being behind by the network latency.
+  let targetTime = Number(state.currentTime || 0);
+  if(!state.paused && state.updatedAt){
+    const elapsed = Math.max(0, (Date.now() - Number(state.updatedAt)) / 1000);
+    targetTime += elapsed * Number(state.playbackRate || 1);
+  }
+
   suppressMovieSync = true;
   const finish = ()=>{ suppressMovieSync=false; };
   try{
     if(activeMovieType === "youtube" && youtubePlayer && youtubePlayer.seekTo){
-      youtubePlayer.seekTo(Number(state.currentTime||0), true);
+      youtubePlayer.seekTo(targetTime, true);
       if(state.playbackRate && youtubePlayer.setPlaybackRate) youtubePlayer.setPlaybackRate(Number(state.playbackRate));
       if(typeof state.volume === "number" && youtubePlayer.setVolume) youtubePlayer.setVolume(Math.round(state.volume*100));
       if(state.paused) youtubePlayer.pauseVideo(); else youtubePlayer.playVideo();
@@ -2337,7 +2346,7 @@ function syncMovieState(state, isInitial=false){
       return;
     }
     if(activeMovieElement){
-      if(Number.isFinite(Number(state.currentTime))) activeMovieElement.currentTime = Number(state.currentTime);
+      if(Number.isFinite(targetTime)) activeMovieElement.currentTime = targetTime;
       if(state.playbackRate) activeMovieElement.playbackRate = Number(state.playbackRate);
       if(typeof state.volume === "number") activeMovieElement.volume = Math.max(0, Math.min(1, Number(state.volume)));
       if(state.paused) activeMovieElement.pause();
@@ -2379,7 +2388,7 @@ function createYouTubePlayer(iframe, videoId){
               if(!suppressMovieSync && youtubePlayer && youtubePlayer.getPlayerState && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING){
                 movieEventState();
               }
-            }, 1000);
+            }, 500);
           },
           onStateChange:(e)=>{
             if(suppressMovieSync) return;
@@ -2484,6 +2493,14 @@ function loadMovie(){
   lastMovieUrl =
     url;
 
+  movieState = {
+    currentTime:0,
+    paused:true,
+    playbackRate:1,
+    volume:1,
+    updatedAt:Date.now()
+  };
+
 
   /*
     Tell the signaling server which movie
@@ -2500,6 +2517,10 @@ function loadMovie(){
     url:url
 
   });
+
+  // Publish the initial playback state immediately. Later play/pause/seek
+  // changes are published by the movie event listeners and 500ms timer.
+  sendMovieState(true);
 
 
   setStatus(
