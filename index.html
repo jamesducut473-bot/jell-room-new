@@ -2,60 +2,89 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <meta
   name="viewport"
-  content="width=device-width,initial-scale=1"
+  content="width=device-width, initial-scale=1.0"
 >
-<title>Video Room</title>
+
+<title>Private Video Room</title>
 
 <style>
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  background: #101510;
+  width: 100%;
+  height: 100%;
+  background: #111;
   color: white;
   font-family: Arial, sans-serif;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 header {
-  height: 60px;
-  padding: 0 18px;
+  height: 58px;
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #1d291f;
+
+  padding: 0 16px;
+
+  background: #1b1b1b;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 #status {
-  font-size: 14px;
-  color: #b9cbbd;
+  font-size: 13px;
+  color: #bbb;
 }
 
-.videos {
-  width: 100%;
-  min-height: calc(100vh - 60px);
+#videos {
+  flex: 1;
+
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
+
   gap: 10px;
   padding: 10px;
+
+  min-height: 0;
 }
 
-.videoBox {
+.video-container {
   position: relative;
-  min-height: 300px;
+
   background: #000;
-  border-radius: 14px;
+
+  border-radius: 12px;
+
   overflow: hidden;
+
+  min-height: 250px;
 }
 
 video {
   width: 100%;
   height: 100%;
-  min-height: 300px;
+
+  display: block;
+
   object-fit: cover;
+
   background: #000;
 }
 
@@ -63,53 +92,78 @@ video {
   transform: scaleX(-1);
 }
 
-.label {
+.video-label {
   position: absolute;
+
   left: 10px;
   bottom: 10px;
+
   padding: 6px 9px;
-  background: rgba(0,0,0,.65);
-  border-radius: 7px;
-  font-size: 13px;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  border-radius: 6px;
+
+  font-size: 12px;
 }
 
 #waiting {
   position: absolute;
+
   inset: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #aaa;
-  background: #000;
+
   text-align: center;
+
+  color: #aaa;
+
+  background: #000;
 }
 
 #controls {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  height: 75px;
+
+  flex-shrink: 0;
+
   display: flex;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  background: #1b1b1b;
 }
 
 button {
-  border: 0;
+  width: 48px;
+  height: 48px;
+
+  border: none;
   border-radius: 50%;
-  width: 52px;
-  height: 52px;
+
+  background: #333;
+
+  color: white;
+
+  font-size: 19px;
+
   cursor: pointer;
-  font-size: 20px;
 }
 
-.off {
-  background: #c65353;
-  color: white;
+button.off {
+  background: #b83c3c;
 }
 
 @media (max-width: 700px) {
-  .videos {
+  #videos {
     grid-template-columns: 1fr;
+  }
+
+  .video-container {
+    min-height: 220px;
   }
 }
 </style>
@@ -118,23 +172,31 @@ button {
 <body>
 
 <header>
-  <strong>Video Room</strong>
-  <span id="status">Connecting...</span>
+  <div class="title">
+    Private Video Room
+  </div>
+
+  <div id="status">
+    Starting...
+  </div>
 </header>
 
-<div class="videos">
+<main id="videos">
 
-  <div class="videoBox">
+  <div class="video-container">
     <video
       id="localVideo"
       autoplay
       muted
       playsinline
     ></video>
-    <div class="label">You</div>
+
+    <div class="video-label">
+      You
+    </div>
   </div>
 
-  <div class="videoBox">
+  <div class="video-container">
 
     <video
       id="remoteVideo"
@@ -146,14 +208,24 @@ button {
       Waiting for your friend...
     </div>
 
-    <div class="label">Friend</div>
+    <div class="video-label">
+      Friend
+    </div>
+
   </div>
 
-</div>
+</main>
 
 <div id="controls">
-  <button id="mic">🎙️</button>
-  <button id="camera">📹</button>
+
+  <button id="micButton">
+    🎙️
+  </button>
+
+  <button id="cameraButton">
+    📹
+  </button>
+
 </div>
 
 <script>
@@ -163,247 +235,450 @@ const localVideo =
 const remoteVideo =
   document.getElementById("remoteVideo");
 
-const status =
+const statusText =
   document.getElementById("status");
 
 const waiting =
   document.getElementById("waiting");
 
 const micButton =
-  document.getElementById("mic");
+  document.getElementById("micButton");
 
 const cameraButton =
-  document.getElementById("camera");
+  document.getElementById("cameraButton");
+
 
 let socket = null;
+
 let localStream = null;
+
 let peerConnection = null;
 
 let clientId =
-  localStorage.getItem("video-client-id");
+  localStorage.getItem("videoClientId");
 
 let role = null;
+
 let peerPresent = false;
 
-let candidates = [];
-let remoteDescriptionSet = false;
-
-let stopped = false;
 let reconnectTimer = null;
-let makingOffer = false;
+
+let candidateQueue = [];
+
+let remoteDescriptionReady = false;
+
+let callStarting = false;
+
+let manuallyStopped = false;
+
+
+/*
+ * Status
+ */
 
 function setStatus(text) {
-  status.textContent = text;
+  statusText.textContent = text;
 }
 
-function send(data) {
+
+/*
+ * Signaling
+ */
+
+function send(message) {
   if (
     socket &&
     socket.readyState === WebSocket.OPEN
   ) {
-    socket.send(JSON.stringify(data));
+    socket.send(
+      JSON.stringify(message)
+    );
   }
 }
+
+
+/*
+ * Camera + microphone
+ */
+
+async function startMedia() {
+  if (localStream) {
+    return;
+  }
+
+  localStream =
+    await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: {
+          ideal: 1280
+        },
+
+        height: {
+          ideal: 720
+        },
+
+        frameRate: {
+          ideal: 30,
+          max: 30
+        }
+      },
+
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        channelCount: 1
+      }
+    });
+
+  localVideo.srcObject =
+    localStream;
+
+  try {
+    await localVideo.play();
+  } catch {}
+}
+
+
+/*
+ * ICE configuration
+ */
 
 async function getIceServers() {
   try {
     const response =
-      await fetch("/ice-config", {
-        cache: "no-store"
-      });
+      await fetch(
+        "/ice-config",
+        {
+          cache: "no-store"
+        }
+      );
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    return data.iceServers || [];
-  } catch {
-    return [
-      {
-        urls: [
-          "stun:stun.l.google.com:19302",
-          "stun:stun1.l.google.com:19302"
-        ]
-      }
-    ];
+    if (
+      data &&
+      Array.isArray(data.iceServers)
+    ) {
+      return data.iceServers;
+    }
+  } catch (error) {
+    console.warn(
+      "ICE config failed",
+      error
+    );
   }
+
+  return [
+    {
+      urls: [
+        "stun:stun.l.google.com:19302",
+        "stun:stun1.l.google.com:19302"
+      ]
+    }
+  ];
 }
 
-async function startCamera() {
-  if (localStream) return;
 
-  localStream =
-    await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      }
-    });
+/*
+ * Create ONE peer connection.
+ *
+ * We do not recreate this connection
+ * every time an ICE candidate arrives.
+ * This prevents repeated loading.
+ */
 
-  localVideo.srcObject = localStream;
-
-  await localVideo.play().catch(() => {});
-}
-
-async function createPeer() {
+async function createPeerConnection() {
   if (peerConnection) {
-    peerConnection.close();
+    return peerConnection;
   }
 
-  const servers =
+  const iceServers =
     await getIceServers();
 
   const pc =
     new RTCPeerConnection({
-      iceServers: servers,
-      iceCandidatePoolSize: 10
+      iceServers,
+
+      iceCandidatePoolSize: 10,
+
+      bundlePolicy: "max-bundle",
+
+      rtcpMuxPolicy: "require"
     });
 
   peerConnection = pc;
-  candidates = [];
-  remoteDescriptionSet = false;
 
-  localStream
-    .getTracks()
-    .forEach(track => {
-      pc.addTrack(track, localStream);
-    });
+  candidateQueue = [];
+
+  remoteDescriptionReady = false;
+
+
+  /*
+   * Add local tracks ONCE.
+   */
+
+  if (localStream) {
+    localStream
+      .getTracks()
+      .forEach(track => {
+        pc.addTrack(
+          track,
+          localStream
+        );
+      });
+  }
+
+
+  /*
+   * Send ICE candidates.
+   */
 
   pc.onicecandidate = event => {
-    if (event.candidate) {
-      send({
-        type: "candidate",
-        candidate: event.candidate
-      });
+    if (!event.candidate) {
+      return;
     }
+
+    send({
+      type: "candidate",
+      candidate: event.candidate
+    });
   };
+
+
+  /*
+   * Receive remote video/audio.
+   */
 
   pc.ontrack = event => {
-    let stream = event.streams[0];
+    let stream =
+      event.streams &&
+      event.streams[0];
 
     if (!stream) {
-      stream =
-        remoteVideo.srcObject ||
-        new MediaStream();
-
       if (
-        !stream
+        !remoteVideo.srcObject
+      ) {
+        remoteVideo.srcObject =
+          new MediaStream();
+      }
+
+      stream =
+        remoteVideo.srcObject;
+
+      const alreadyAdded =
+        stream
           .getTracks()
           .some(
-            t => t.id === event.track.id
-          )
+            track =>
+              track.id ===
+              event.track.id
+          );
+
+      if (!alreadyAdded) {
+        stream.addTrack(
+          event.track
+        );
+      }
+    }
+
+    remoteVideo.srcObject =
+      stream;
+
+    waiting.style.display =
+      "none";
+
+    /*
+     * Make sure audio is not muted.
+     */
+    remoteVideo.muted = false;
+
+    remoteVideo.volume = 1;
+
+    remoteVideo
+      .play()
+      .catch(() => {});
+  };
+
+
+  pc.oniceconnectionstatechange =
+    () => {
+
+      console.log(
+        "ICE:",
+        pc.iceConnectionState
+      );
+
+      if (
+        pc.iceConnectionState ===
+        "checking"
       ) {
-        stream.addTrack(event.track);
+        setStatus(
+          "Connecting..."
+        );
       }
-    }
 
-    remoteVideo.srcObject = stream;
-
-    waiting.style.display = "none";
-
-    remoteVideo.play().catch(() => {});
-  };
-
-  pc.oniceconnectionstatechange = () => {
-    console.log(
-      "ICE:",
-      pc.iceConnectionState
-    );
-
-    if (
-      pc.iceConnectionState === "checking"
-    ) {
-      setStatus("Connecting video...");
-    }
-
-    if (
-      pc.iceConnectionState === "connected" ||
-      pc.iceConnectionState === "completed"
-    ) {
-      setStatus("Connected ✓");
-    }
-
-    if (
-      pc.iceConnectionState === "failed"
-    ) {
-      setStatus("Retrying connection...");
-
-      if (role === "host") {
-        restartCall();
+      if (
+        pc.iceConnectionState ===
+          "connected" ||
+        pc.iceConnectionState ===
+          "completed"
+      ) {
+        setStatus(
+          "Connected ✓"
+        );
       }
-    }
-  };
 
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState === "connected") {
-      setStatus("Connected ✓");
-    }
+      if (
+        pc.iceConnectionState ===
+        "failed"
+      ) {
+        setStatus(
+          "Connection failed. Retrying..."
+        );
 
-    if (pc.connectionState === "failed") {
-      if (role === "host") {
-        restartCall();
+        /*
+         * Only the host restarts
+         * the negotiation.
+         */
+        if (role === "host") {
+          restartConnection();
+        }
       }
-    }
-  };
+    };
+
+
+  pc.onconnectionstatechange =
+    () => {
+
+      console.log(
+        "Connection:",
+        pc.connectionState
+      );
+
+      if (
+        pc.connectionState ===
+        "connected"
+      ) {
+        setStatus(
+          "Connected ✓"
+        );
+      }
+
+      if (
+        pc.connectionState ===
+        "failed"
+      ) {
+        if (role === "host") {
+          restartConnection();
+        }
+      }
+    };
+
 
   return pc;
 }
 
+
+/*
+ * HOST starts the call.
+ *
+ * This is deliberately protected so
+ * it cannot repeatedly create offers.
+ */
+
 async function startCall() {
   if (
-    !peerPresent ||
     role !== "host" ||
-    makingOffer
+    !peerPresent ||
+    callStarting
   ) {
     return;
   }
 
-  makingOffer = true;
+  callStarting = true;
 
   try {
     const pc =
-      await createPeer();
+      await createPeerConnection();
+
+    /*
+     * Don't create another offer if
+     * a negotiation is already underway.
+     */
+    if (
+      pc.signalingState !==
+      "stable"
+    ) {
+      return;
+    }
 
     const offer =
       await pc.createOffer();
 
-    await pc.setLocalDescription(offer);
+    await pc.setLocalDescription(
+      offer
+    );
 
     send({
       type: "offer",
-      offer: pc.localDescription
+      offer:
+        pc.localDescription
     });
+
   } catch (error) {
-    console.error(error);
-  }
 
-  makingOffer = false;
-}
-
-async function handleOffer(offer) {
-  try {
-    const pc =
-      await createPeer();
-
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(offer)
+    console.error(
+      "Call start error:",
+      error
     );
 
-    remoteDescriptionSet = true;
+  } finally {
+
+    callStarting = false;
+  }
+}
+
+
+/*
+ * Guest receives offer.
+ */
+
+async function receiveOffer(
+  offer
+) {
+  try {
+
+    const pc =
+      await createPeerConnection();
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(
+        offer
+      )
+    );
+
+    remoteDescriptionReady =
+      true;
 
     await flushCandidates();
 
     const answer =
       await pc.createAnswer();
 
-    await pc.setLocalDescription(answer);
+    await pc.setLocalDescription(
+      answer
+    );
 
     send({
       type: "answer",
-      answer: pc.localDescription
+      answer:
+        pc.localDescription
     });
 
   } catch (error) {
+
     console.error(
       "Offer error:",
       error
@@ -411,19 +686,34 @@ async function handleOffer(offer) {
   }
 }
 
-async function handleAnswer(answer) {
-  if (!peerConnection) return;
+
+/*
+ * Host receives answer.
+ */
+
+async function receiveAnswer(
+  answer
+) {
+  if (!peerConnection) {
+    return;
+  }
 
   try {
-    await peerConnection.setRemoteDescription(
-      new RTCSessionDescription(answer)
-    );
 
-    remoteDescriptionSet = true;
+    await peerConnection
+      .setRemoteDescription(
+        new RTCSessionDescription(
+          answer
+        )
+      );
+
+    remoteDescriptionReady =
+      true;
 
     await flushCandidates();
 
   } catch (error) {
+
     console.error(
       "Answer error:",
       error
@@ -431,44 +721,76 @@ async function handleAnswer(answer) {
   }
 }
 
-async function handleCandidate(candidate) {
+
+/*
+ * ICE candidate.
+ */
+
+async function receiveCandidate(
+  candidate
+) {
   if (
     !peerConnection ||
-    !remoteDescriptionSet
+    !remoteDescriptionReady
   ) {
-    candidates.push(candidate);
+    candidateQueue.push(
+      candidate
+    );
+
     return;
   }
 
   try {
-    await peerConnection.addIceCandidate(
-      new RTCIceCandidate(candidate)
-    );
+
+    await peerConnection
+      .addIceCandidate(
+        new RTCIceCandidate(
+          candidate
+        )
+      );
+
   } catch (error) {
+
     console.warn(
-      "ICE error:",
+      "ICE candidate error:",
       error
     );
   }
 }
 
+
+/*
+ * Process candidates that arrived
+ * before the remote description.
+ */
+
 async function flushCandidates() {
   if (
     !peerConnection ||
-    !remoteDescriptionSet
+    !remoteDescriptionReady
   ) {
     return;
   }
 
-  const queued = candidates;
-  candidates = [];
+  const queued =
+    candidateQueue;
 
-  for (const candidate of queued) {
+  candidateQueue = [];
+
+  for (
+    const candidate of queued
+  ) {
     try {
-      await peerConnection.addIceCandidate(
-        new RTCIceCandidate(candidate)
-      );
+
+      await peerConnection
+        .addIceCandidate(
+          new RTCIceCandidate(
+            candidate
+          )
+        );
+
     } catch (error) {
+
       console.warn(
         "Queued ICE error:",
         error
@@ -477,23 +799,57 @@ async function flushCandidates() {
   }
 }
 
-function restartCall() {
-  clearTimeout(reconnectTimer);
+
+/*
+ * Connection retry.
+ *
+ * Do not immediately create
+ * endless offers.
+ */
+
+function restartConnection() {
+  clearTimeout(
+    reconnectTimer
+  );
 
   reconnectTimer =
-    setTimeout(() => {
-      if (
-        !stopped &&
-        role === "host" &&
-        peerPresent
-      ) {
-        startCall();
-      }
-    }, 1500);
+    setTimeout(
+      async () => {
+
+        if (
+          manuallyStopped ||
+          !peerPresent ||
+          role !== "host"
+        ) {
+          return;
+        }
+
+        if (peerConnection) {
+          peerConnection.close();
+          peerConnection = null;
+        }
+
+        candidateQueue = [];
+
+        remoteDescriptionReady =
+          false;
+
+        await startCall();
+
+      },
+      2500
+    );
 }
 
+
+/*
+ * WebSocket connection.
+ */
+
 function connectSocket() {
-  if (stopped) return;
+  if (manuallyStopped) {
+    return;
+  }
 
   const protocol =
     location.protocol === "https:"
@@ -505,126 +861,261 @@ function connectSocket() {
       `${protocol}//${location.host}`
     );
 
+
   socket.onopen = () => {
-    setStatus("Joining room...");
+
+    setStatus(
+      "Joining room..."
+    );
 
     send({
       type: "join",
-      clientId: clientId || undefined
+      clientId:
+        clientId || undefined
     });
   };
 
-  socket.onmessage = async event => {
-    let msg;
 
-    try {
-      msg = JSON.parse(event.data);
-    } catch {
-      return;
-    }
+  socket.onmessage =
+    async event => {
 
-    if (msg.type === "joined") {
-      clientId = msg.clientId;
+      let message;
 
-      localStorage.setItem(
-        "video-client-id",
-        clientId
-      );
+      try {
 
-      role = msg.role;
-      peerPresent = !!msg.peerPresent;
+        message =
+          JSON.parse(
+            event.data
+          );
 
-      if (peerPresent) {
-        setStatus(
-          "Friend found — connecting..."
+      } catch {
+        return;
+      }
+
+
+      /*
+       * Successfully joined
+       * the ONE room.
+       */
+
+      if (
+        message.type ===
+        "joined"
+      ) {
+
+        clientId =
+          message.clientId;
+
+        localStorage.setItem(
+          "videoClientId",
+          clientId
         );
 
-        if (role === "host") {
+        role =
+          message.role;
+
+        peerPresent =
+          !!message.peerPresent;
+
+
+        if (peerPresent) {
+
+          setStatus(
+            "Friend found. Connecting..."
+          );
+
+          /*
+           * Only host starts.
+           */
+          if (
+            role === "host"
+          ) {
+            await startCall();
+          }
+
+        } else {
+
+          setStatus(
+            "Waiting for your friend..."
+          );
+        }
+
+        return;
+      }
+
+
+      /*
+       * Second person joined.
+       */
+
+      if (
+        message.type ===
+        "peer-joined"
+      ) {
+
+        peerPresent = true;
+
+        setStatus(
+          "Friend joined. Connecting..."
+        );
+
+        if (
+          role === "host"
+        ) {
           await startCall();
         }
-      } else {
+
+        return;
+      }
+
+
+      /*
+       * Reconnected peer.
+       */
+
+      if (
+        message.type ===
+        "peer-reconnected"
+      ) {
+
+        peerPresent = true;
+
+        if (
+          role === "host"
+        ) {
+          restartConnection();
+        }
+
+        return;
+      }
+
+
+      /*
+       * Offer.
+       */
+
+      if (
+        message.type ===
+        "offer"
+      ) {
+
+        peerPresent = true;
+
+        await receiveOffer(
+          message.offer
+        );
+
+        return;
+      }
+
+
+      /*
+       * Answer.
+       */
+
+      if (
+        message.type ===
+        "answer"
+      ) {
+
+        await receiveAnswer(
+          message.answer
+        );
+
+        return;
+      }
+
+
+      /*
+       * ICE.
+       */
+
+      if (
+        message.type ===
+        "candidate"
+      ) {
+
+        await receiveCandidate(
+          message.candidate
+        );
+
+        return;
+      }
+
+
+      /*
+       * Friend disconnected.
+       */
+
+      if (
+        message.type ===
+        "peer-disconnected"
+      ) {
+
+        peerPresent = false;
+
+        if (peerConnection) {
+          peerConnection.close();
+          peerConnection = null;
+        }
+
+        remoteVideo.srcObject =
+          null;
+
+        waiting.style.display =
+          "flex";
+
         setStatus(
           "Waiting for your friend..."
         );
+
+        return;
       }
 
-      return;
-    }
 
-    if (msg.type === "peer-joined") {
-      peerPresent = true;
+      /*
+       * Third user.
+       */
 
-      setStatus(
-        "Friend joined — connecting..."
-      );
+      if (
+        message.type ===
+        "room-full"
+      ) {
 
-      if (role === "host") {
-        await startCall();
+        setStatus(
+          "Room is full."
+        );
+
+        return;
       }
+    };
 
-      return;
-    }
 
-    if (msg.type === "peer-reconnected") {
-      peerPresent = true;
+  socket.onerror = error => {
 
-      if (role === "host") {
-        await startCall();
-      }
-
-      return;
-    }
-
-    if (msg.type === "offer") {
-      peerPresent = true;
-      await handleOffer(msg.offer);
-      return;
-    }
-
-    if (msg.type === "answer") {
-      await handleAnswer(msg.answer);
-      return;
-    }
-
-    if (msg.type === "candidate") {
-      await handleCandidate(
-        msg.candidate
-      );
-      return;
-    }
-
-    if (msg.type === "peer-disconnected") {
-      peerPresent = false;
-
-      if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-      }
-
-      remoteVideo.srcObject = null;
-      waiting.style.display = "flex";
-
-      setStatus(
-        "Waiting for your friend..."
-      );
-
-      return;
-    }
-
-    if (msg.type === "room-full") {
-      setStatus("Room is full.");
-    }
-  };
-
-  socket.onerror = () => {
-    setStatus("Connection error...");
-  };
-
-  socket.onclose = () => {
-    if (stopped) return;
+    console.error(
+      "WebSocket error:",
+      error
+    );
 
     setStatus(
-      "Disconnected — reconnecting..."
+      "Connection error..."
+    );
+  };
+
+
+  socket.onclose = () => {
+
+    if (manuallyStopped) {
+      return;
+    }
+
+    setStatus(
+      "Disconnected. Reconnecting..."
+    );
+
+    clearTimeout(
+      reconnectTimer
     );
 
     reconnectTimer =
@@ -635,80 +1126,100 @@ function connectSocket() {
   };
 }
 
-// ==========================================
-// AUTOMATIC JOIN
-// ==========================================
 
-async function start() {
-  try {
-    setStatus(
-      "Starting camera and microphone..."
-    );
-
-    await startCamera();
-
-    // Walang Join Room button.
-    // Automatic na pumapasok sa main room.
-    connectSocket();
-
-  } catch (error) {
-    console.error(error);
-
-    setStatus(
-      "Camera/microphone permission required."
-    );
-  }
-}
-
-// ==========================================
-// MICROPHONE
-// ==========================================
+/*
+ * Microphone.
+ */
 
 micButton.onclick = () => {
-  if (!localStream) return;
+
+  if (!localStream) {
+    return;
+  }
 
   const tracks =
     localStream.getAudioTracks();
 
   tracks.forEach(track => {
-    track.enabled = !track.enabled;
+    track.enabled =
+      !track.enabled;
   });
 
-  const off =
-    tracks.length &&
+  const muted =
+    tracks.length > 0 &&
     !tracks[0].enabled;
 
   micButton.classList.toggle(
     "off",
-    off
+    muted
   );
 };
 
-// ==========================================
-// CAMERA
-// ==========================================
+
+/*
+ * Camera.
+ */
 
 cameraButton.onclick = () => {
-  if (!localStream) return;
+
+  if (!localStream) {
+    return;
+  }
 
   const tracks =
     localStream.getVideoTracks();
 
   tracks.forEach(track => {
-    track.enabled = !track.enabled;
+    track.enabled =
+      !track.enabled;
   });
 
-  const off =
-    tracks.length &&
+  const disabled =
+    tracks.length > 0 &&
     !tracks[0].enabled;
 
   cameraButton.classList.toggle(
     "off",
-    off
+    disabled
   );
 };
 
-// Start automatically
+
+/*
+ * AUTOMATIC START.
+ *
+ * There is no Join Room button.
+ */
+
+async function start() {
+
+  try {
+
+    setStatus(
+      "Starting camera..."
+    );
+
+    await startMedia();
+
+    setStatus(
+      "Connecting..."
+    );
+
+    connectSocket();
+
+  } catch (error) {
+
+    console.error(
+      "Media error:",
+      error
+    );
+
+    setStatus(
+      "Please allow camera and microphone access."
+    );
+  }
+}
+
 start();
 </script>
 
