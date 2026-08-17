@@ -1408,7 +1408,9 @@ function connectSignaling(){
 
       if(
         data.type ===
-        "peer-joined"
+        "peer-joined" ||
+        data.type ===
+        "user-connected"
       ){
 
         peerPresent =
@@ -1487,7 +1489,9 @@ function connectSignaling(){
 
       if(
         data.type ===
-        "room-full"
+        "room-full" ||
+        data.type ===
+        "full"
       ){
 
         setStatus(
@@ -1502,7 +1506,9 @@ function connectSignaling(){
 
       if(
         data.type ===
-        "peer-left"
+        "peer-left" ||
+        data.type ===
+        "user-disconnected"
       ){
 
         peerPresent =
