@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jell & James Movie</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#eef5ee;
+  color:#26352a;
+}
+
+button,input{font:inherit}
+
+button{cursor:pointer}
+
+/* =========================
+   START SCREEN
+========================= */
+
+.start-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.start-card{
+  width:min(420px,100%);
+  background:white;
+  border-radius:22px;
+  padding:30px 24px;
+  text-align:center;
+  box-shadow:0 10px 35px rgba(40,70,45,.12);
+}
+
+.start-title{
+  font-size:28px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.start-subtitle{
+  color:#718073;
+  font-size:14px;
+  margin-bottom:25px;
+}
+
+.start-button{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:14px;
+  margin-top:10px;
+  background:#739b78;
+  color:white;
+  font-weight:700;
+}
+
+.start-button.secondary{
+  background:#edf3ed;
+  color:#456049;
+}
+
+.join-area{
+  display:none;
+  margin-top:14px;
+}
+
+.join-area input{
+  width:100%;
+  border:1px solid #ccd8cc;
+  border-radius:10px;
+  padding:12px;
+  outline:none;
+}
+
+/* =========================
+   INTRO
+========================= */
+
+.intro{
+  height:64px;
+  background:#dcebdc;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  border-bottom:1px solid #c9dcc9;
+  transition:.5s;
+}
+
+.intro.hidden{
+  height:0;
+  opacity:0;
+  padding:0;
+  border:0;
+  overflow:hidden;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:700;
+}
+
+.room-status{
+  font-size:13px;
+  color:#55705b;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 330px;
+  gap:14px;
+  padding:14px;
+  max-width:1500px;
+  margin:auto;
+}
+
+.movie-card{
+  background:#000;
+  border-radius:16px;
+  overflow:hidden;
+  aspect-ratio:16/9;
+}
+
+.movie-card iframe,
+.movie-card video{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+.movie-placeholder{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#aaa;
+  text-align:center;
+  padding:30px;
+}
+
+.movie-info{
+  background:white;
+  border-radius:14px;
+  margin-top:12px;
+  padding:16px;
+}
+
+.movie-title{
+  font-size:21px;
+  font-weight:700;
+}
+
+.movie-input{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+
+.movie-input input{
+  flex:1;
+  border:1px solid #ccd8cc;
+  border-radius:10px;
+  padding:11px;
+  outline:none;
+}
+
+.primary{
+  border:0;
+  background:#739b78;
+  color:white;
+  border-radius:10px;
+  padding:11px 15px;
+}
+
+/* =========================
+   VIDEO CALL
+========================= */
+
+.side{
+  background:white;
+  border-radius:16px;
+  padding:12px;
+  min-height:500px;
+}
+
+.side-title{
+  font-weight:700;
+  padding:4px 4px 12px;
+}
+
+.video-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  max-height:190px;
+  overflow:hidden;
+}
+
+.video-tile{
+  background:#18221b;
+  border-radius:12px;
+  overflow:hidden;
+  aspect-ratio:16/10;
+  position:relative;
+}
+
+.video-tile video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+#localVideo{
+  transform:scaleX(-1);
+}
+
+.video-name{
+  position:absolute;
+  left:8px;
+  bottom:7px;
+  background:rgba(0,0,0,.6);
+  color:white;
+  padding:4px 7px;
+  border-radius:6px;
+  font-size:12px;
+}
+
+.video-off{
+  width:100%;
+  height:100%;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  background:#39483c;
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:9px;
+  padding-top:12px;
+}
+
+.control{
+  width:46px;
+  height:46px;
+  border:0;
+  border-radius:50%;
+  background:#edf2ed;
+  color:#26352a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.control.off{
+  background:#c96f6f;
+  color:white;
+}
+
+.control.end{
+  background:#bd5555;
+  color:white;
+  width:58px;
+  border-radius:23px;
+}
+
+.icon{
+  width:21px;
+  height:21px;
+}
+
+/* =========================
+   INVITE
+========================= */
+
+.invite-box{
+  background:#f4f8f4;
+  border-radius:12px;
+  padding:12px;
+  margin-top:12px;
+}
+
+.invite-label{
+  font-size:12px;
+  color:#647366;
+  margin-bottom:7px;
+}
+
+.invite-row{
+  display:flex;
+  gap:7px;
+}
+
+.invite-row input{
+  min-width:0;
+  flex:1;
+  border:1px solid #ccd8cc;
+  border-radius:8px;
+  padding:9px;
+  font-size:12px;
+}
+
+.small-button{
+  border:0;
+  border-radius:8px;
+  padding:9px 10px;
+  background:#739b78;
+  color:white;
+}
+
+.status,.people{
+  font-size:12px;
+  color:#68756b;
+  margin-top:8px;
+}
+
+@media(max-width:850px){
+  .main{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<div
+  class="start-screen"
+  id="startScreen"
+>
+
+  <div class="start-card">
+
+    <div class="start-title">
+      Jell & James Movie
+    </div>
+
+    <div class="start-subtitle">
+      Watch together with someone
+    </div>
+
+    <button
+      class="start-button"
+      onclick="makeRoom()"
+    >
+      Make Room
+    </button>
+
+    <button
+      class="start-button secondary"
+      onclick="showJoin()"
+    >
+      Join Room
+    </button>
+
+    <div
+      class="join-area"
+      id="joinArea"
+    >
+
+      <input
+        id="joinInput"
+        placeholder="Paste invitation link or room ID"
+      >
+
+      <button
+        class="start-button"
+        onclick="joinRoom()"
+      >
+        Join
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     WATCH ROOM
+========================= -->
+
+<div id="watchRoom" style="display:none">
+
+  <div
+    class="intro"
+    id="intro"
+  >
+
+    <div class="logo">
+      Jell & James Movie
+    </div>
+
+    <div
+      class="room-status"
+      id="roomStatus"
+    >
+      Room ready
+    </div>
+
+  </div>
+
+
+  <main class="main">
+
+    <section>
+
+      <div
+        class="movie-card"
+        id="movieContainer"
+      >
+
+        <div class="movie-placeholder">
+          Paste a movie/video URL below to start watching.
+        </div>
+
+      </div>
+
+
+      <div class="movie-info">
+
+        <div class="movie-title">
+          Watch Together
+        </div>
+
+        <div class="movie-input">
+
+          <input
+            id="movieUrl"
+            placeholder="Paste YouTube, Vimeo or video URL..."
+          >
+
+          <button
+            class="primary"
+            onclick="loadMovie()"
+          >
+            Play
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- VIDEO CALL -->
+
+    <aside class="side">
+
+      <div class="side-title">
+        Video Call
+      </div>
+
+
+      <div
+        class="video-grid"
+        id="videoGrid"
+      >
+
+        <div
+          class="video-tile"
+          id="localTile"
+        >
+
+          <video
+            id="localVideo"
+            autoplay
+            muted
+            playsinline
+          ></video>
+
+          <div
+            class="video-off"
+            id="localOff"
+          >
+            Camera Off
+          </div>
+
+          <div class="video-name">
+            You
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- CONTROLS -->
+
+      <div class="controls">
+
+        <button
+          class="control"
+          id="micButton"
+          onclick="toggleMic()"
+          title="Mute"
+        >
+
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <rect
+              x="9"
+              y="2"
+              width="6"
+              height="12"
+              rx="3"
+            />
+
+            <path d="M5 10a7 7 0 0 0 14 0"/>
+
+            <path d="M12 17v5"/>
+
+            <path d="M8 22h8"/>
+
+          </svg>
+
+        </button>
+
+
+        <button
+          class="control"
+          id="cameraButton"
+          onclick="toggleCamera()"
+          title="Turn camera off"
+        >
+
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+
+            <path d="M15 10l4-3v10l-4-3"/>
+
+            <rect
+              x="3"
+              y="6"
+              width="12"
+              height="12"
+              rx="2"
+            />
+
+          </svg>
+
+        </button>
+
+
+        <button
+          class="control end"
+          onclick="leaveRoom()"
+          title="Leave room"
+        >
+
+          ✕
+
+        </button>
+
+      </div>
+
+
+      <!-- INVITE -->
+
+      <div class="invite-box">
+
+        <div class="invite-label">
+          Room invitation
+        </div>
+
+        <div class="invite-row">
+
+          <input
+            id="inviteLink"
+            readonly
+          >
+
+          <button
+            class="small-button"
+            onclick="copyInvite()"
+          >
+            Copy
+          </button>
+
+        </div>
+
+        <div
+          class="status"
+          id="connectionStatus"
+        >
+          Starting room...
+        </div>
+
+      </div>
+
+
+      <div
+        class="people"
+        id="peopleCount"
+      >
+        1 person in room
+      </div>
+
+    </aside>
+
+  </main>
+
+</div>
+
+
+<script>
+
+/*
+==================================================
+ SIGNALING SERVER
+==================================================
+
+ Render backend WebSocket server:
+
+ wss://jell-james-signaling.onrender.com
+
+==================================================
+*/
+
+const SIGNALING_SERVER =
+  "wss://jell-james-signaling.onrender.com";
+
+
+let ws = null;
+let pc = null;
+let localStream = null;
+
+let roomId = null;
+let isHost = false;
+
+
+/* =========================
+   START SCREEN
+========================= */
+
+function showJoin(){
+
+  document.getElementById(
+    "joinArea"
+  ).style.display = "block";
+
+}
+
+
+/* =========================
+   MAKE ROOM
+========================= */
+
+function makeRoom(){
+
+  roomId =
+    "jell-" +
+    Math.random()
+      .toString(36)
+      .substring(2,10);
+
+  isHost = true;
+
+  openRoom();
+
+}
+
+
+/* =========================
+   JOIN ROOM
+========================= */
+
+function joinRoom(){
+
+  const value =
+    document.getElementById(
+      "joinInput"
+    ).value.trim();
+
+  if(!value){
+
+    alert(
+      "Paste an invitation link or room ID."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const url =
+      new URL(value);
+
+    const room =
+      url.searchParams.get(
+        "room"
+      );
+
+    if(room){
+
+      roomId = room;
+
+    }else{
+
+      roomId = value;
+
+    }
+
+  }catch{
+
+    roomId = value;
+
+  }
+
+
+  isHost = false;
+
+  openRoom();
+
+}
+
+
+/* =========================
+   OPEN ROOM
+========================= */
+
+function openRoom(){
+
+  if(!roomId){
+
+    setStatus(
+      "Invalid room ID"
+    );
+
+    return;
+
+  }
+
+
+  const roomUrl =
+    new URL(
+      window.location.href
+    );
+
+
+  roomUrl.search =
+    "";
+
+
+  roomUrl.searchParams.set(
+    "room",
+    roomId
+  );
+
+
+  history.replaceState(
+    {},
+    "",
+    roomUrl.pathname +
+    "?" +
+    roomUrl.searchParams.toString()
+  );
+
+
+  document.getElementById(
+    "startScreen"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "watchRoom"
+  ).style.display =
+    "block";
+
+
+  updateInvite();
+
+
+  /*
+    IMPORTANT:
+    Join the WebSocket room FIRST.
+    Camera/microphone permission must never
+    prevent User B from joining the room.
+  */
+  connectSignaling();
+
+
+  /*
+    Camera/mic is started separately.
+    If Messenger blocks permission, the user
+    can still remain joined to the room.
+  */
+  startCamera();
+
+}
+
+
+/* =========================
+   INVITE
+========================= */
+
+function updateInvite(){
+
+  document.getElementById(
+    "inviteLink"
+  ).value =
+    location.origin +
+    location.pathname +
+    "?room=" +
+    encodeURIComponent(
+      roomId
+    );
+
+}
+
+
+async function copyInvite(){
+
+  const input =
+    document.getElementById(
+      "inviteLink"
+    );
+
+  try{
+
+    await navigator.clipboard.writeText(
+      input.value
+    );
+
+    setStatus(
+      "Invitation link copied"
+    );
+
+  }catch{
+
+    input.select();
+
+    document.execCommand(
+      "copy"
+    );
+
+    setStatus(
+      "Invitation link copied"
+    );
+
+  }
+
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+function setStatus(text){
+
+  document.getElementById(
+    "connectionStatus"
+  ).textContent =
+    text;
+
+  document.getElementById(
+    "roomStatus"
+  ).textContent =
+    text;
+
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+async function startCamera(){
+
+  try{
+
+    if(
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ){
+
+      throw new Error(
+        "Camera/microphone API is unavailable."
+      );
+
+    }
+
+    localStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:true,
+
+        audio:true
+
+      });
+
+
+    const localVideo =
+      document.getElementById(
+        "localVideo"
+      );
+
+    if(localVideo){
+
+      localVideo.srcObject =
+        localStream;
+
+      localVideo.muted =
+        true;
+
+      localVideo.playsInline =
+        true;
+
+      try{
+        await localVideo.play();
+      }catch{}
+
+    }
+
+
+    setStatus(
+      isHost
+      ? "Room ready — camera ready"
+      : "Joined room — camera ready"
+    );
+
+
+    /*
+      If WebRTC was already created while waiting
+      for camera permission, add the tracks now.
+    */
+    if(pc){
+
+      addLocalTracks();
+
+      /*
+        If the other person is already in the room,
+        renegotiate so the newly available camera/mic
+        tracks are included.
+      */
+      if(peerPresent){
+
+        await createOffer();
+
+      }
+
+    }
+
+    return localStream;
+
+  }catch(error){
+
+    console.error(
+      "Camera/microphone error:",
+      error
+    );
+
+    setStatus(
+      isHost
+      ? "Room ready — camera/mic permission needed"
+      : "Joined room — camera/mic permission needed"
+    );
+
+    /*
+      IMPORTANT:
+      Do not stop the room connection if camera permission
+      is denied. The WebSocket room still remains joined.
+    */
+
+    return null;
+
+  }
+
+}
+
+
+/* =========================
+   WEBRTC
+========================= */
+
+let peerPresent = false;
+let pendingCandidates = [];
+let remoteDescriptionSet = false;
+let makingOffer = false;
+
+
+function addLocalTracks(){
+
+  if(
+    !pc ||
+    !localStream
+  ){
+
+    return;
+
+  }
+
+
+  const senders =
+    pc.getSenders();
+
+
+  localStream
+    .getTracks()
+    .forEach(track=>{
+
+      const alreadyAdded =
+        senders.some(
+          sender =>
+            sender.track &&
+            sender.track.kind ===
+            track.kind
+        );
+
+
+      if(!alreadyAdded){
+
+        pc.addTrack(
+          track,
+          localStream
+        );
+
+      }
+
+    });
+
+}
+
+
+function createPeerConnection(){
+
+  if(pc){
+
+    addLocalTracks();
+
+    return pc;
+
+  }
+
+
+  pc =
+    new RTCPeerConnection({
+
+      iceServers:[
+
+        {
+          urls:[
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302"
+          ]
+        }
+
+      ]
+
+    });
+
+
+  remoteDescriptionSet =
+    false;
+
+  pendingCandidates =
+    [];
+
+
+  addLocalTracks();
+
+
+  pc.onicecandidate =
+    event=>{
+
+      if(
+        event.candidate
+      ){
+
+        sendSignal({
+
+          type:"candidate",
+
+          room:roomId,
+
+          candidate:
+            event.candidate
+
+        });
+
+      }
+
+    };
+
+
+  pc.ontrack =
+    event=>{
+
+      if(
+        event.streams &&
+        event.streams[0]
+      ){
+
+        addGuestVideo(
+          event.streams[0]
+        );
+
+      }
+
+    };
+
+
+  pc.onconnectionstatechange =
+    ()=>{
+
+      console.log(
+        "WebRTC connection state:",
+        pc.connectionState
+      );
+
+
+      if(
+        pc.connectionState ===
+        "connected"
+      ){
+
+        setStatus(
+          "Connected — 2 people in room"
+        );
+
+      }
+
+
+      if(
+        pc.connectionState ===
+        "disconnected"
+      ){
+
+        setStatus(
+          "Connection temporarily disconnected"
+        );
+
+      }
+
+
+      if(
+        pc.connectionState ===
+        "failed"
+      ){
+
+        setStatus(
+          "WebRTC connection failed"
+        );
+
+      }
+
+    };
+
+
+  pc.oniceconnectionstatechange =
+    ()=>{
+
+      console.log(
+        "ICE connection state:",
+        pc.iceConnectionState
+      );
+
+    };
+
+
+  return pc;
+
+}
+
+
+function sendSignal(
+  data
+){
+
+  if(
+    !ws ||
+    ws.readyState !==
+    WebSocket.OPEN
+  ){
+
+    console.warn(
+      "WebSocket is not ready:",
+      data.type
+    );
+
+    return false;
+
+  }
+
+
+  ws.send(
+    JSON.stringify(data)
+  );
+
+
+  return true;
+
+}
+
+
+async function flushPendingCandidates(){
+
+  if(
+    !pc ||
+    !remoteDescriptionSet
+  ){
+
+    return;
+
+  }
+
+
+  const queued =
+    pendingCandidates;
+
+
+  pendingCandidates =
+    [];
+
+
+  for(
+    const candidate of queued
+  ){
+
+    try{
+
+      await pc.addIceCandidate(
+        candidate
+      );
+
+    }catch(error){
+
+      console.error(
+        "Queued ICE candidate error:",
+        error
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   SIGNALING
+========================= */
+
+function connectSignaling(){
+
+  if(!roomId){
+
+    setStatus(
+      "No room ID"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    ws &&
+    (
+      ws.readyState ===
+      WebSocket.OPEN ||
+      ws.readyState ===
+      WebSocket.CONNECTING
+    )
+  ){
+
+    return;
+
+  }
+
+
+  ws =
+    new WebSocket(
+      SIGNALING_SERVER
+    );
+
+
+  ws.onopen =
+    ()=>{
+
+      console.log(
+        "WebSocket connected:",
+        SIGNALING_SERVER
+      );
+
+
+      /*
+        This happens immediately after the WebSocket opens.
+        Camera permission is NOT required for this step.
+      */
+      sendSignal({
+
+        type:"join",
+
+        room:roomId
+
+      });
+
+
+      setStatus(
+        isHost
+        ? "Room ready — waiting for friend..."
+        : "Joining room..."
+      );
+
+    };
+
+
+  ws.onmessage =
+    async event=>{
+
+      let data;
+
+
+      try{
+
+        data =
+          JSON.parse(
+            event.data
+          );
+
+      }catch(error){
+
+        console.error(
+          "Invalid signaling message:",
+          event.data
+        );
+
+        return;
+
+      }
+
+
+      console.log(
+        "Signaling message:",
+        data
+      );
+
+
+      if(
+        data.type ===
+        "joined"
+      ){
+
+        if(
+          data.role ===
+          "guest"
+        ){
+
+          setStatus(
+            "Joined room — waiting for connection..."
+          );
+
+        }else{
+
+          setStatus(
+            "Room ready — waiting for friend..."
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "peer-joined"
+      ){
+
+        peerPresent =
+          true;
+
+
+        setStatus(
+          "Friend joined — connecting..."
+        );
+
+
+        /*
+          The host is the only side that starts
+          the initial offer.
+        */
+        if(isHost){
+
+          await createOffer();
+
+        }
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "offer"
+      ){
+
+        peerPresent =
+          true;
+
+
+        await receiveOffer(
+          data.offer
+        );
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "answer"
+      ){
+
+        await receiveAnswer(
+          data.answer
+        );
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "candidate"
+      ){
+
+        await receiveCandidate(
+          data.candidate
+        );
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "room-full"
+      ){
+
+        setStatus(
+          "Room is full"
+        );
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "peer-left"
+      ){
+
+        peerPresent =
+          false;
+
+
+        if(pc){
+
+          try{
+            pc.close();
+          }catch{}
+
+        }
+
+
+        pc =
+          null;
+
+        pendingCandidates =
+          [];
+
+        remoteDescriptionSet =
+          false;
+
+        makingOffer =
+          false;
+
+
+        removeGuestVideo();
+
+
+        setStatus(
+          isHost
+          ? "Waiting for friend..."
+          : "Friend left the room"
+        );
+
+
+        return;
+
+      }
+
+
+      if(
+        data.type ===
+        "error"
+      ){
+
+        setStatus(
+          data.message ||
+          "Room error"
+        );
+
+      }
+
+    };
+
+
+  ws.onerror =
+    error=>{
+
+      console.error(
+        "WebSocket error:",
+        error
+      );
+
+
+      setStatus(
+        "Unable to connect to room server"
+      );
+
+    };
+
+
+  ws.onclose =
+    ()=>{
+
+      console.log(
+        "WebSocket closed"
+      );
+
+    };
+
+}
+
+
+/* =========================
+   OFFER
+========================= */
+
+async function createOffer(){
+
+  if(makingOffer){
+
+    return;
+
+  }
+
+
+  if(
+    !ws ||
+    ws.readyState !==
+    WebSocket.OPEN
+  ){
+
+    return;
+
+  }
+
+
+  makingOffer =
+    true;
+
+
+  try{
+
+    createPeerConnection();
+
+    addLocalTracks();
+
+
+    const offer =
+      await pc.createOffer();
+
+
+    await pc.setLocalDescription(
+      offer
+    );
+
+
+    sendSignal({
+
+      type:"offer",
+
+      room:roomId,
+
+      offer:
+        pc.localDescription
+
+    });
+
+
+    setStatus(
+      "Connecting..."
+    );
+
+  }catch(error){
+
+    console.error(
+      "Offer error:",
+      error
+    );
+
+
+    setStatus(
+      "Unable to create WebRTC offer"
+    );
+
+  }finally{
+
+    makingOffer =
+      false;
+
+  }
+
+}
+
+
+/* =========================
+   ANSWER
+========================= */
+
+async function receiveOffer(
+  offer
+){
+
+  try{
+
+    createPeerConnection();
+
+
+    /*
+      Camera permission is optional for joining.
+      If permission is available, include the tracks.
+    */
+    if(
+      !localStream
+    ){
+
+      try{
+
+        await startCamera();
+
+      }catch(error){
+
+        console.warn(
+          "Camera unavailable:",
+          error
+        );
+
+      }
+
+    }
+
+
+    addLocalTracks();
+
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(
+        offer
+      )
+    );
+
+
+    remoteDescriptionSet =
+      true;
+
+
+    await flushPendingCandidates();
+
+
+    const answer =
+      await pc.createAnswer();
+
+
+    await pc.setLocalDescription(
+      answer
+    );
+
+
+    sendSignal({
+
+      type:"answer",
+
+      room:roomId,
+
+      answer:
+        pc.localDescription
+
+    });
+
+
+    setStatus(
+      "Connecting..."
+    );
+
+  }catch(error){
+
+    console.error(
+      "Answer creation error:",
+      error
+    );
+
+
+    setStatus(
+      "WebRTC setup failed"
+    );
+
+  }
+
+}
+
+
+async function receiveAnswer(
+  answer
+){
+
+  try{
+
+    if(!pc){
+
+      return;
+
+    }
+
+
+    await pc.setRemoteDescription(
+      new RTCSessionDescription(
+        answer
+      )
+    );
+
+
+    remoteDescriptionSet =
+      true;
+
+
+    await flushPendingCandidates();
+
+
+    setStatus(
+      "Connecting..."
+    );
+
+  }catch(error){
+
+    console.error(
+      "Remote answer error:",
+      error
+    );
+
+
+    setStatus(
+      "WebRTC answer failed"
+    );
+
+  }
+
+}
+
+
+async function receiveCandidate(
+  candidate
+){
+
+  if(
+    !pc ||
+    !remoteDescriptionSet
+  ){
+
+    pendingCandidates.push(
+      candidate
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    await pc.addIceCandidate(
+      candidate
+    );
+
+  }catch(error){
+
+    console.error(
+      "ICE candidate error:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================
+   GUEST VIDEO
+========================= */
+
+function addGuestVideo(
+  stream
+){
+
+  if(
+    document.getElementById(
+      "guestTile"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const grid =
+    document.getElementById(
+      "videoGrid"
+    );
+
+
+  if(
+    grid.querySelectorAll(
+      ".video-tile"
+    ).length >= 2
+  ){
+
+    return;
+
+  }
+
+
+  const tile =
+    document.createElement(
+      "div"
+    );
+
+  tile.className =
+    "video-tile";
+
+  tile.id =
+    "guestTile";
+
+
+  const video =
+    document.createElement(
+      "video"
+    );
+
+  video.autoplay = true;
+  video.playsInline = true;
+  video.srcObject = stream;
+
+
+  const name =
+    document.createElement(
+      "div"
+    );
+
+  name.className =
+    "video-name";
+
+  name.textContent =
+    "Guest";
+
+
+  tile.appendChild(video);
+  tile.appendChild(name);
+
+  grid.appendChild(tile);
+
+
+  document.getElementById(
+    "peopleCount"
+  ).textContent =
+    "2 people in room";
+
+}
+
+
+/* =========================
+   REMOVE GUEST
+========================= */
+
+function removeGuestVideo(){
+
+  const guest =
+    document.getElementById(
+      "guestTile"
+    );
+
+
+  if(guest){
+
+    guest.remove();
+
+  }
+
+
+  document.getElementById(
+    "peopleCount"
+  ).textContent =
+    "1 person in room";
+
+}
+
+
+/* =========================
+   MIC
+========================= */
+
+function toggleMic(){
+
+  if(!localStream) return;
+
+
+  const tracks =
+    localStream.getAudioTracks();
+
+
+  if(!tracks.length) return;
+
+
+  const currentlyEnabled =
+    tracks[0].enabled;
+
+
+  tracks.forEach(
+    track=>{
+      track.enabled =
+        !currentlyEnabled;
+    }
+  );
+
+
+  document.getElementById(
+    "micButton"
+  ).classList.toggle(
+    "off",
+    currentlyEnabled
+  );
+
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+function toggleCamera(){
+
+  if(!localStream) return;
+
+
+  const tracks =
+    localStream.getVideoTracks();
+
+
+  if(!tracks.length) return;
+
+
+  const currentlyEnabled =
+    tracks[0].enabled;
+
+
+  tracks.forEach(
+    track=>{
+      track.enabled =
+        !currentlyEnabled;
+    }
+  );
+
+
+  document.getElementById(
+    "cameraButton"
+  ).classList.toggle(
+    "off",
+    currentlyEnabled
+  );
+
+
+  document.getElementById(
+    "localOff"
+  ).style.display =
+    currentlyEnabled
+    ? "flex"
+    : "none";
+
+}
+
+
+/* =========================
+   LEAVE
+========================= */
+
+function leaveRoom(){
+
+  if(ws){
+
+    try{
+      ws.close();
+    }catch{}
+
+  }
+
+
+  if(pc){
+
+    try{
+      pc.close();
+    }catch{}
+
+  }
+
+
+  if(localStream){
+
+    localStream
+      .getTracks()
+      .forEach(
+        track=>
+        track.stop()
+      );
+
+  }
+
+
+  location.href =
+    location.pathname;
+
+}
+
+
+/* =========================
+   MOVIE
+========================= */
+
+function loadMovie(){
+
+  const url =
+    document.getElementById(
+      "movieUrl"
+    ).value.trim();
+
+
+  if(!url) return;
+
+
+  const container =
+    document.getElementById(
+      "movieContainer"
+    );
+
+
+  const youtube =
+    url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/
+    );
+
+
+  if(youtube){
+
+    const iframe =
+      document.createElement(
+        "iframe"
+      );
+
+
+    iframe.src =
+      "https://www.youtube.com/embed/" +
+      youtube[1];
+
+
+    iframe.allow =
+      "autoplay; fullscreen";
+
+
+    iframe.allowFullscreen =
+      true;
+
+
+    container.innerHTML =
+      "";
+
+    container.appendChild(
+      iframe
+    );
+
+    return;
+
+  }
+
+
+  const vimeo =
+    url.match(
+      /vimeo\.com\/(\d+)/
+    );
+
+
+  if(vimeo){
+
+    const iframe =
+      document.createElement(
+        "iframe"
+      );
+
+
+    iframe.src =
+      "https://player.vimeo.com/video/" +
+      vimeo[1];
+
+
+    iframe.allowFullscreen =
+      true;
+
+
+    container.innerHTML =
+      "";
+
+    container.appendChild(
+      iframe
+    );
+
+    return;
+
+  }
+
+
+  const video =
+    document.createElement(
+      "video"
+    );
+
+
+  video.src =
+    url;
+
+  video.controls =
+    true;
+
+  video.playsInline =
+    true;
+
+
+  container.innerHTML =
+    "";
+
+  container.appendChild(
+    video
+  );
+
+}
+
+
+/* =========================
+   AUTO JOIN FROM INVITE LINK
+========================= */
+
+(function(){
+
+  const params =
+    new URLSearchParams(
+      location.search
+    );
+
+  const room =
+    params.get(
+      "room"
+    );
+
+
+  if(room){
+
+    roomId =
+      room.trim();
+
+    isHost =
+      false;
+
+
+    openRoom();
+
+  }
+
+})();
+
+
+/* =========================
+   10 SECOND INTRO
+========================= */
+
+setTimeout(
+  ()=>{
+
+    const intro =
+      document.getElementById(
+        "intro"
+      );
+
+    if(intro){
+
+      intro.classList.add(
+        "hidden"
+      );
+
+    }
+
+  },
+  10000
+);
+
+</script>
+
+</body>
+</html>
