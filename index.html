@@ -649,13 +649,13 @@ button{cursor:pointer}
 
  Render backend WebSocket server:
 
- wss://jell-james-signaling.onrender.com
+ wss://jell-room-new.onrender.com
 
 ==================================================
 */
 
 const SIGNALING_SERVER =
-  "wss://jell-james-signaling.onrender.com";
+  "wss://jell-room-new.onrender.com";
 
 
 let ws = null;
@@ -906,7 +906,7 @@ function setStatus(text){
    CAMERA
 ========================= */
 
-async function startCamera(){
+async function startCamera(options={}){
 
   try{
 
@@ -974,7 +974,7 @@ async function startCamera(){
         renegotiate so the newly available camera/mic
         tracks are included.
       */
-      if(peerPresent){
+      if(peerPresent && !options.skipRenegotiation){
 
         await createOffer();
 
@@ -1082,7 +1082,8 @@ function createPeerConnection(){
         {
           urls:[
             "stun:stun.l.google.com:19302",
-            "stun:stun1.l.google.com:19302"
+            "stun:stun1.l.google.com:19302",
+            "stun:stun2.l.google.com:19302"
           ]
         }
 
@@ -1693,7 +1694,9 @@ async function receiveOffer(
 
       try{
 
-        await startCamera();
+        await startCamera({
+          skipRenegotiation:true
+        });
 
       }catch(error){
 
