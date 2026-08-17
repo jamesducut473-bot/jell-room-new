@@ -5,85 +5,34 @@ const crypto = require("crypto");
 const WebSocket = require("ws");
 
 const PORT = process.env.PORT || 10000;
-const ROOM = "main";
+const ROOM_ID = "main";
 const MAX_USERS = 2;
-const RECONNECT_GRACE = 30000;
 
 const clients = new Map();
 
-function newId() {
+function createClientId() {
   return crypto.randomUUID();
 }
 
-function send(ws, data) {
+function send(ws, message) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(data));
+    ws.send(JSON.stringify(message));
   }
 }
 
-function connectedClients() {
-  return [...clients.values()].filter(c => c.ws);
+function getConnectedClients() {
+  return [...clients.values()].filter(
+    client => client.ws && client.ws.readyState === WebSocket.OPEN
+  );
 }
 
-function getPeer(id) {
-  return connectedClients().find(c => c.id !== id);
-}
-
-function iceServers() {
-  const servers = [
-    {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302"
-      ]
-    }
-  ];
-
-  if (
-    process.env.TURN_URLS &&
-    process.env.TURN_USERNAME &&
-    process.env.TURN_CREDENTIAL
-  ) {
-    servers.push({
-      urls: process.env.TURN_URLS
-        .split(",")
-        .map(x => x.trim()),
-      username: process.env.TURN_USERNAME,
-      credential: process.env.TURN_CREDENTIAL
-    });
-  }
-
-  return servers;
-}
-
-function cleanup() {
-  const now = Date.now();
-
-  for (const [id, client] of clients) {
-    if (
-      !client.ws &&
-      client.disconnectedAt &&
-      now - client.disconnectedAt > RECONNECT_GRACE
-    ) {
-      clients.delete(id);
-    }
-  }
+function getOtherClient(clientId) {
+  return getConnectedClients().find(
+    client => client.id !== clientId
+  );
 }
 
 const server = http.createServer((req, res) => {
-  if (req.url === "/ice-config") {
-    res.writeHead(200, {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store"
-    });
-
-    res.end(JSON.stringify({
-      iceServers: iceServers()
-    }));
-
-    return;
-  }
-
   if (req.url === "/health") {
     res.writeHead(200, {
       "Content-Type": "application/json"
@@ -91,20 +40,55 @@ const server = http.createServer((req, res) => {
 
     res.end(JSON.stringify({
       ok: true,
-      room: ROOM,
-      users: connectedClients().length,
+      room: ROOM_ID,
+      users: getConnectedClients().length,
       maxUsers: MAX_USERS
     }));
 
     return;
   }
 
-  const file = path.join(__dirname, "index.html");
+  if (req.url === "/ice-config") {
+    const iceServers = [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302"
+        ]
+      }
+    ];
 
-  fs.readFile(file, (err, data) => {
-    if (err) {
-      res.writeHead(500);
-      res.end("index.html not found.");
+    // Optional TURN server.
+    if (
+      process.env.TURN_URL &&
+      process.env.TURN_USERNAME &&
+      process.env.TURN_PASSWORD
+    ) {
+      iceServers.push({
+        urls: process.env.TURN_URL,
+        username: process.env.TURN_USERNAME,
+        credential: process.env.TURN_PASSWORD
+      });
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store"
+    });
+
+    res.end(JSON.stringify({ iceServers }));
+    return;
+  }
+
+  const filePath = path.join(__dirname, "index.html");
+
+  fs.readFile(filePath, (error, data) => {
+    if (error) {
+      res.writeHead(500, {
+        "Content-Type": "text/plain"
+      });
+
+      res.end("index.html could not be loaded.");
       return;
     }
 
@@ -116,47 +100,48 @@ const server = http.createServer((req, res) => {
   });
 });
 
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({
+  server
+});
 
 wss.on("connection", ws => {
   let clientId = null;
 
   ws.on("message", raw => {
-    let msg;
+    let message;
 
     try {
-      msg = JSON.parse(raw.toString());
+      message = JSON.parse(raw.toString());
     } catch {
       return;
     }
 
-    // ============================
-    // JOIN ONE ROOM ONLY
-    // ============================
-
-    if (msg.type === "join") {
-      cleanup();
-
+    /*
+     * ONE ROOM ONLY
+     */
+    if (message.type === "join") {
       const requestedId =
-        typeof msg.clientId === "string"
-          ? msg.clientId
+        typeof message.clientId === "string"
+          ? message.clientId
           : null;
 
-      // Reconnect existing client
+      /*
+       * Reconnect existing client.
+       */
       if (requestedId && clients.has(requestedId)) {
         const existing = clients.get(requestedId);
 
         existing.ws = ws;
-        existing.disconnectedAt = null;
+        existing.disconnected = false;
 
         clientId = requestedId;
         ws.clientId = clientId;
 
-        const peer = getPeer(clientId);
+        const peer = getOtherClient(clientId);
 
         send(ws, {
           type: "joined",
-          room: ROOM,
+          room: ROOM_ID,
           clientId,
           role: existing.role,
           peerPresent: !!peer
@@ -171,8 +156,10 @@ wss.on("connection", ws => {
         return;
       }
 
-      // Only two users
-      if (connectedClients().length >= MAX_USERS) {
+      /*
+       * Only two people are allowed.
+       */
+      if (getConnectedClients().length >= MAX_USERS) {
         send(ws, {
           type: "room-full"
         });
@@ -180,10 +167,10 @@ wss.on("connection", ws => {
         return;
       }
 
-      clientId = newId();
+      clientId = createClientId();
 
       const role =
-        connectedClients().length === 0
+        getConnectedClients().length === 0
           ? "host"
           : "guest";
 
@@ -191,16 +178,16 @@ wss.on("connection", ws => {
         id: clientId,
         ws,
         role,
-        disconnectedAt: null
+        disconnected: false
       });
 
       ws.clientId = clientId;
 
-      const peer = getPeer(clientId);
+      const peer = getOtherClient(clientId);
 
       send(ws, {
         type: "joined",
-        room: ROOM,
+        room: ROOM_ID,
         clientId,
         role,
         peerPresent: !!peer
@@ -215,33 +202,37 @@ wss.on("connection", ws => {
       return;
     }
 
-    // ============================
-    // WEBRTC SIGNALING
-    // ============================
-
+    /*
+     * WebRTC signaling.
+     */
     if (
-      msg.type === "offer" ||
-      msg.type === "answer" ||
-      msg.type === "candidate"
+      message.type === "offer" ||
+      message.type === "answer" ||
+      message.type === "candidate"
     ) {
       if (!clientId) return;
 
-      const peer = getPeer(clientId);
+      const peer = getOtherClient(clientId);
 
       if (!peer) return;
 
-      send(peer.ws, {
-        type: msg.type,
-        ...(msg.type === "offer"
-          ? { offer: msg.offer }
-          : {}),
-        ...(msg.type === "answer"
-          ? { answer: msg.answer }
-          : {}),
-        ...(msg.type === "candidate"
-          ? { candidate: msg.candidate }
-          : {})
-      });
+      const outgoing = {
+        type: message.type
+      };
+
+      if (message.type === "offer") {
+        outgoing.offer = message.offer;
+      }
+
+      if (message.type === "answer") {
+        outgoing.answer = message.answer;
+      }
+
+      if (message.type === "candidate") {
+        outgoing.candidate = message.candidate;
+      }
+
+      send(peer.ws, outgoing);
     }
   });
 
@@ -250,12 +241,15 @@ wss.on("connection", ws => {
 
     const client = clients.get(clientId);
 
-    if (!client || client.ws !== ws) return;
+    if (!client) return;
 
+    /*
+     * Keep the client record for reconnect.
+     */
     client.ws = null;
-    client.disconnectedAt = Date.now();
+    client.disconnected = true;
 
-    const peer = getPeer(clientId);
+    const peer = getOtherClient(clientId);
 
     if (peer) {
       send(peer.ws, {
@@ -263,23 +257,24 @@ wss.on("connection", ws => {
       });
     }
 
-    setTimeout(cleanup, RECONNECT_GRACE + 100);
+    /*
+     * Remove stale disconnected clients later.
+     */
+    setTimeout(() => {
+      const current = clients.get(clientId);
+
+      if (
+        current &&
+        current.disconnected
+      ) {
+        clients.delete(clientId);
+      }
+    }, 30000);
   });
 });
 
-setInterval(cleanup, 5000);
-
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Room: ${ROOM}`);
+  console.log(`Room: ${ROOM_ID}`);
   console.log(`Maximum users: ${MAX_USERS}`);
-  console.log(
-    `TURN enabled: ${
-      !!(
-        process.env.TURN_URLS &&
-        process.env.TURN_USERNAME &&
-        process.env.TURN_CREDENTIAL
-      )
-    }`
-  );
 });
